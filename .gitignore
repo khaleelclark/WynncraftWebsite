@@ -1,0 +1,35 @@
+# Node/React/Frontend
+node_modules/
+dist/
+build/
+.env
+.env.*
+*.log
+*.tsbuildinfo
+.cache/
+.vscode/
+.DS_Store
+
+# .NET/Backend
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.dbmdl
+*.pdb
+*.mdb
+*.log
+*.vs/
+
+# OS/Editor
+Thumbs.db
+*.swp
+*.tmp
+.idea/
+*.iml
+*.bak
+
+# pnpm
+.pnpm-store/

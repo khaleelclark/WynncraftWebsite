@@ -1,0 +1,112 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace ImperialBackend.Migrations
+{
+    /// <inheritdoc />
+    public partial class RemoveUuidFromPlayerHistoricalStat : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlayerHistoricalStats_GuildMembers_GuildMemberId",
+                table: "PlayerHistoricalStats");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RaidsCompleted_GuildMembers_GuildMemberId",
+                table: "RaidsCompleted");
+
+            migrationBuilder.DropColumn(
+                name: "Uuid",
+                table: "PlayerHistoricalStats");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GuildMemberId",
+                table: "RaidsCompleted",
+                type: "int",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "int",
+                oldNullable: true);
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GuildMemberId",
+                table: "PlayerHistoricalStats",
+                type: "int",
+                nullable: false,
+                defaultValue: 0,
+                oldClrType: typeof(int),
+                oldType: "int",
+                oldNullable: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlayerHistoricalStats_GuildMembers_GuildMemberId",
+                table: "PlayerHistoricalStats",
+                column: "GuildMemberId",
+                principalTable: "GuildMembers",
+                principalColumn: "GuildMemberId",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RaidsCompleted_GuildMembers_GuildMemberId",
+                table: "RaidsCompleted",
+                column: "GuildMemberId",
+                principalTable: "GuildMembers",
+                principalColumn: "GuildMemberId",
+                onDelete: ReferentialAction.Cascade);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_PlayerHistoricalStats_GuildMembers_GuildMemberId",
+                table: "PlayerHistoricalStats");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_RaidsCompleted_GuildMembers_GuildMemberId",
+                table: "RaidsCompleted");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GuildMemberId",
+                table: "RaidsCompleted",
+                type: "int",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "int");
+
+            migrationBuilder.AlterColumn<int>(
+                name: "GuildMemberId",
+                table: "PlayerHistoricalStats",
+                type: "int",
+                nullable: true,
+                oldClrType: typeof(int),
+                oldType: "int");
+
+            migrationBuilder.AddColumn<Guid>(
+                name: "Uuid",
+                table: "PlayerHistoricalStats",
+                type: "uniqueidentifier",
+                nullable: false,
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PlayerHistoricalStats_GuildMembers_GuildMemberId",
+                table: "PlayerHistoricalStats",
+                column: "GuildMemberId",
+                principalTable: "GuildMembers",
+                principalColumn: "GuildMemberId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_RaidsCompleted_GuildMembers_GuildMemberId",
+                table: "RaidsCompleted",
+                column: "GuildMemberId",
+                principalTable: "GuildMembers",
+                principalColumn: "GuildMemberId");
+        }
+    }
+}

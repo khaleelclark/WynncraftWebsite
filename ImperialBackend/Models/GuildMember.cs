@@ -1,0 +1,27 @@
+using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
+
+namespace ImperialBackend.Models
+{
+    public class GuildMember
+    {
+        [Key]
+        public int GuildMemberId { get; set; }
+        public string? DiscordTag { get; set; }
+        public string? MainUsername { get; set; }
+        public string? MinecraftUsername { get; set; }
+        public int RankId { get; set; }
+        public string? PlayerSkin { get; set; }
+        public DateTime JoinDate { get; set; }
+        public Guid Uuid { get; set; }
+        public string? WynncraftRank { get; set; }
+        public int HoursPlayed { get; set; }
+        public int WarsCompleted { get; set; }
+        public int WeekliesCompleted { get; set; }
+        public Rank? Rank { get; set; }
+        public ICollection<GuildMemberGame> Games { get; set; } = new List<GuildMemberGame>();
+        public ICollection<GuildMemberMedal> Medals { get; set; } = new List<GuildMemberMedal>();
+        public DateTime? LastSynced { get; set; } // UTC timestamp of last sync
+    }
+}
