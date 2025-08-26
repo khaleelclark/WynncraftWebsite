@@ -1,42 +1,50 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class EventsController : ODataController
+    [ApiController]
+    [Route("api/events")]
+    public class EventsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public EventsController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<Event> Get() => _context.Events;
+        public IActionResult GetAll() => Ok(_context.Events.ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var ev = _context.Events.FirstOrDefault(e => e.EventId == id);
+            if (ev == null) return NotFound();
+            return Ok(ev);
+        }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Event evt)
+        public IActionResult Post([FromBody] Event ev)
         {
-            _context.Events.Add(evt);
+            _context.Events.Add(ev);
             _context.SaveChanges();
-            return Created(evt);
+            return CreatedAtAction(nameof(GetById), new { id = ev.EventId }, ev);
         }
 
-        [HttpPut]
-        [Route("odata/Events")]
-        public IActionResult Put([FromBody] Event evt)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Event ev)
         {
-            _context.Entry(evt).State = EntityState.Modified;
+            if (id != ev.EventId) return BadRequest();
+            _context.Entry(ev).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(evt);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/Events")]
-        public IActionResult Delete([FromBody] Event evt)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            _context.Events.Remove(evt);
+            var ev = _context.Events.Find(id);
+            if (ev == null) return NotFound();
+            _context.Events.Remove(ev);
             _context.SaveChanges();
             return NoContent();
         }

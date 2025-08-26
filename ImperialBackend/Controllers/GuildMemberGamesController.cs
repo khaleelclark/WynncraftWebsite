@@ -1,41 +1,50 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class GuildMemberGamesController : ODataController
+    [ApiController]
+    [Route("api/guildmembergames")]
+    public class GuildMemberGamesController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public GuildMemberGamesController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<GuildMemberGame> Get() => _context.GuildMemberGames.Include(gmg => gmg.Game).Include(gmg => gmg.GuildMember);
+        public IActionResult GetAll() => Ok(_context.GuildMemberGames.ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var game = _context.GuildMemberGames.FirstOrDefault(g => g.GuildMemberGameId == id);
+            if (game == null) return NotFound();
+            return Ok(game);
+        }
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberGame gmg)
+        public IActionResult Post([FromBody] GuildMemberGame game)
         {
-            _context.GuildMemberGames.Add(gmg);
+            _context.GuildMemberGames.Add(game);
             _context.SaveChanges();
-            return Created(gmg);
+            return CreatedAtAction(nameof(GetById), new { id = game.GuildMemberGameId }, game);
         }
 
-        [HttpPut]
-        public IActionResult Put([FromBody] GuildMemberGame gmg)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] GuildMemberGame game)
         {
-            _context.Entry(gmg).State = EntityState.Modified;
+            if (id != game.GuildMemberGameId) return BadRequest();
+            _context.Entry(game).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(gmg);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/GuildMemberGames")]
-        public IActionResult Delete([FromBody] GuildMemberGame gmg)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            _context.GuildMemberGames.Remove(gmg);
+            var game = _context.GuildMemberGames.Find(id);
+            if (game == null) return NotFound();
+            _context.GuildMemberGames.Remove(game);
             _context.SaveChanges();
             return NoContent();
         }

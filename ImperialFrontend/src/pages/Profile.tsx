@@ -21,9 +21,31 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    fetch(`/odata/GuildMembers/Profile/${id}`)
+    fetch(`/api/guildmembers/${id}`)
       .then((res) => res.json())
-      .then(setProfile);
+      .then((data) => {
+        if (!data) return setProfile(null);
+        // Map snake_case to camelCase
+        const keyMap: Record<string, string> = {
+          main_username: "mainUsername",
+          minecraft_username: "minecraftUsername",
+          rank_name: "rankName",
+          player_skin: "playerSkin",
+          join_date: "joinDate",
+          wynncraft_rank: "wynncraftRank",
+          hours_played: "hoursPlayed",
+          wars_completed: "warsCompleted",
+          weeklies_completed: "weekliesCompleted",
+          games: "games",
+          medals: "medals",
+          raids_completed: "raidsCompleted",
+        };
+        const mapped: any = {};
+        Object.keys(data).forEach((key) => {
+          mapped[keyMap[key] || key] = data[key];
+        });
+        setProfile(mapped);
+      });
   }, [id]);
 
   if (!profile) return <div>Loading...</div>;

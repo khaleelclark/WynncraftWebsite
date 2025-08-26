@@ -53,7 +53,7 @@ const Leaderboard: React.FC = () => {
   const fetchLeaderboard = () => {
     if (!startDate || !endDate) return;
     fetch(
-      `/odata/GuildMembers/Leaderboard?startDate=${startDate}&endDate=${endDate}`
+      `/api/guildmembers/leaderboard?startDate=${startDate}&endDate=${endDate}`
     )
       .then((res) => res.json())
       .then((data) => setEntries(data.value ?? data ?? []));

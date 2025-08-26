@@ -1,41 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class RaidsController : ODataController
+    [ApiController]
+    [Route("api/raids")]
+    public class RaidsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public RaidsController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<Raid> Get() => _context.Raids.Include(r => r.RaidsCompleted);
+        public IActionResult GetAll() => Ok(_context.Raids.Include(r => r.RaidsCompleted).ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var raid = _context.Raids.Include(r => r.RaidsCompleted).FirstOrDefault(r => r.RaidId == id);
+            if (raid == null) return NotFound();
+            return Ok(raid);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] Raid raid)
         {
             _context.Raids.Add(raid);
             _context.SaveChanges();
-            return Created(raid);
+            return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
         }
 
-        [HttpPut]
-        [Route("odata/Raids")]
-        public IActionResult Put([FromBody] Raid raid)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Raid raid)
         {
+            if (id != raid.RaidId) return BadRequest();
             _context.Entry(raid).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(raid);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/Raids")]
-        public IActionResult Delete([FromBody] Raid raid)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
+            var raid = _context.Raids.Find(id);
+            if (raid == null) return NotFound();
             _context.Raids.Remove(raid);
             _context.SaveChanges();
             return NoContent();

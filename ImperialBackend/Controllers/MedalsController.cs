@@ -1,41 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class MedalsController : ODataController
+    [ApiController]
+    [Route("api/medals")]
+    public class MedalsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public MedalsController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<Medal> Get() => _context.Medals.Include(m => m.GuildMemberMedals);
+        public IActionResult GetAll() => Ok(_context.Medals.Include(m => m.GuildMemberMedals).ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var medal = _context.Medals.Include(m => m.GuildMemberMedals).FirstOrDefault(m => m.MedalId == id);
+            if (medal == null) return NotFound();
+            return Ok(medal);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] Medal medal)
         {
             _context.Medals.Add(medal);
             _context.SaveChanges();
-            return Created(medal);
+            return CreatedAtAction(nameof(GetById), new { id = medal.MedalId }, medal);
         }
 
-        [HttpPut]
-        [Route("odata/Medals")]
-        public IActionResult Put([FromBody] Medal medal)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Medal medal)
         {
+            if (id != medal.MedalId) return BadRequest();
             _context.Entry(medal).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(medal);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/Medals")]
-        public IActionResult Delete([FromBody] Medal medal)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
+            var medal = _context.Medals.Find(id);
+            if (medal == null) return NotFound();
             _context.Medals.Remove(medal);
             _context.SaveChanges();
             return NoContent();

@@ -1,41 +1,49 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class GamesController : ODataController
+    [ApiController]
+    [Route("api/games")]
+    public class GamesController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public GamesController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<Game> Get() => _context.Games.Include(g => g.GuildMemberGames);
+        public IActionResult GetAll() => Ok(_context.Games.Include(g => g.GuildMemberGames).ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var game = _context.Games.Include(g => g.GuildMemberGames).FirstOrDefault(g => g.GameId == id);
+            if (game == null) return NotFound();
+            return Ok(game);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] Game game)
         {
             _context.Games.Add(game);
             _context.SaveChanges();
-            return Created(game);
+            return CreatedAtAction(nameof(GetById), new { id = game.GameId }, game);
         }
 
-        [HttpPut]
-        [Route("odata/Games")]
-        public IActionResult Put([FromBody] Game game)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Game game)
         {
+            if (id != game.GameId) return BadRequest();
             _context.Entry(game).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(game);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/Games")]
-        public IActionResult Delete([FromBody] Game game)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
+            var game = _context.Games.Find(id);
+            if (game == null) return NotFound();
             _context.Games.Remove(game);
             _context.SaveChanges();
             return NoContent();

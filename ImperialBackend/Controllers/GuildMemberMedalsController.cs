@@ -1,41 +1,50 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.AspNetCore.OData.Routing.Controllers;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-    public class GuildMemberMedalsController : ODataController
+    [ApiController]
+    [Route("api/guildmembermedals")]
+    public class GuildMemberMedalsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
         public GuildMemberMedalsController(ImperialDbContext context) => _context = context;
 
-        [EnableQuery]
         [HttpGet]
-        public IQueryable<GuildMemberMedal> Get() => _context.GuildMemberMedals.Include(gmm => gmm.Medal).Include(gmm => gmm.GuildMember);
+        public IActionResult GetAll() => Ok(_context.GuildMemberMedals.ToList());
+
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var medal = _context.GuildMemberMedals.FirstOrDefault(m => m.GuildMemberMedalId == id);
+            if (medal == null) return NotFound();
+            return Ok(medal);
+        }
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberMedal gmm)
+        public IActionResult Post([FromBody] GuildMemberMedal medal)
         {
-            _context.GuildMemberMedals.Add(gmm);
+            _context.GuildMemberMedals.Add(medal);
             _context.SaveChanges();
-            return Created(gmm);
+            return CreatedAtAction(nameof(GetById), new { id = medal.GuildMemberMedalId }, medal);
         }
 
-        [HttpPut]
-        public IActionResult Put([FromBody] GuildMemberMedal gmm)
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] GuildMemberMedal medal)
         {
-            _context.Entry(gmm).State = EntityState.Modified;
+            if (id != medal.GuildMemberMedalId) return BadRequest();
+            _context.Entry(medal).State = EntityState.Modified;
             _context.SaveChanges();
-            return Updated(gmm);
+            return NoContent();
         }
 
-        [HttpDelete]
-        [Route("odata/GuildMemberMedals")]
-        public IActionResult Delete([FromBody] GuildMemberMedal gmm)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            _context.GuildMemberMedals.Remove(gmm);
+            var medal = _context.GuildMemberMedals.Find(id);
+            if (medal == null) return NotFound();
+            _context.GuildMemberMedals.Remove(medal);
             _context.SaveChanges();
             return NoContent();
         }

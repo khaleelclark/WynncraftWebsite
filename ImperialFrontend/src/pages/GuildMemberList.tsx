@@ -17,7 +17,7 @@ const GuildMemberList: React.FC = () => {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/odata/GuildMembers")
+    fetch("/api/guildmembers")
       .then((res) => res.json())
       .then((data) => {
         let arr = [];
@@ -26,8 +26,29 @@ const GuildMemberList: React.FC = () => {
         } else if (Array.isArray(data.value)) {
           arr = data.value;
         }
-        console.log("Fetched members:", arr);
-        setMembers(arr);
+        // Map backend keys to frontend snake_case keys
+        const keyMap: Record<string, string> = {
+          GuildMemberId: "guildMemberId",
+          MainUsername: "main_username",
+          MinecraftUsername: "minecraft_username",
+          RankName: "rank_name",
+          PlayerSkin: "player_skin",
+          JoinDate: "join_date",
+          WynncraftRank: "wynncraft_rank",
+          DiscordTag: "discord_tag",
+          Uuid: "uuid",
+          Games: "games",
+          Medals: "medals",
+        };
+        const mappedArr = arr.map((item: any) => {
+          const mapped: any = {};
+          Object.keys(item).forEach((key) => {
+            mapped[keyMap[key] || key] = item[key];
+          });
+          return mapped;
+        });
+        console.log("Mapped members:", mappedArr);
+        setMembers(mappedArr);
       });
   }, []);
 
@@ -67,13 +88,14 @@ const GuildMemberList: React.FC = () => {
       field: "join_date",
       headerName: "Join Date",
       width: 120,
-      valueGetter: (params: any) =>
-        params && params.row && params.row.join_date
-          ? String(params.row.join_date).slice(0, 10)
-          : "",
+      valueGetter: (params: any) => {
+        console.log(params);
+        return params ? String(params).slice(0, 10) : "";
+      },
     },
     { field: "uuid", headerName: "UUID", width: 250 },
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
+    { field: "raids_completed", headerName: "Raids Completed", width: 150 },
     {
       field: "games",
       headerName: "Games",
@@ -107,7 +129,7 @@ const GuildMemberList: React.FC = () => {
             padding: "4px 12px",
             cursor: "pointer",
           }}
-          onClick={() => handleProfileClick(params.row.guildMemberId)}
+          onClick={() => handleProfileClick(params.row.guild_member_id)}
         >
           View
         </button>
@@ -130,7 +152,7 @@ const GuildMemberList: React.FC = () => {
       <DataGrid
         rows={members}
         columns={columns}
-        getRowId={(row) => row.guildMemberId}
+        getRowId={(row) => row.guild_member_id}
         pageSizeOptions={[20, 50, 100]}
         initialState={{
           pagination: { paginationModel: { pageSize: 20, page: 0 } },

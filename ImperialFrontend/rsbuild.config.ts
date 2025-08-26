@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/odata': 'http://localhost:5032',
+      '/api': 'http://localhost:5032',
     },
   },
 });
