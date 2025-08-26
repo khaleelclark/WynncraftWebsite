@@ -7,9 +7,9 @@ interface GuildMember {
   mainUsername: string;
   minecraftUsername: string;
   rankName?: string;
-  playerSkin?: string;
   joinDate?: string;
   wynncraftRank?: string;
+  uuid?: string;
 }
 
 const GuildMemberList: React.FC = () => {
@@ -32,7 +32,6 @@ const GuildMemberList: React.FC = () => {
           MainUsername: "main_username",
           MinecraftUsername: "minecraft_username",
           RankName: "rank_name",
-          PlayerSkin: "player_skin",
           JoinDate: "join_date",
           WynncraftRank: "wynncraft_rank",
           DiscordTag: "discord_tag",
@@ -59,25 +58,29 @@ const GuildMemberList: React.FC = () => {
 
   const columns: GridColDef[] = [
     {
-      field: "player_skin",
-      headerName: "Player Skin",
-      width: 80,
-      align: "right",
-      renderCell: (params: any) =>
-        params && params.row && params.row.player_skin ? (
-          <img
-            src={params.row.player_skin}
-            alt="skin"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 4,
-            }}
-          />
-        ) : null,
+      field: "main_username",
+      headerName: "Main Username",
+      width: 220,
+      renderCell: (params: any) => (
+        <span style={{ display: "flex", alignItems: "center" }}>
+          {params.row.uuid && (
+            <img
+              src={`https://crafatar.com/avatars/${params.row.uuid}?size=32&overlay`}
+              alt="Skin"
+              style={{
+                width: 32,
+                height: 32,
+                marginRight: 8,
+                verticalAlign: "middle",
+                borderRadius: 4,
+              }}
+            />
+          )}
+          <span>{params.row.main_username}</span>
+        </span>
+      ),
     },
     { field: "discord_tag", headerName: "Discord Tag", width: 150 },
-    { field: "main_username", headerName: "Main Username", width: 180 },
     {
       field: "minecraft_username",
       headerName: "Minecraft Username",

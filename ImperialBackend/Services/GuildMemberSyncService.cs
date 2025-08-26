@@ -98,7 +98,6 @@ namespace ImperialBackend.Services
                                             if (decoded.TryGetProperty("textures", out var texturesObj) && texturesObj.TryGetProperty("SKIN", out var skinObj2))
                                             {
                                                 var skinUrl = skinObj2.TryGetProperty("url", out var urlProp) ? urlProp.GetString() : null;
-                                                member.PlayerSkin = skinUrl;
                                             }
                                         }
                                     }

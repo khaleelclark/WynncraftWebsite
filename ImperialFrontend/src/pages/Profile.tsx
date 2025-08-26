@@ -5,7 +5,6 @@ interface ProfileData {
   mainUsername: string;
   minecraftUsername: string;
   rankName?: string;
-  playerSkin?: string;
   joinDate?: string;
   wynncraftRank?: string;
   hoursPlayed?: number;
@@ -14,6 +13,7 @@ interface ProfileData {
   games?: string[];
   medals?: string[];
   raidsCompleted?: number;
+  uuid?: string;
 }
 
 const Profile: React.FC = () => {
@@ -31,7 +31,6 @@ const Profile: React.FC = () => {
           main_username: "mainUsername",
           minecraft_username: "minecraftUsername",
           rank_name: "rankName",
-          player_skin: "playerSkin",
           join_date: "joinDate",
           wynncraft_rank: "wynncraftRank",
           hours_played: "hoursPlayed",
@@ -40,6 +39,7 @@ const Profile: React.FC = () => {
           games: "games",
           medals: "medals",
           raids_completed: "raidsCompleted",
+          uuid: "uuid",
         };
         const mapped: any = {};
         Object.keys(data).forEach((key) => {
@@ -55,9 +55,15 @@ const Profile: React.FC = () => {
     <div style={{ padding: 24 }}>
       <h2>Profile: {profile.mainUsername}</h2>
       <img
-        src={profile.playerSkin}
-        alt="Skin"
-        style={{ width: 64, height: 64 }}
+        src={`https://crafatar.com/avatars/${profile.uuid}?size=64&overlay`}
+        alt="Skin Face"
+        width={64}
+        height={64}
+        style={{
+          borderRadius: 8,
+          border: "1px solid #ccc",
+          display: "inline-block",
+        }}
       />
       <ul>
         <li>Minecraft Username: {profile.minecraftUsername}</li>

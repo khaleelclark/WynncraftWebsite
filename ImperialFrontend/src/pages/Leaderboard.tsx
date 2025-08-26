@@ -3,7 +3,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 interface LeaderboardEntry {
   minecraftUsername: string;
-  playerSkin?: string;
+  uuid?: string;
   weekliesCompleted: number;
   warsCompleted: number;
   hoursPlayed: number;
@@ -17,9 +17,9 @@ const columns: GridColDef[] = [
     width: 220,
     renderCell: (params) => (
       <span style={{ display: "flex", alignItems: "center" }}>
-        {params.row.playerSkin && (
+        {params.row.uuid && (
           <img
-            src={params.row.playerSkin}
+            src={`https://crafatar.com/avatars/${params.row.uuid}?size=32&overlay`}
             alt="Skin"
             style={{
               width: 32,
@@ -30,7 +30,7 @@ const columns: GridColDef[] = [
             }}
           />
         )}
-        {params.row.minecraftUsername}
+        <span>{params.row.minecraftUsername}</span>
       </span>
     ),
   },
