@@ -25,6 +25,7 @@ const Profile: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (!data) return setProfile(null);
+
         // Map snake_case to camelCase
         const keyMap: Record<string, string> = {
           main_username: "mainUsername",

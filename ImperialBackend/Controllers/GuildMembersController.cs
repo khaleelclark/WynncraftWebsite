@@ -123,7 +123,8 @@ namespace ImperialBackend.Controllers
                     m.WeekliesCompleted,
                     m.LastSynced,
                     Games = m.Games.Select(g => g.Game.GameName).ToList(),
-                    Medals = m.Medals.Select(md => md.Medal.MedalName).ToList()
+                    Medals = m.Medals.Select(md => md.Medal.MedalName).ToList(),
+                    RaidsCompleted = _context.RaidsCompleted.Count(r => r.Uuid == m.Uuid)
                 })
                 .FirstOrDefault();
             if (member == null) return NotFound();
