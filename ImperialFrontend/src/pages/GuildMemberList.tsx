@@ -98,7 +98,6 @@ const GuildMemberList: React.FC = () => {
     },
     { field: "uuid", headerName: "UUID", width: 250 },
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
-    { field: "raids_completed", headerName: "Raids Completed", width: 150 },
     {
       field: "games",
       headerName: "Games",

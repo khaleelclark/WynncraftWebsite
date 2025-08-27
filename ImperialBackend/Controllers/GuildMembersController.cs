@@ -93,7 +93,6 @@ namespace ImperialBackend.Controllers
                     rank_name = m.Rank != null ? m.Rank.RankName : null,
                     games = m.Games.Select(g => g.Game.GameName).ToList(),
                     medals = m.Medals.Select(md => md.Medal.MedalName).ToList(),
-                    raids_completed = _context.RaidsCompleted.Count(r => r.Uuid == m.Uuid)
                 })
                 .ToList();
             return Ok(members);
