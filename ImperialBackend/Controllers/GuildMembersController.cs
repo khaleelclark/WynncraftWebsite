@@ -63,7 +63,7 @@ namespace ImperialBackend.Controllers
                     WarsCompleted = warsDiff,
                     HoursPlayed = hoursDiff,
                     RaidsCompleted = raidCount,
-                    Games = m.Games.Select(g => g.Game.GameName).ToList()
+                    Games = m.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList()
                 });
             }
             return Ok(leaderboard);
@@ -104,28 +104,43 @@ namespace ImperialBackend.Controllers
         {
             var member = _context.GuildMembers
                 .Include(m => m.Games)
+                    .ThenInclude(gmg => gmg.Game)
                 .Include(m => m.Medals)
+                    .ThenInclude(gmm => gmm.Medal)
+                .Include(m => m.PlayerHistoricalStats)
                 .Where(m => m.GuildMemberId == id)
-                .Select(m => new
-                {
-                    m.GuildMemberId,
-                    m.MainUsername,
-                    m.DiscordTag,
-                    m.MinecraftUsername,
-                    m.JoinDate,
-                    m.Uuid,
-                    m.WynncraftRank,
-                    m.HoursPlayed,
-                    m.WarsCompleted,
-                    m.WeekliesCompleted,
-                    m.LastSynced,
-                    Games = m.Games.Select(g => g.Game.GameName).ToList(),
-                    Medals = m.Medals.Select(md => md.Medal.MedalName).ToList(),
-                    RaidsCompleted = _context.RaidsCompleted.Count(r => r.Uuid == m.Uuid)
-                })
                 .FirstOrDefault();
             if (member == null) return NotFound();
-            return Ok(member);
+
+            var oldestStat = member.PlayerHistoricalStats.OrderBy(s => s.SyncDate).FirstOrDefault();
+
+            int warsDiff = 0;
+            int weekliesDiff = 0;
+            int hoursDiff = 0;
+            if (oldestStat != null)
+            {
+                warsDiff = member.WarsCompleted - oldestStat.WarsCompleted;
+                weekliesDiff = member.WeekliesCompleted - oldestStat.WeekliesCompleted;
+                hoursDiff = member.HoursPlayed - oldestStat.HoursPlayed;
+            }
+
+            var response = new
+            {
+                member.GuildMemberId,
+                member.MainUsername,
+                member.DiscordTag,
+                member.MinecraftUsername,
+                member.JoinDate,
+                member.Uuid,
+                member.WynncraftRank,
+                WarsCompleted = warsDiff,
+                WeekliesCompleted = weekliesDiff,
+                HoursPlayed = hoursDiff,
+                member.LastSynced,
+                Games = member.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList(),
+                Medals = member.Medals.Select(md => md.Medal.MedalName).ToList()
+            };
+            return Ok(response);
         }
     }
 }

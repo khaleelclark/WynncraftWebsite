@@ -14,7 +14,6 @@ interface GuildMember {
 
 const GuildMemberList: React.FC = () => {
   const [members, setMembers] = useState<GuildMember[]>([]);
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/guildmembers")
@@ -28,7 +27,7 @@ const GuildMemberList: React.FC = () => {
         }
         // Map backend keys to frontend snake_case keys
         const keyMap: Record<string, string> = {
-          GuildMemberId: "guildMemberId",
+          GuildMemberId: "guild_member_id",
           MainUsername: "main_username",
           MinecraftUsername: "minecraft_username",
           RankName: "rank_name",
@@ -57,6 +56,11 @@ const GuildMemberList: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
+    {
+      field: "guild_member_id",
+      headerName: "Guild Member ID",
+      width: 120,
+    },
     {
       field: "main_username",
       headerName: "Main Username",
@@ -96,16 +100,14 @@ const GuildMemberList: React.FC = () => {
         return params ? String(params).slice(0, 10) : "";
       },
     },
-    { field: "uuid", headerName: "UUID", width: 250 },
+    // Removed UUID column
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
     {
       field: "games",
       headerName: "Games",
       width: 200,
       valueGetter: (params: any) =>
-        params && params.row && Array.isArray(params.row.games)
-          ? params.row.games.join(", ")
-          : "",
+        params && Array.isArray(params) ? params.join(", ") : "",
     },
     {
       field: "medals",

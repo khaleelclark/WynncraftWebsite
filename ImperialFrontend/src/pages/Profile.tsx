@@ -75,7 +75,7 @@ const Profile: React.FC = () => {
         <li>Weeklies Completed: {profile.weekliesCompleted}</li>
         <li>Games: {profile.games?.join(", ")}</li>
         <li>Medals: {profile.medals?.join(", ")}</li>
-        <li>Raids Completed: {profile.raidsCompleted}</li>
+        <li>Raids Completed: {profile.raidsCompleted ?? 0}</li>
       </ul>
     </div>
   );

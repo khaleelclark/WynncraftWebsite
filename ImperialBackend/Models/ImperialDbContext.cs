@@ -20,7 +20,14 @@ namespace ImperialBackend.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            // Add any custom configuration here if needed
+
+            modelBuilder.Entity<GuildMemberGame>()
+                .HasIndex(gmg => new { gmg.GameId, gmg.GuildMemberId })
+                .IsUnique();
+
+            modelBuilder.Entity<GuildMemberMedal>()
+                .HasIndex(gmm => new { gmm.MedalId, gmm.GuildMemberId })
+                .IsUnique();
         }
     }
 }
