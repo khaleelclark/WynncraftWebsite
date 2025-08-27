@@ -5,6 +5,7 @@ import theme from "./theme";
 import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
+import AddEvent from "./pages/AddEvent";
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
@@ -32,15 +33,27 @@ const App: React.FC = () => (
         </Link>
         <Link
           to="/leaderboard"
-          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600 }}
+          style={{
+            color: "#efdddb",
+            textDecoration: "none",
+            fontWeight: 600,
+            marginRight: 16,
+          }}
         >
           Leaderboard
+        </Link>
+        <Link
+          to="/add-event"
+          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600 }}
+        >
+          Add Event
         </Link>
       </nav>
       <Routes>
         <Route path="/" element={<GuildMemberList />} />
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/add-event" element={<AddEvent />} />
       </Routes>
     </BrowserRouter>
   </ThemeProvider>
