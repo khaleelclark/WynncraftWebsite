@@ -31,10 +31,20 @@ namespace ImperialBackend.Controllers
             var leaderboard = new List<object>();
             foreach (var m in members)
             {
+                // Build statsInRange with current stats appended as the latest entry
                 var statsInRange = m.PlayerHistoricalStats
                     .Where(s => s.SyncDate >= startDate && s.SyncDate <= endDate)
                     .OrderBy(s => s.SyncDate)
                     .ToList();
+
+                // Always include current stats as the latest entry
+                statsInRange.Add(new Models.PlayerHistoricalStat
+                {
+                    WeekliesCompleted = m.WeekliesCompleted,
+                    WarsCompleted = m.WarsCompleted,
+                    HoursPlayed = m.HoursPlayed,
+                    SyncDate = DateTime.Now // Use current time for ordering
+                });
 
                 int weekliesDiff = 0;
                 int warsDiff = 0;

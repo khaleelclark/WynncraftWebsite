@@ -66,12 +66,27 @@ const AddEvent: React.FC = () => {
         </div>
         <button
           type="submit"
-          style={{ padding: "8px 16px", background: "#82172e", color: "#efdddb", border: "none", borderRadius: 4 }}
+          style={{
+            padding: "8px 16px",
+            background: "#82172e",
+            color: "#efdddb",
+            border: "none",
+            borderRadius: 4,
+          }}
         >
           Add Event
         </button>
       </form>
-      {message && <div style={{ color: message.includes("success") ? "#4caf50" : "#f44336", marginTop: 16 }}>{message}</div>}
+      {message && (
+        <div
+          style={{
+            color: message.includes("success") ? "#4caf50" : "#f44336",
+            marginTop: 16,
+          }}
+        >
+          {message}
+        </div>
+      )}
     </div>
   );
 };
