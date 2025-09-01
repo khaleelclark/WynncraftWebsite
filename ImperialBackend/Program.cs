@@ -1,27 +1,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using ImperialBackend.Models;
-using Microsoft.OData.ModelBuilder;
-using Microsoft.AspNetCore.OData;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().AddOData(opt =>
-{
-    var odataBuilder = new ODataConventionModelBuilder();
-    odataBuilder.EntitySet<Rank>("Ranks");
-    odataBuilder.EntitySet<Raid>("Raids");
-    odataBuilder.EntitySet<RaidCompleted>("RaidsCompleted");
-    odataBuilder.EntitySet<PlayerHistoricalStat>("PlayerHistoricalStats");
-    odataBuilder.EntitySet<Event>("Events");
-    odataBuilder.EntitySet<GuildMember>("GuildMembers");
-    odataBuilder.EntitySet<Game>("Games");
-    odataBuilder.EntitySet<GuildMemberGame>("GuildMemberGames");
-    odataBuilder.EntitySet<Medal>("Medals");
-    odataBuilder.EntitySet<GuildMemberMedal>("GuildMemberMedals");
-    opt.AddRouteComponents("odata", odataBuilder.GetEdmModel());
-    opt.Select().Filter().OrderBy().Expand().Count().SetMaxTop(100);
-});
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ImperialDbContext>(options =>

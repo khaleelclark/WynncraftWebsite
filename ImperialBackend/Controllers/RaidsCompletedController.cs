@@ -58,13 +58,42 @@ namespace ImperialBackend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = raidCompleted.RaidCompletedId }, raidCompleted);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] RaidCompleted raidCompleted)
+        public class RaidsCompletedBatchDto
         {
-            if (id != raidCompleted.RaidCompletedId) return BadRequest();
-            _context.Entry(raidCompleted).State = EntityState.Modified;
+            public int RaidId { get; set; }
+            public DateTime CompletedDate { get; set; }
+            public List<Guid> Uuids { get; set; } = new List<Guid>();
+        }
+
+        [HttpPut]
+        public IActionResult BatchPut([FromBody] RaidsCompletedBatchDto dto)
+        {
+            // Generate a new RaidInstanceId for this batch
+            int newRaidInstanceId = (_context.RaidsCompleted.Any() ? _context.RaidsCompleted.Max(r => r.RaidInstanceId) : 0) + 1;
+            var created = new List<RaidCompleted>();
+            foreach (var uuid in dto.Uuids)
+            {
+                var member = _context.GuildMembers.FirstOrDefault(m => m.Uuid == uuid);
+                if (member == null) continue; // skip if not found
+                var raidCompleted = new RaidCompleted
+                {
+                    RaidId = dto.RaidId,
+                    RaidInstanceId = newRaidInstanceId,
+                    Uuid = uuid,
+                    CompletedDate = dto.CompletedDate,
+                    GuildMember = member
+                };
+                _context.RaidsCompleted.Add(raidCompleted);
+                created.Add(raidCompleted);
+            }
             _context.SaveChanges();
-            return NoContent();
+            return Ok(created.Select(r => new {
+                r.RaidCompletedId,
+                r.RaidId,
+                r.RaidInstanceId,
+                r.Uuid,
+                r.CompletedDate
+            }));
         }
 
         [HttpDelete("{id}")]
