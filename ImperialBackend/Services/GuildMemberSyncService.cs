@@ -44,7 +44,7 @@ namespace ImperialBackend.Services
             using var scope = _serviceProvider.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
             var membersToSync = db.GuildMembers
-                .Where(m => !string.IsNullOrEmpty(m.MinecraftUsername))
+                .Where(m => m.Uuid != Guid.Empty)
                 .OrderBy(m => m.LastSynced ?? DateTime.MinValue)
                 .Take(100)
                 .ToList();
