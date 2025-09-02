@@ -62,7 +62,7 @@ namespace ImperialBackend.Controllers
         {
             public int RaidId { get; set; }
             public DateTime CompletedDate { get; set; }
-            public List<Guid> Uuids { get; set; } = new List<Guid>();
+            public List<string> MinecraftUsernames { get; set; } = new List<string>();
         }
 
         [HttpPut]
@@ -71,15 +71,15 @@ namespace ImperialBackend.Controllers
             // Generate a new RaidInstanceId for this batch
             int newRaidInstanceId = (_context.RaidsCompleted.Any() ? _context.RaidsCompleted.Max(r => r.RaidInstanceId) : 0) + 1;
             var created = new List<RaidCompleted>();
-            foreach (var uuid in dto.Uuids)
+            foreach (var username in dto.MinecraftUsernames)
             {
-                var member = _context.GuildMembers.FirstOrDefault(m => m.Uuid == uuid);
+                var member = _context.GuildMembers.FirstOrDefault(m => m.MinecraftUsername == username);
                 if (member == null) continue; // skip if not found
                 var raidCompleted = new RaidCompleted
                 {
                     RaidId = dto.RaidId,
                     RaidInstanceId = newRaidInstanceId,
-                    Uuid = uuid,
+                    Uuid = member.Uuid,
                     CompletedDate = dto.CompletedDate,
                     GuildMember = member
                 };
@@ -87,7 +87,8 @@ namespace ImperialBackend.Controllers
                 created.Add(raidCompleted);
             }
             _context.SaveChanges();
-            return Ok(created.Select(r => new {
+            return Ok(created.Select(r => new
+            {
                 r.RaidCompletedId,
                 r.RaidId,
                 r.RaidInstanceId,

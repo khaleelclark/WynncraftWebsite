@@ -11,6 +11,8 @@ interface LeaderboardEntry {
   raidsCompleted: number;
 }
 
+import { useNavigate } from "react-router-dom";
+
 const columns: GridColDef[] = [
   {
     field: "minecraftUsername",
@@ -32,6 +34,23 @@ const columns: GridColDef[] = [
           />
         )}
         <span>{params.row.minecraftUsername}</span>
+        <button
+          style={{
+            marginLeft: 12,
+            background: "#bc511c",
+            color: "#efdddb",
+            border: "none",
+            borderRadius: 4,
+            padding: "4px 8px",
+            cursor: "pointer",
+            fontWeight: 600,
+          }}
+          onClick={() =>
+            (window.location.href = `/profile/${params.row.guildMemberId}`)
+          }
+        >
+          Profile
+        </button>
       </span>
     ),
   },
