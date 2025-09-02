@@ -134,6 +134,8 @@ namespace ImperialBackend.Controllers
                 hoursDiff = member.HoursPlayed - oldestStat.HoursPlayed;
             }
 
+            int raidsCompleted = _context.RaidsCompleted.Count(r => r.Uuid == member.Uuid);
+
             var response = new
             {
                 member.GuildMemberId,
@@ -146,6 +148,7 @@ namespace ImperialBackend.Controllers
                 WarsCompleted = warsDiff,
                 WeekliesCompleted = weekliesDiff,
                 HoursPlayed = hoursDiff,
+                RaidsCompleted = raidsCompleted,
                 member.LastSynced,
                 Games = member.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList(),
                 Medals = member.Medals.Select(md => md.Medal.MedalName).ToList()
