@@ -63,12 +63,15 @@ const columns: GridColDef[] = [
   },
   { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
   { field: "hoursPlayed", headerName: "Hours", width: 120, type: "number" },
+  { field: "lastUpdated", headerName: "Last Updated", width: 180, type: "string" },
 ];
 
 const Leaderboard: React.FC = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("00:00");
+  const [endTime, setEndTime] = useState("23:59");
   const [selectedEvent, setSelectedEvent] = useState<any>({
     eventId: -1,
     eventName: "All Time",
@@ -78,8 +81,11 @@ const Leaderboard: React.FC = () => {
 
   const fetchLeaderboard = () => {
     if (!startDate || !endDate) return;
+    // Combine date and time for precise filtering
+    const startDateTime = `${startDate}T${startTime}`;
+    const endDateTime = `${endDate}T${endTime}`;
     fetch(
-      `/api/guildmembers/leaderboard?startDate=${startDate}&endDate=${endDate}`
+      `/api/guildmembers/leaderboard?startDate=${startDateTime}&endDate=${endDateTime}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -94,37 +100,51 @@ const Leaderboard: React.FC = () => {
 
   useEffect(() => {
     if (selectedEvent?.eventId === -2) {
-      // Custom: reset dates and clear table when switching to custom
+      // Custom: reset dates/times and clear table when switching to custom
       setStartDate("");
       setEndDate("");
+      setStartTime("00:00");
+      setEndTime("23:59");
       setEntries([]);
       return;
     }
     if (selectedEvent?.eventId === -1) {
-      // All Time: set dates and fetch
-      console.log("Fetching all time leaderboard");
+      // All Time: set dates/times and fetch
       setStartDate("2000-01-01");
       setEndDate("2100-01-01");
+      setStartTime("00:00");
+      setEndTime("23:59");
       return;
     }
     if (selectedEvent?.eventStart && selectedEvent?.eventEnd) {
-      // Specific event: set dates and fetch
+      // Specific event: set dates/times and fetch
       const start = selectedEvent.eventStart.slice(0, 10);
       const end = selectedEvent.eventEnd.slice(0, 10);
+      let startT = "00:00";
+      let endT = "23:59";
+      // If eventStart/eventEnd have time, use it
+      if (selectedEvent.eventStart.length > 10) {
+        startT = selectedEvent.eventStart.slice(11, 16);
+      }
+      if (selectedEvent.eventEnd.length > 10) {
+        endT = selectedEvent.eventEnd.slice(11, 16);
+      }
       setStartDate(start);
       setEndDate(end);
+      setStartTime(startT);
+      setEndTime(endT);
       return;
     }
   }, [selectedEvent]);
 
   useEffect(() => {
-    // Only fetch for custom when both dates are set
-    if (selectedEvent?.eventId === -2 && startDate && endDate) {
+    // Only fetch for custom when both dates and times are set
+    if (selectedEvent?.eventId === -2 && startDate && endDate && startTime && endTime) {
       fetchLeaderboard();
     } else if (selectedEvent?.eventId !== -2) {
       fetchLeaderboard();
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, startTime, endTime]);
 
   return (
     <div
@@ -168,11 +188,47 @@ const Leaderboard: React.FC = () => {
             />
           </label>
           <label style={{ color: "#efdddb", marginLeft: 16 }}>
+            Start Time:
+            <input
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              style={{
+                marginLeft: 8,
+                marginRight: 16,
+                background: "#511220",
+                color: "#efdddb",
+                border: "1px solid #bc511c",
+                borderRadius: 4,
+                padding: 4,
+              }}
+              disabled={selectedEvent?.eventId !== -2}
+            />
+          </label>
+          <label style={{ color: "#efdddb", marginLeft: 16 }}>
             End Date:
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
+              style={{
+                marginLeft: 8,
+                marginRight: 16,
+                background: "#511220",
+                color: "#efdddb",
+                border: "1px solid #bc511c",
+                borderRadius: 4,
+                padding: 4,
+              }}
+              disabled={selectedEvent?.eventId !== -2}
+            />
+          </label>
+          <label style={{ color: "#efdddb", marginLeft: 16 }}>
+            End Time:
+            <input
+              type="time"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
               style={{
                 marginLeft: 8,
                 background: "#511220",

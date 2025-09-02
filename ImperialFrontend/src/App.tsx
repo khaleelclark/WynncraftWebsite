@@ -2,10 +2,12 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
+import AdminPanel from "./pages/AdminPanel";
 import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
+import EventTablePage from "./pages/EventTablePage";
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
@@ -43,10 +45,10 @@ const App: React.FC = () => (
           Leaderboard
         </Link>
         <Link
-          to="/add-event"
-          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600 }}
+          to="/admin"
+          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600, marginRight: 16 }}
         >
-          Add Event
+          Admin Panel
         </Link>
       </nav>
       <Routes>
@@ -54,6 +56,8 @@ const App: React.FC = () => (
         <Route path="/profile/:id" element={<Profile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/add-event" element={<AddEvent />} />
+        <Route path="/admin" element={<AdminPanel />} />
+  <Route path="/events" element={<EventTablePage />} />
       </Routes>
     </BrowserRouter>
   </ThemeProvider>
