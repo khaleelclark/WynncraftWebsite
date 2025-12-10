@@ -69,7 +69,7 @@ const GuildMemberList: React.FC = () => {
         <span style={{ display: "flex", alignItems: "center" }}>
           {params.row.uuid && (
             <img
-              src={`https://crafatar.com/avatars/${params.row.uuid}?size=32&overlay`}
+              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
               alt="Skin"
               style={{
                 width: 32,

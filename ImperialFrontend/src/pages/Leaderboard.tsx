@@ -22,7 +22,7 @@ const columns: GridColDef[] = [
       <span style={{ display: "flex", alignItems: "center" }}>
         {params.row.uuid && (
           <img
-            src={`https://crafatar.com/avatars/${params.row.uuid}?size=32&overlay`}
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
             alt="Skin"
             style={{
               width: 32,
@@ -63,7 +63,12 @@ const columns: GridColDef[] = [
   },
   { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
   { field: "hoursPlayed", headerName: "Hours", width: 120, type: "number" },
-  { field: "lastUpdated", headerName: "Last Updated", width: 180, type: "string" },
+  {
+    field: "lastUpdated",
+    headerName: "Last Updated",
+    width: 180,
+    type: "string",
+  },
 ];
 
 const Leaderboard: React.FC = () => {
@@ -139,7 +144,13 @@ const Leaderboard: React.FC = () => {
 
   useEffect(() => {
     // Only fetch for custom when both dates and times are set
-    if (selectedEvent?.eventId === -2 && startDate && endDate && startTime && endTime) {
+    if (
+      selectedEvent?.eventId === -2 &&
+      startDate &&
+      endDate &&
+      startTime &&
+      endTime
+    ) {
       fetchLeaderboard();
     } else if (selectedEvent?.eventId !== -2) {
       fetchLeaderboard();

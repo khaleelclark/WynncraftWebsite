@@ -55,7 +55,7 @@ const Profile: React.FC = () => {
     <div style={{ padding: 24 }}>
       <h2>Profile: {profile.mainUsername}</h2>
       <img
-        src={`https://crafatar.com/avatars/${profile.uuid}?size=64&overlay`}
+        src={`https://mc-heads.net/avatar/${profile.uuid}/100/nohelm`}
         alt="Skin Face"
         width={64}
         height={64}
