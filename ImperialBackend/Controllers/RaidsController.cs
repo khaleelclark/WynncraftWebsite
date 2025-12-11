@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using ImperialBackend.DTOs;
 
 namespace ImperialBackend.Controllers
 {
@@ -23,9 +24,16 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Raid raid)
+        public IActionResult Post([FromBody] RaidDTO raid)
         {
-            _context.Raids.Add(raid);
+            Raid newRaid = new Raid
+            {
+                RaidId = raid.RaidId,
+                RaidName = raid.RaidName,
+                SeasonRaiting = raid.SeasonRaiting
+            };
+
+            _context.Raids.Add(newRaid);
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
         }
