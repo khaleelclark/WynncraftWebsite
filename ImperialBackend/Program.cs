@@ -7,8 +7,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+}
+
 builder.Services.AddDbContext<ImperialDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Server=localhost;Database=ImperialDb;Trusted_Connection=True;TrustServerCertificate=True;"));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
 builder.Services.AddSingleton<ImperialBackend.Services.GuildMemberSyncService>();
