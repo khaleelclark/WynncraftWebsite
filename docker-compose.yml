@@ -13,6 +13,16 @@ services:
     depends_on:
       - db
 
+  frontend:
+    build:
+      context: ./ImperialFrontend
+      dockerfile: Dockerfile
+    container_name: imperial_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: imperial_db
