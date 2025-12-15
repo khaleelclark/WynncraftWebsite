@@ -37,6 +37,7 @@ namespace ImperialBackend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newEvent.EventId }, ev);
         }
 
+        // Not sure why this would be used
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Event ev)
         {

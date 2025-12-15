@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
-
 namespace ImperialBackend.Models
 {
     public class Game
