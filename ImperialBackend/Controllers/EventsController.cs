@@ -23,11 +23,18 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Event ev)
+        public IActionResult Post([FromBody] EventDTO ev)
         {
-            _context.Events.Add(ev);
+            Event newEvent = new Event
+            {
+                EventName = ev.EventName,
+                EventStart = ev.EventStart,
+                EventEnd = ev.EventEnd
+            };
+
+            _context.Events.Add(newEvent);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = ev.EventId }, ev);
+            return CreatedAtAction(nameof(GetById), new { id = newEvent.EventId }, ev);
         }
 
         [HttpPut("{id}")]

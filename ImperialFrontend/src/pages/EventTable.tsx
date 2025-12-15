@@ -10,7 +10,6 @@ import Button from "@mui/material/Button";
 interface Event {
   eventId: number;
   eventName: string;
-  eventType: string;
   eventStart: string;
   eventEnd: string;
 }
@@ -22,7 +21,12 @@ const EventTable: React.FC = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
-  const [newEvent, setNewEvent] = useState<Event>({ eventId: 0, eventName: "", eventType: "", eventStart: "", eventEnd: "" });
+  const [newEvent, setNewEvent] = useState<Event>({
+    eventId: 0,
+    eventName: "",
+    eventStart: "",
+    eventEnd: "",
+  });
 
   useEffect(() => {
     fetch("/api/events")
@@ -58,7 +62,8 @@ const EventTable: React.FC = () => {
   const handleDeleteSubmit = async () => {
     if (!deleteEvent) return;
     await fetch(`/api/events/${deleteEvent.eventId}`, {
-      method: "DELETE" });
+      method: "DELETE",
+    });
     setOpenDelete(false);
     setDeleteEvent(null);
     // Refresh
@@ -70,7 +75,6 @@ const EventTable: React.FC = () => {
   const columns: GridColDef[] = [
     { field: "eventId", headerName: "ID", width: 80 },
     { field: "eventName", headerName: "Name", width: 180 },
-    { field: "eventType", headerName: "Type", width: 120 },
     { field: "eventStart", headerName: "Start", width: 160 },
     { field: "eventEnd", headerName: "End", width: 160 },
     {
@@ -100,7 +104,7 @@ const EventTable: React.FC = () => {
       body: JSON.stringify(newEvent),
     });
     setOpenAdd(false);
-    setNewEvent({ eventId: 0, eventName: "", eventType: "", eventStart: "", eventEnd: "" });
+    setNewEvent({ eventId: 0, eventName: "", eventStart: "", eventEnd: "" });
     // Refresh
     fetch("/api/events")
       .then((res) => res.json())
@@ -108,10 +112,30 @@ const EventTable: React.FC = () => {
   };
 
   return (
-    <div style={{ height: 500, width: "100%", background: "#fff", borderRadius: 8, padding: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div
+      style={{
+        height: 500,
+        width: "100%",
+        background: "#fff",
+        borderRadius: 8,
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h3>All Events</h3>
-        <Button variant="contained" color="primary" onClick={() => setOpenAdd(true)}>Add Event</Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenAdd(true)}
+        >
+          Add Event
+        </Button>
       </div>
       <DataGrid
         rows={events}
@@ -126,14 +150,9 @@ const EventTable: React.FC = () => {
           <TextField
             label="Name"
             value={newEvent.eventName}
-            onChange={e => setNewEvent(ev => ({ ...ev, eventName: e.target.value }))}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Type"
-            value={newEvent.eventType}
-            onChange={e => setNewEvent(ev => ({ ...ev, eventType: e.target.value }))}
+            onChange={(e) =>
+              setNewEvent((ev) => ({ ...ev, eventName: e.target.value }))
+            }
             fullWidth
             margin="normal"
           />
@@ -141,7 +160,9 @@ const EventTable: React.FC = () => {
             label="Start"
             type="datetime-local"
             value={newEvent.eventStart}
-            onChange={e => setNewEvent(ev => ({ ...ev, eventStart: e.target.value }))}
+            onChange={(e) =>
+              setNewEvent((ev) => ({ ...ev, eventStart: e.target.value }))
+            }
             fullWidth
             margin="normal"
           />
@@ -149,14 +170,18 @@ const EventTable: React.FC = () => {
             label="End"
             type="datetime-local"
             value={newEvent.eventEnd}
-            onChange={e => setNewEvent(ev => ({ ...ev, eventEnd: e.target.value }))}
+            onChange={(e) =>
+              setNewEvent((ev) => ({ ...ev, eventEnd: e.target.value }))
+            }
             fullWidth
             margin="normal"
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
-          <Button onClick={handleAddSubmit} variant="contained" color="primary">Add</Button>
+          <Button onClick={handleAddSubmit} variant="contained" color="primary">
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
       {/* Edit Dialog */}
@@ -166,14 +191,11 @@ const EventTable: React.FC = () => {
           <TextField
             label="Name"
             value={editEvent?.eventName ?? ""}
-            onChange={e => setEditEvent(ev => ev ? { ...ev, eventName: e.target.value } : ev)}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Type"
-            value={editEvent?.eventType ?? ""}
-            onChange={e => setEditEvent(ev => ev ? { ...ev, eventType: e.target.value } : ev)}
+            onChange={(e) =>
+              setEditEvent((ev) =>
+                ev ? { ...ev, eventName: e.target.value } : ev
+              )
+            }
             fullWidth
             margin="normal"
           />
@@ -181,7 +203,11 @@ const EventTable: React.FC = () => {
             label="Start"
             type="datetime-local"
             value={editEvent?.eventStart?.slice(0, 16) ?? ""}
-            onChange={e => setEditEvent(ev => ev ? { ...ev, eventStart: e.target.value } : ev)}
+            onChange={(e) =>
+              setEditEvent((ev) =>
+                ev ? { ...ev, eventStart: e.target.value } : ev
+              )
+            }
             fullWidth
             margin="normal"
           />
@@ -189,14 +215,24 @@ const EventTable: React.FC = () => {
             label="End"
             type="datetime-local"
             value={editEvent?.eventEnd?.slice(0, 16) ?? ""}
-            onChange={e => setEditEvent(ev => ev ? { ...ev, eventEnd: e.target.value } : ev)}
+            onChange={(e) =>
+              setEditEvent((ev) =>
+                ev ? { ...ev, eventEnd: e.target.value } : ev
+              )
+            }
             fullWidth
             margin="normal"
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
-          <Button onClick={handleEditSubmit} variant="contained" color="primary">Save</Button>
+          <Button
+            onClick={handleEditSubmit}
+            variant="contained"
+            color="primary"
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
       {/* Delete Dialog */}
@@ -207,7 +243,13 @@ const EventTable: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
-          <Button onClick={handleDeleteSubmit} variant="contained" color="error">Delete</Button>
+          <Button
+            onClick={handleDeleteSubmit}
+            variant="contained"
+            color="error"
+          >
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
     </div>
