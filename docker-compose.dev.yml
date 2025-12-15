@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./ImperialBackend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./ImperialBackend:/app
+    ports:
+      - "5032:5032"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True"
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./ImperialFrontend
+      dockerfile: Dockerfile.dev
+    container_name: imperial_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./ImperialFrontend:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - backend
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "SomeStrongPassword123!"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:

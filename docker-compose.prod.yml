@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ./ImperialBackend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: imperial_backend
     environment:
       ASPNETCORE_URLS: "http://+:5032"
@@ -16,7 +16,7 @@ services:
   frontend:
     build:
       context: ./ImperialFrontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     container_name: imperial_frontend
     ports:
       - "5173:80"
