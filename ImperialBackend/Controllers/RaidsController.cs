@@ -13,18 +13,42 @@ namespace ImperialBackend.Controllers
         public RaidsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Raids.Include(r => r.RaidsCompleted).ToList());
+        public IActionResult GetAll()
+        {
+            var raids = _context.Raids
+                .Select(r => new RaidGetDTO
+                {
+                    RaidId = r.RaidId,
+                    RaidName = r.RaidName,
+                    SeasonRating = r.SeasonRaiting,
+                    CompletedCount = r.RaidsCompleted.Count
+                })
+                .ToList();
+
+            return Ok(raids);
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var raid = _context.Raids.Include(r => r.RaidsCompleted).FirstOrDefault(r => r.RaidId == id);
+            var raid = _context.Raids
+                .Where(r => r.RaidId == id)
+                .Select(r => new RaidGetDTO
+                {
+                    RaidId = r.RaidId,
+                    RaidName = r.RaidName,
+                    SeasonRating = r.SeasonRaiting,
+                    CompletedCount = r.RaidsCompleted.Count
+                })
+                .FirstOrDefault();
+
             if (raid == null) return NotFound();
             return Ok(raid);
         }
 
+
         [HttpPost]
-        public IActionResult Post([FromBody] RaidDTO raid)
+        public IActionResult Post([FromBody] RaidPostDTO raid)
         {
             Raid newRaid = new Raid
             {
@@ -39,10 +63,14 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Raid raid)
+        public IActionResult Put(int id, [FromBody] RaidPostDTO raid)
         {
-            if (id != raid.RaidId) return BadRequest();
-            _context.Entry(raid).State = EntityState.Modified;
+            var existingRaid = _context.Raids.Find(id);
+            if (existingRaid == null) return NotFound();
+
+            existingRaid.RaidName = raid.RaidName;
+            existingRaid.SeasonRaiting = raid.SeasonRaiting;
+
             _context.SaveChanges();
             return NoContent();
         }
