@@ -14,7 +14,7 @@ namespace ImperialBackend.Controllers
         public GuildMembersController(ImperialDbContext context) => _context = context;
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberDTO memberDto)
+        public IActionResult Post([FromBody] GuildMemberWriteDTO memberDto)
         {
             GuildMember newMember = new GuildMember
             {
@@ -23,15 +23,25 @@ namespace ImperialBackend.Controllers
                 JoinDate = memberDto.JoinDate,
                 Uuid = memberDto.Uuid,
                 RankId = memberDto.RankId,
-                // WynncraftRank = memberDto.WynncraftRank,
-                // HoursPlayed = memberDto.HoursPlayed,
-                // WarsCompleted = memberDto.WarsCompleted,
-                // WeekliesCompleted = memberDto.WeekliesCompleted,
             };
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, memberDto);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] GuildMemberUpdateDTO dto)
+        {
+            var existingMember = _context.GuildMembers.Find(id);
+            if (existingMember == null) return NotFound();
+
+            existingMember.DiscordTag = dto.DiscordTag;
+            existingMember.MainUsername = dto.MainUsername;
+            existingMember.RankId = dto.RankId;
+
+            _context.SaveChanges();
+            return NoContent();
         }
 
         // GET: api/guildmembers/leaderboard?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
