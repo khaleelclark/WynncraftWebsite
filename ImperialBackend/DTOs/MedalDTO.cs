@@ -1,7 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ImperialBackend.Models
 {
     public class MedalDTO
-    {        
-        public string? MedalName { get; set; }
-    }
+{
+    [Required]
+    [MinLength(1)]
+    public string MedalName { get; set; } = default!;
+}
 }

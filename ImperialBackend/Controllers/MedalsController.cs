@@ -36,10 +36,16 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Medal medal)
+        public IActionResult Put(int id, [FromBody] MedalDTO medal)
         {
-            if (id != medal.MedalId) return BadRequest();
-            _context.Entry(medal).State = EntityState.Modified;
+
+            if (string.IsNullOrWhiteSpace(medal.MedalName))
+                return BadRequest("MedalName is required.");
+
+            var existingMedal = _context.Medals.Find(id);
+            if (existingMedal == null) return NotFound();
+            existingMedal.MedalName = medal.MedalName;
+
             _context.SaveChanges();
             return NoContent();
         }

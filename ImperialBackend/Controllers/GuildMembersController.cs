@@ -14,7 +14,7 @@ namespace ImperialBackend.Controllers
         public GuildMembersController(ImperialDbContext context) => _context = context;
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberWriteDTO memberDto)
+        public IActionResult Post([FromBody] GuildMemberPostDTO memberDto)
         {
             GuildMember newMember = new GuildMember
             {
@@ -31,7 +31,7 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GuildMemberUpdateDTO dto)
+        public IActionResult Put(int id, [FromBody] GuildMemberPutDTO dto)
         {
             var existingMember = _context.GuildMembers.Find(id);
             if (existingMember == null) return NotFound();
