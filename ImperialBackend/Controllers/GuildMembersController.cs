@@ -13,6 +13,27 @@ namespace ImperialBackend.Controllers
         private readonly ImperialDbContext _context;
         public GuildMembersController(ImperialDbContext context) => _context = context;
 
+        [HttpPost]
+        public IActionResult Post([FromBody] GuildMemberDTO memberDto)
+        {
+            GuildMember newMember = new GuildMember
+            {
+                MainUsername = memberDto.MainUsername,
+                DiscordTag = memberDto.DiscordTag,
+                JoinDate = memberDto.JoinDate,
+                Uuid = memberDto.Uuid,
+                RankId = memberDto.RankId,
+                // WynncraftRank = memberDto.WynncraftRank,
+                // HoursPlayed = memberDto.HoursPlayed,
+                // WarsCompleted = memberDto.WarsCompleted,
+                // WeekliesCompleted = memberDto.WeekliesCompleted,
+            };
+
+            _context.GuildMembers.Add(newMember);
+            _context.SaveChanges();
+            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, memberDto);
+        }
+
         // GET: api/guildmembers/leaderboard?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
         [HttpGet("leaderboard")]
         public IActionResult GetLeaderboard([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
@@ -161,5 +182,7 @@ namespace ImperialBackend.Controllers
             };
             return Ok(response);
         }
+
+
     }
 }
