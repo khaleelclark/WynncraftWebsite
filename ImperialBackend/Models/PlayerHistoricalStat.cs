@@ -11,7 +11,7 @@ namespace ImperialBackend.Models
         public int WarsCompleted { get; set; }
         public int HoursPlayed { get; set; }
         public DateTime SyncDate { get; set; }
-        public int GuildMemberId { get; set; }     // ✅ FK column
-        public GuildMember? GuildMember { get; set; }  // ✅ nullable navigation is safer
+        public int GuildMemberId { get; set; }
+        public GuildMember GuildMember { get; set; } = null!;
     }
 }

@@ -32,14 +32,6 @@ namespace ImperialBackend.Controllers
 
     return Ok(stats);
 }
-        
-        // [HttpGet("{id}")]
-        // public IActionResult GetById(int id)
-        // {
-        //     var stat = _context.PlayerHistoricalStats.FirstOrDefault(s => s.StatHistoryId == id);
-        //     if (stat == null) return NotFound();
-        //     return Ok(stat);
-        // }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
