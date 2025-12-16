@@ -193,6 +193,14 @@ namespace ImperialBackend.Controllers
             return Ok(response);
         }
 
-
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var member = _context.GuildMembers.Find(id);
+            if (member == null) return NotFound();
+            _context.GuildMembers.Remove(member);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
 }
