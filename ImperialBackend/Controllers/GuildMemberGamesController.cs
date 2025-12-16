@@ -21,6 +21,7 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
+        //absolutley not
         public IActionResult Post([FromBody] GuildMemberGameDTO dto)
         {
             var gameEntity = _context.Games.Find(dto.GameId);

@@ -9,6 +9,7 @@ interface LeaderboardEntry {
   warsCompleted: number;
   hoursPlayed: number;
   raidsCompleted: number;
+  lastSynced?: string | null; // ✅
 }
 
 import { useNavigate } from "react-router-dom";
@@ -64,10 +65,16 @@ const columns: GridColDef[] = [
   { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
   { field: "hoursPlayed", headerName: "Hours", width: 120, type: "number" },
   {
-    field: "lastUpdated",
+    field: "lastSynced",
     headerName: "Last Updated",
     width: 180,
-    type: "string",
+    valueFormatter: (value) =>
+      value
+        ? new Date(value as string).toLocaleString(undefined, {
+            dateStyle: "short",
+            timeStyle: "short",
+          })
+        : "—",
   },
 ];
 

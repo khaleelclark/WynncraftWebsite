@@ -23,11 +23,16 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Medal medal)
+        public IActionResult Post([FromBody] MedalDTO medal)
         {
-            _context.Medals.Add(medal);
+            Medal newMedal = new Medal
+            {
+                MedalName = medal.MedalName
+            };
+
+            _context.Medals.Add(newMedal);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = medal.MedalId }, medal);
+            return CreatedAtAction(nameof(GetById), new { id = newMedal.MedalId }, newMedal);
         }
 
         [HttpPut("{id}")]

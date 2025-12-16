@@ -4,12 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-using Microsoft.AspNetCore.Mvc;
-using ImperialBackend.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-
 namespace ImperialBackend.Controllers
 {
     [ApiController]
@@ -27,6 +21,16 @@ namespace ImperialBackend.Controllers
                 .Include(m => m.PlayerHistoricalStats)
                 .Include(m => m.Games)
                 .ToList();
+
+            var raidCounts = _context.RaidsCompleted
+                .Where(r => r.CompletedDate >= startDate && r.CompletedDate <= endDate)
+                .GroupBy(r => r.Uuid)
+                .Select(g => new
+                {
+                    Uuid = g.Key,
+                    Count = g.Count()
+                })
+                .ToDictionary(x => x.Uuid, x => x.Count);
 
             var leaderboard = new List<object>();
             foreach (var m in members)
@@ -49,9 +53,10 @@ namespace ImperialBackend.Controllers
                 int weekliesDiff = 0;
                 int warsDiff = 0;
                 int hoursDiff = 0;
-                int raidCount = _context.RaidsCompleted
-                    .Where(r => r.Uuid == m.Uuid && r.CompletedDate >= startDate && r.CompletedDate <= endDate)
-                    .Count();
+                int raidCount = raidCounts.TryGetValue(m.Uuid, out var count)
+                ? count
+                : 0;
+
 
                 if (statsInRange.Count >= 2)
                 {
@@ -68,11 +73,12 @@ namespace ImperialBackend.Controllers
                     m.GuildMemberId,
                     m.MainUsername,
                     m.MinecraftUsername,
-                    Uuid = m.Uuid,
+                    m.Uuid,
                     WeekliesCompleted = weekliesDiff,
                     WarsCompleted = warsDiff,
                     HoursPlayed = hoursDiff,
                     RaidsCompleted = raidCount,
+                    m.LastSynced, 
                     Games = m.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList()
                 });
             }

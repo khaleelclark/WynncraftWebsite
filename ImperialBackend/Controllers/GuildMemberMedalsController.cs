@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace ImperialBackend.Controllers
 {
     [ApiController]
@@ -25,6 +26,12 @@ namespace ImperialBackend.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] GuildMemberMedal medal)
         {
+            GuildMemberMedal newMedal = new GuildMemberMedal
+            {
+                MedalId = medal.MedalId,
+                GuildMemberId = medal.GuildMemberId
+            };
+
             _context.GuildMemberMedals.Add(medal);
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetById), new { id = medal.GuildMemberMedalId }, medal);

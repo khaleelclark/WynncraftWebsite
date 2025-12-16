@@ -1,17 +1,16 @@
-using System.ComponentModel.DataAnnotations;
-using System;
-
 namespace ImperialBackend.Models
 {
-    public class PlayerHistoricalStat
+    public class PlayerHistoricalStatReadDTO
     {
-        [Key]
         public int StatHistoryId { get; set; }
         public int WeekliesCompleted { get; set; }
         public int WarsCompleted { get; set; }
         public int HoursPlayed { get; set; }
         public DateTime SyncDate { get; set; }
-        public int GuildMemberId { get; set; }     // ✅ FK column
-        public GuildMember? GuildMember { get; set; }  // ✅ nullable navigation is safer
+
+        public int GuildMemberId { get; set; }
+        public string? MinecraftUsername { get; set; }
+        public string? MainUsername { get; set; }
+        public string? DiscordTag { get; set; }
     }
 }
