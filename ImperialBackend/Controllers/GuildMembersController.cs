@@ -14,20 +14,20 @@ namespace ImperialBackend.Controllers
         public GuildMembersController(ImperialDbContext context) => _context = context;
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberPostDTO memberDto)
+        public IActionResult Post([FromBody] GuildMemberPostDTO guildMember)
         {
             GuildMember newMember = new GuildMember
             {
-                MainUsername = memberDto.MainUsername,
-                DiscordTag = memberDto.DiscordTag,
-                JoinDate = memberDto.JoinDate,
-                Uuid = memberDto.Uuid,
-                RankId = memberDto.RankId,
+                MainUsername = guildMember.MainUsername,
+                DiscordTag = guildMember.DiscordTag,
+                JoinDate = guildMember.JoinDate,
+                Uuid = guildMember.Uuid,
+                RankId = guildMember.RankId,
             };
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, memberDto);
+            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, guildMember);
         }
 
         [HttpPut("{id}")]
