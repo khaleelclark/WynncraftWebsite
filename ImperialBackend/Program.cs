@@ -19,7 +19,7 @@ builder.Services.AddDbContext<ImperialDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
-builder.Services.AddSingleton<ImperialBackend.Services.GuildMemberSyncService>();
+//builder.Services.AddSingleton<ImperialBackend.Services.GuildMemberSyncService>();
 
 var app = builder.Build();
 
@@ -31,9 +31,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.Run();

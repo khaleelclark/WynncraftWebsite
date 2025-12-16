@@ -159,7 +159,7 @@ namespace ImperialBackend.Services
                         WarsCompleted = member.WarsCompleted,
                         HoursPlayed = member.HoursPlayed,
                         SyncDate = DateTime.UtcNow,
-                        GuildMember = member
+                        GuildMemberId = member.GuildMemberId
                     });
                 }
             }
