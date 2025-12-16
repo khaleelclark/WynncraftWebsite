@@ -1,11 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ImperialBackend.Models
 {
-    public class Event
+    public class EventDTO
     {
-        [Key]
-        public int EventId { get; set; }
         public string? EventName { get; set; }
         public DateTime EventStart { get; set; }
         public DateTime EventEnd { get; set; }

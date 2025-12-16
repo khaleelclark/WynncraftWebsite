@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
-using ImperialBackend.Models;
-using Microsoft.EntityFrameworkCore;
-
 namespace ImperialBackend.Controllers
 {
     [ApiController]
@@ -24,7 +21,8 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberGameDto dto)
+        //absolutley not
+        public IActionResult Post([FromBody] GuildMemberGameDTO dto)
         {
             var gameEntity = _context.Games.Find(dto.GameId);
             var memberEntity = _context.GuildMembers.Find(dto.GuildMemberId);
@@ -40,7 +38,7 @@ namespace ImperialBackend.Controllers
             };
             _context.GuildMemberGames.Add(guildMemberGame);
             _context.SaveChanges();
-            var resultDto = new GuildMemberGameDto
+            var resultDto = new GuildMemberGameDTO
             {
                 GameId = guildMemberGame.Game.GameId,
                 GuildMemberId = guildMemberGame.GuildMember.GuildMemberId
@@ -50,7 +48,7 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GuildMemberGameDto dto)
+        public IActionResult Put(int id, [FromBody] GuildMemberGameDTO dto)
         {
             var existing = _context.GuildMemberGames.Find(id);
             if (existing == null) return NotFound();

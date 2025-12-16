@@ -4,10 +4,18 @@ export default defineConfig({
   html: {
     template: "./src/index.html",
   },
+  tools: {
+    rspack: {
+      watchOptions: {
+        poll: 1000, // check for changes every 1s
+        ignored: /node_modules/,
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://192.168.4.121:5032",
+      "/api": "http://backend:5032",
     },
   },
 });

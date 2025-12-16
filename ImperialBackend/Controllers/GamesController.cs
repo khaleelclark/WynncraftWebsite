@@ -23,11 +23,16 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Game game)
+        public IActionResult Post([FromBody] GameDTO game)
         {
-            _context.Games.Add(game);
+            Game newGame = new Game
+            {
+                GameName = game.GameName
+            };
+
+            _context.Games.Add(newGame);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = game.GameId }, game);
+            return CreatedAtAction(nameof(GetById), new { id = newGame.GameId }, game);
         }
 
         [HttpPut("{id}")]

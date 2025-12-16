@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
