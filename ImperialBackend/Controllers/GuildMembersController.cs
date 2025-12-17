@@ -156,6 +156,7 @@ namespace ImperialBackend.Controllers
                     .ThenInclude(gmm => gmm.Medal)
                 .Include(m => m.PlayerHistoricalStats)
                 .Where(m => m.GuildMemberId == id)
+                .Include(m => m.Rank)
                 .FirstOrDefault();
             if (member == null) return NotFound();
 
@@ -182,6 +183,10 @@ namespace ImperialBackend.Controllers
                 member.JoinDate,
                 member.Uuid,
                 member.WynncraftRank,
+
+                member.RankId,
+                member.Rank?.RankName,
+
                 WarsCompleted = warsDiff,
                 WeekliesCompleted = weekliesDiff,
                 HoursPlayed = hoursDiff,

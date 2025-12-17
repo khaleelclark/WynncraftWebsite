@@ -48,37 +48,44 @@ namespace ImperialBackend.Controllers
             return Ok(rank);
         }
 
-// TODO: fix post and put for ranks
+        // Creates a new rank. By default MemberCount is 0, guild members will have to be assigned to the rank separately.
         [HttpPost]
-        public IActionResult Post([FromBody] Rank rank)
+        public IActionResult Post([FromBody] RankPostDTO dto)
         {
+            var rank = new Rank
+            {
+                RankName = dto.RankName
+            };
+
             _context.Ranks.Add(rank);
             _context.SaveChanges();
             return CreatedAtAction(nameof(GetById), new { id = rank.RankId }, rank);
         }
 
-        //Change the rank of a guild member by guild member ID, takes in rank id in body
-        [HttpPut("{id}/rank")]
-        public IActionResult UpdateRank(int id, [FromBody] GuildMemberRankUpdateDTO dto)
+        [HttpPut("{id}")]
+        public IActionResult UpdateRank(int id, [FromBody] RankPostDTO dto)
         {
-            var member = _context.GuildMembers.Find(id);
-            if (member == null) return NotFound();
+            var rank = _context.Ranks.Find(id);
+            if (rank == null) return NotFound();
 
-            var rankExists = _context.Ranks.Any(r => r.RankId == dto.RankId);
-            if (!rankExists) return BadRequest($"RankId {dto.RankId} does not exist.");
-
-            member.RankId = dto.RankId;
+            rank.RankName = dto.RankName;
             _context.SaveChanges();
 
             return NoContent();
         }
 
-
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var rank = _context.Ranks.Find(id);
+            var rank = _context.Ranks
+                .Include(r => r.GuildMembers)
+                .FirstOrDefault(r => r.RankId == id);
+
             if (rank == null) return NotFound();
+
+            if (rank.GuildMembers.Any())
+                return Conflict("Can't delete this rank because it still has guild members. Reassign them first.");
+
             _context.Ranks.Remove(rank);
             _context.SaveChanges();
             return NoContent();
