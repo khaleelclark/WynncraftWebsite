@@ -57,14 +57,22 @@ namespace ImperialBackend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = rank.RankId }, rank);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Rank rank)
+        //Change the rank of a guild member by guild member ID, takes in rank id in body
+        [HttpPut("{id}/rank")]
+        public IActionResult UpdateRank(int id, [FromBody] GuildMemberRankUpdateDTO dto)
         {
-            if (id != rank.RankId) return BadRequest();
-            _context.Entry(rank).State = EntityState.Modified;
+            var member = _context.GuildMembers.Find(id);
+            if (member == null) return NotFound();
+
+            var rankExists = _context.Ranks.Any(r => r.RankId == dto.RankId);
+            if (!rankExists) return BadRequest($"RankId {dto.RankId} does not exist.");
+
+            member.RankId = dto.RankId;
             _context.SaveChanges();
+
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
