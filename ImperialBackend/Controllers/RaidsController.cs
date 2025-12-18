@@ -46,26 +46,12 @@ namespace ImperialBackend.Controllers
             return Ok(raid);
         }
 
-
-        // [HttpPost]
-        // public IActionResult Post([FromBody] RaidPostDTO raid)
-        // {
-        //     Raid newRaid = new Raid
-        //     {
-        //         RaidId = raid.RaidId,
-        //         RaidName = raid.RaidName,
-        //         SeasonRating = raid.SeasonRating
-        //     };
-
-        //     _context.Raids.Add(newRaid);
-        //     _context.SaveChanges();
-        //     return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
-        // }
         [HttpPost]
         public IActionResult Post([FromBody] RaidPostDTO raid)
         {
             var newRaid = new Raid
             {
+                RaidId = raid.RaidId,
                 RaidName = raid.RaidName,
                 SeasonRating = raid.SeasonRating
             };
