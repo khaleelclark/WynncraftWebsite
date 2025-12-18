@@ -48,7 +48,7 @@ namespace ImperialBackend.Controllers
             return Ok(raidCompleted);
         }
        
-[HttpPut("raid-bot-report")]
+[HttpPost("raid-bot-report")]
 public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
 {
     if (dto.MinecraftUsernames == null || dto.MinecraftUsernames.Count == 0)
