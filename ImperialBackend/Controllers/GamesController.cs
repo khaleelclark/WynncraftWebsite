@@ -85,6 +85,9 @@ namespace ImperialBackend.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            if (_context.GuildMemberGames.Any(g => g.GameId == id))
+            return BadRequest("Cannot delete game with guild members. Remove guild members first");
+
             var game = _context.Games.Find(id);
             if (game == null) return NotFound();
             _context.Games.Remove(game);
