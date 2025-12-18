@@ -20,6 +20,10 @@ namespace ImperialBackend.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.RenameColumn(
+            name: "SeasonRaiting",
+            table: "Raids",
+            newName: "SeasonRating");
 
         }
     }
