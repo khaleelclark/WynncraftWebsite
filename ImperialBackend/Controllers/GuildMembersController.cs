@@ -16,18 +16,34 @@ namespace ImperialBackend.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] GuildMemberPostDTO guildMember)
         {
+            const int DefaultRankId = 6; // Imperial Citizen rank ID
+
+            var existingMember = _context.GuildMembers.FirstOrDefault(m => m.Uuid == guildMember.Uuid);
+            if (existingMember != null) return BadRequest("Guild member with this UUID already exists");
+
+            if (!_context.Ranks.Any(r => r.RankId == DefaultRankId))
+                return BadRequest($"Default rank id {DefaultRankId} does not exist in Ranks table.");
+
             GuildMember newMember = new GuildMember
             {
                 MainUsername = guildMember.MainUsername,
                 DiscordTag = guildMember.DiscordTag,
                 JoinDate = guildMember.JoinDate,
                 Uuid = guildMember.Uuid,
-                RankId = guildMember.RankId,
+                RankId = DefaultRankId
             };
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, guildMember);
+            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, new
+            {
+                newMember.GuildMemberId,
+                newMember.MainUsername,
+                newMember.DiscordTag,
+                newMember.JoinDate,
+                newMember.Uuid,
+                newMember.RankId
+            });
         }
 
         [HttpPut("{id}")]

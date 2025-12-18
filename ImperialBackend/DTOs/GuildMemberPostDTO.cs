@@ -8,9 +8,6 @@ namespace ImperialBackend.Models
         public string? MainUsername { get; set; }
 
         [Required]
-        public int RankId { get; set; }
-
-        [Required]
         public DateTime JoinDate { get; set; }
 
         [Required]
