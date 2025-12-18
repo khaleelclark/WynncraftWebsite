@@ -58,6 +58,8 @@ public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
     if (raid == null)
         return BadRequest($"Unknown RaidId {dto.RaidId}");
 
+    var completedDateUtc = (dto.CompletedDate ?? DateTimeOffset.UtcNow).UtcDateTime;
+
     int newRaidInstanceId =
         (_context.RaidsCompleted.Any()
             ? _context.RaidsCompleted.Max(r => r.RaidInstanceId)
@@ -82,7 +84,7 @@ public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
             RaidId = dto.RaidId,
             RaidInstanceId = newRaidInstanceId,
             Uuid = member.Uuid,
-            CompletedDate = dto.CompletedDate ?? DateTime.UtcNow,
+            CompletedDate = completedDateUtc,
             GuildMember = member
         };
 
@@ -94,7 +96,7 @@ public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
             member.Uuid,
             raid.RaidName,
             newRaidInstanceId,
-            dto.CompletedDate
+            completedDateUtc
         });
     }
 
@@ -105,12 +107,11 @@ public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
         raidId = raid.RaidId,
         raidName = raid.RaidName,
         raidInstanceId = newRaidInstanceId,
-        completedDate = dto.CompletedDate ?? DateTime.UtcNow,
+        completedDateUtc,
         createdCount = created.Count,
         notFoundUsers
     });
 }
-
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
