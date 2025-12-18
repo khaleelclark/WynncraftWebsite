@@ -44,10 +44,12 @@ namespace ImperialBackend.Controllers
             return Ok(game);
         }
 
-        //dont allow duplicate entries?
         [HttpPost]
         public IActionResult Post([FromBody] GameDTO game)
         {
+            var existingGame = _context.Games.FirstOrDefault(g => g.GameName == game.GameName);
+            if (existingGame != null) return BadRequest("Game already exists");
+
             Game newGame = new Game
             {
                 GameName = game.GameName
@@ -68,6 +70,9 @@ namespace ImperialBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] GameDTO dto)
         {
+            var existingGame = _context.Games.FirstOrDefault(g => g.GameName == dto.GameName && g.GameId != id);
+            if (existingGame != null) return BadRequest("Game with that name already exists");
+
             var game = _context.Games.Find(id);
             if (game == null) return NotFound();
 
