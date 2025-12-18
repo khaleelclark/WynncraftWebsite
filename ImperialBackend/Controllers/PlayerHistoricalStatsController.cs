@@ -34,13 +34,14 @@ namespace ImperialBackend.Controllers
     return Ok(stats);
 }
 
-        [HttpGet("{id}")]
-        public IActionResult GetStatByGuildMemberId(int id)
+        [HttpGet("by-member/{guildMemberId}")]
+        public IActionResult GetStatByGuildMemberId(int guildMemberId)
         {
             var stat = _context.PlayerHistoricalStats
                 .Include(s => s.GuildMember)
                 //get by GuildMemberId, NOT stat id
-                .Where(s => s.GuildMemberId == id)
+                .Where(s => s.GuildMemberId == guildMemberId)
+                .OrderByDescending(s => s.SyncDate)
                 .Select(s => new PlayerHistoricalStatReadDTO
                 {
                     StatHistoryId = s.StatHistoryId,
@@ -59,14 +60,6 @@ namespace ImperialBackend.Controllers
             return Ok(stat);
         }
 
-
-        //[HttpPost]
-        // public IActionResult Post([FromBody] PlayerHistoricalStat stat)
-        // {
-        //     _context.PlayerHistoricalStats.Add(stat);
-        //     _context.SaveChanges();
-        //     return CreatedAtAction(nameof(GetById), new { id = stat.StatHistoryId }, stat);
-        // }
         [HttpPost]
         public IActionResult Post([FromBody] PlayerHistoricalStatWriteDTO dto)
         {
@@ -102,7 +95,12 @@ namespace ImperialBackend.Controllers
                 })
                 .First();
 
-            return CreatedAtAction(nameof(GetStatByGuildMemberId), new { guildMemberId = stat.GuildMemberId }, read);
+            return CreatedAtAction(
+            nameof(GetStatByGuildMemberId),
+            new { guildMemberId = stat.GuildMemberId },
+            read
+);
+
         }
 
 
