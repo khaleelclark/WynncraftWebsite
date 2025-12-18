@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ImperialBackend.Models;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -15,7 +16,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<ImperialDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    )
+);
 
 builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
 
