@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using ImperialBackend.DTOs;
 
 namespace ImperialBackend.Controllers
 {
@@ -12,12 +13,34 @@ namespace ImperialBackend.Controllers
         public MedalsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Medals.Include(m => m.GuildMemberMedals).ToList());
+        public IActionResult GetAll()
+        {
+            var medals = _context.Medals
+                .AsNoTracking()
+                .Select(m => new
+                {
+                    m.MedalId,
+                    m.MedalName,
+                    MemberCount = m.GuildMemberMedals.Count
+                })
+                .ToList();
+            return Ok(medals);
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var medal = _context.Medals.Include(m => m.GuildMemberMedals).FirstOrDefault(m => m.MedalId == id);
+            var medal = _context.Medals
+                .AsNoTracking()
+                .Where(m => m.MedalId == id)
+                .Select(m => new
+                {
+                    m.MedalId,
+                    m.MedalName,
+                    MemberCount = m.GuildMemberMedals.Count
+                })
+                .FirstOrDefault();
+
             if (medal == null) return NotFound();
             return Ok(medal);
         }
@@ -32,7 +55,14 @@ namespace ImperialBackend.Controllers
 
             _context.Medals.Add(newMedal);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newMedal.MedalId }, newMedal);
+            var result = new MedalGetDTO
+            {
+                MedalId = newMedal.MedalId,
+                MedalName = newMedal.MedalName,
+                MemberCount = 0
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = newMedal.MedalId }, result);
         }
 
         [HttpPut("{id}")]

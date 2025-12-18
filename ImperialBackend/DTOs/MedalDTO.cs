@@ -5,7 +5,7 @@ namespace ImperialBackend.Models
     public class MedalDTO
 {
     [Required]
-    [MinLength(1)]
+    [StringLength(100, MinimumLength = 1)]
     public string MedalName { get; set; } = default!;
 }
 }
