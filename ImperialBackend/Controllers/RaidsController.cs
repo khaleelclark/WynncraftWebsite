@@ -20,7 +20,7 @@ namespace ImperialBackend.Controllers
                 {
                     RaidId = r.RaidId,
                     RaidName = r.RaidName,
-                    SeasonRating = r.SeasonRaiting,
+                    SeasonRating = r.SeasonRating,
                     CompletedCount = r.RaidsCompleted.Count
                 })
                 .ToList();
@@ -37,7 +37,7 @@ namespace ImperialBackend.Controllers
                 {
                     RaidId = r.RaidId,
                     RaidName = r.RaidName,
-                    SeasonRating = r.SeasonRaiting,
+                    SeasonRating = r.SeasonRating,
                     CompletedCount = r.RaidsCompleted.Count
                 })
                 .FirstOrDefault();
@@ -47,19 +47,39 @@ namespace ImperialBackend.Controllers
         }
 
 
+        // [HttpPost]
+        // public IActionResult Post([FromBody] RaidPostDTO raid)
+        // {
+        //     Raid newRaid = new Raid
+        //     {
+        //         RaidId = raid.RaidId,
+        //         RaidName = raid.RaidName,
+        //         SeasonRating = raid.SeasonRating
+        //     };
+
+        //     _context.Raids.Add(newRaid);
+        //     _context.SaveChanges();
+        //     return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
+        // }
         [HttpPost]
         public IActionResult Post([FromBody] RaidPostDTO raid)
         {
-            Raid newRaid = new Raid
+            var newRaid = new Raid
             {
-                RaidId = raid.RaidId,
                 RaidName = raid.RaidName,
-                SeasonRaiting = raid.SeasonRaiting
+                SeasonRating = raid.SeasonRating
             };
 
             _context.Raids.Add(newRaid);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
+
+            return CreatedAtAction(nameof(GetById), new { id = newRaid.RaidId }, new RaidGetDTO
+            {
+                RaidId = newRaid.RaidId,
+                RaidName = newRaid.RaidName,
+                SeasonRating = newRaid.SeasonRating,
+                CompletedCount = 0
+            });
         }
 
         [HttpPut("{id}")]
@@ -69,7 +89,7 @@ namespace ImperialBackend.Controllers
             if (existingRaid == null) return NotFound();
 
             existingRaid.RaidName = raid.RaidName;
-            existingRaid.SeasonRaiting = raid.SeasonRaiting;
+            existingRaid.SeasonRating = raid.SeasonRating;
 
             _context.SaveChanges();
             return NoContent();
