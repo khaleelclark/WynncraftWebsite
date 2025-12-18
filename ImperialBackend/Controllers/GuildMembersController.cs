@@ -14,24 +14,50 @@ namespace ImperialBackend.Controllers
         public GuildMembersController(ImperialDbContext context) => _context = context;
 
         [HttpPost]
-        public IActionResult Post([FromBody] GuildMemberDTO memberDto)
+        public IActionResult Post([FromBody] GuildMemberPostDTO guildMember)
         {
+            const int DefaultRankId = 6; // Imperial Citizen rank ID
+
+            var existingMember = _context.GuildMembers.FirstOrDefault(m => m.Uuid == guildMember.Uuid);
+            if (existingMember != null) return BadRequest("Guild member with this UUID already exists");
+
+            if (!_context.Ranks.Any(r => r.RankId == DefaultRankId))
+                return BadRequest($"Default rank id {DefaultRankId} does not exist in Ranks table.");
+
             GuildMember newMember = new GuildMember
             {
-                MainUsername = memberDto.MainUsername,
-                DiscordTag = memberDto.DiscordTag,
-                JoinDate = memberDto.JoinDate,
-                Uuid = memberDto.Uuid,
-                RankId = memberDto.RankId,
-                // WynncraftRank = memberDto.WynncraftRank,
-                // HoursPlayed = memberDto.HoursPlayed,
-                // WarsCompleted = memberDto.WarsCompleted,
-                // WeekliesCompleted = memberDto.WeekliesCompleted,
+                MainUsername = guildMember.MainUsername,
+                DiscordTag = guildMember.DiscordTag,
+                JoinDate = guildMember.JoinDate,
+                Uuid = guildMember.Uuid,
+                RankId = DefaultRankId
             };
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, memberDto);
+            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, new
+            {
+                newMember.GuildMemberId,
+                newMember.MainUsername,
+                newMember.DiscordTag,
+                newMember.JoinDate,
+                newMember.Uuid,
+                newMember.RankId
+            });
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] GuildMemberPutDTO dto)
+        {
+            var existingMember = _context.GuildMembers.Find(id);
+            if (existingMember == null) return NotFound();
+
+            existingMember.DiscordTag = dto.DiscordTag;
+            existingMember.MainUsername = dto.MainUsername;
+            existingMember.RankId = dto.RankId;
+
+            _context.SaveChanges();
+            return NoContent();
         }
 
         // GET: api/guildmembers/leaderboard?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
@@ -146,6 +172,7 @@ namespace ImperialBackend.Controllers
                     .ThenInclude(gmm => gmm.Medal)
                 .Include(m => m.PlayerHistoricalStats)
                 .Where(m => m.GuildMemberId == id)
+                .Include(m => m.Rank)
                 .FirstOrDefault();
             if (member == null) return NotFound();
 
@@ -172,6 +199,10 @@ namespace ImperialBackend.Controllers
                 member.JoinDate,
                 member.Uuid,
                 member.WynncraftRank,
+
+                member.RankId,
+                member.Rank?.RankName,
+
                 WarsCompleted = warsDiff,
                 WeekliesCompleted = weekliesDiff,
                 HoursPlayed = hoursDiff,
@@ -183,6 +214,14 @@ namespace ImperialBackend.Controllers
             return Ok(response);
         }
 
-
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var member = _context.GuildMembers.Find(id);
+            if (member == null) return NotFound();
+            _context.GuildMembers.Remove(member);
+            _context.SaveChanges();
+            return NoContent();
+        }
     }
 }

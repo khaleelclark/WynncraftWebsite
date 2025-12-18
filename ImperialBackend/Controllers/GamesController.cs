@@ -12,12 +12,34 @@ namespace ImperialBackend.Controllers
         public GamesController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Games.Include(g => g.GuildMemberGames).ToList());
+        public IActionResult GetAll()
+        {
+            var games = _context.Games
+                .AsNoTracking()
+                .Select(g => new GameGetDTO
+                {
+                    GameId = g.GameId,
+                    GameName = g.GameName,
+                    MemberCount = g.GuildMemberGames.Count
+                })
+                .ToList();
+            return Ok (games);
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var game = _context.Games.Include(g => g.GuildMemberGames).FirstOrDefault(g => g.GameId == id);
+            var game = _context.Games
+                .AsNoTracking()
+                .Where(g => g.GameId == id)
+                .Select(g => new GameGetDTO
+                {
+                    GameId = g.GameId,
+                    GameName = g.GameName,
+                    MemberCount = g.GuildMemberGames.Count
+                })
+                .FirstOrDefault();
+
             if (game == null) return NotFound();
             return Ok(game);
         }
@@ -25,6 +47,9 @@ namespace ImperialBackend.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] GameDTO game)
         {
+            var existingGame = _context.Games.FirstOrDefault(g => g.GameName == game.GameName);
+            if (existingGame != null) return BadRequest("Game already exists");
+
             Game newGame = new Game
             {
                 GameName = game.GameName
@@ -32,21 +57,37 @@ namespace ImperialBackend.Controllers
 
             _context.Games.Add(newGame);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newGame.GameId }, game);
+            var result = new GameGetDTO
+            {
+                GameId = newGame.GameId,
+                GameName = newGame.GameName,
+                MemberCount = 0
+            };
+
+            return CreatedAtAction(nameof(GetById), new { id = newGame.GameId }, result);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Game game)
+        public IActionResult Put(int id, [FromBody] GameDTO dto)
         {
-            if (id != game.GameId) return BadRequest();
-            _context.Entry(game).State = EntityState.Modified;
+            var existingGame = _context.Games.FirstOrDefault(g => g.GameName == dto.GameName && g.GameId != id);
+            if (existingGame != null) return BadRequest("Game with that name already exists");
+
+            var game = _context.Games.Find(id);
+            if (game == null) return NotFound();
+
+            game.GameName = dto.GameName;
             _context.SaveChanges();
             return NoContent();
         }
 
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            if (_context.GuildMemberGames.Any(g => g.GameId == id))
+            return BadRequest("Cannot delete game with guild members. Remove guild members first");
+
             var game = _context.Games.Find(id);
             if (game == null) return NotFound();
             _context.Games.Remove(game);

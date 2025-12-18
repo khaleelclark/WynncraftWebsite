@@ -4,6 +4,7 @@
 
 This project is a full-stack application for managing and displaying Imperial guild member data, built with:
 
+- **Database:** Microsoft SQL Server
 - **Backend:** ASP.NET Core 9, Entity Framework Core, REST API
 - **Frontend:** React 19, TypeScript, Material UI, rsbuild, pnpm
 
@@ -19,10 +20,16 @@ This project is a full-stack application for managing and displaying Imperial gu
 
 ## Project Structure
 
+From the project root run the docker container using the following
+```
+docker compose -f docker-compose.dev.yml up --build
+```
+
 ```
 Imperial Backend/
 ├── ImperialBackend/         # .NET backend
 │   ├── Controllers/         # API controllers
+│   ├── DTOs/                # Request/response contracts
 │   ├── Models/              # Entity models
 │   ├── Migrations/          # EF Core migrations
 │   ├── Services/            # Business logic
@@ -40,31 +47,7 @@ Imperial Backend/
 
 ## Getting Started
 
-### Backend (.NET)
 
-1. Install [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
-2. Navigate to `ImperialBackend` folder
-3. Run database migrations:
-   ```sh
-   dotnet ef database update
-   ```
-4. Start the backend server:
-   ```sh
-   dotnet run --project ImperialBackend/ImperialBackend.csproj
-   ```
-
-### Frontend (React)
-
-1. Install [pnpm](https://pnpm.io/)
-2. Navigate to `ImperialFrontend` folder
-3. Install dependencies:
-   ```sh
-   pnpm install
-   ```
-4. Start the frontend dev server:
-   ```sh
-   pnpm run dev
-   ```
 
 ## API Endpoints
 

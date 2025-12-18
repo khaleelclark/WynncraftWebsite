@@ -1,6 +1,6 @@
-
 using Microsoft.EntityFrameworkCore;
 using ImperialBackend.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,10 +16,17 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<ImperialDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString, sqlOptions =>
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    )
+);
 
 builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
-builder.Services.AddSingleton<ImperialBackend.Services.GuildMemberSyncService>();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
 var app = builder.Build();
 
@@ -31,9 +38,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 app.UseAuthorization();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
-
+app.MapControllers();
 app.Run();

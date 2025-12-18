@@ -13,36 +13,70 @@ namespace ImperialBackend.Controllers
         public RaidsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Raids.Include(r => r.RaidsCompleted).ToList());
+        public IActionResult GetAll()
+        {
+            var raids = _context.Raids
+                .Select(r => new RaidGetDTO
+                {
+                    RaidId = r.RaidId,
+                    RaidName = r.RaidName,
+                    SeasonRating = r.SeasonRating,
+                    CompletedCount = r.RaidsCompleted.Count
+                })
+                .ToList();
+
+            return Ok(raids);
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var raid = _context.Raids.Include(r => r.RaidsCompleted).FirstOrDefault(r => r.RaidId == id);
+            var raid = _context.Raids
+                .Where(r => r.RaidId == id)
+                .Select(r => new RaidGetDTO
+                {
+                    RaidId = r.RaidId,
+                    RaidName = r.RaidName,
+                    SeasonRating = r.SeasonRating,
+                    CompletedCount = r.RaidsCompleted.Count
+                })
+                .FirstOrDefault();
+
             if (raid == null) return NotFound();
             return Ok(raid);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] RaidDTO raid)
+        public IActionResult Post([FromBody] RaidPostDTO raid)
         {
-            Raid newRaid = new Raid
+            var newRaid = new Raid
             {
                 RaidId = raid.RaidId,
                 RaidName = raid.RaidName,
-                SeasonRaiting = raid.SeasonRaiting
+                SeasonRating = raid.SeasonRating
             };
 
             _context.Raids.Add(newRaid);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = raid.RaidId }, raid);
+
+            return CreatedAtAction(nameof(GetById), new { id = newRaid.RaidId }, new RaidGetDTO
+            {
+                RaidId = newRaid.RaidId,
+                RaidName = newRaid.RaidName,
+                SeasonRating = newRaid.SeasonRating,
+                CompletedCount = 0
+            });
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Raid raid)
+        public IActionResult Put(int id, [FromBody] RaidPostDTO raid)
         {
-            if (id != raid.RaidId) return BadRequest();
-            _context.Entry(raid).State = EntityState.Modified;
+            var existingRaid = _context.Raids.Find(id);
+            if (existingRaid == null) return NotFound();
+
+            existingRaid.RaidName = raid.RaidName;
+            existingRaid.SeasonRating = raid.SeasonRating;
+
             _context.SaveChanges();
             return NoContent();
         }

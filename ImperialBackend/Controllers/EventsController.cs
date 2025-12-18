@@ -37,12 +37,16 @@ namespace ImperialBackend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = newEvent.EventId }, ev);
         }
 
-        // Not sure why this would be used
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Event ev)
+        public IActionResult Put(int id, [FromBody] EventDTO ev)
         {
-            if (id != ev.EventId) return BadRequest();
-            _context.Entry(ev).State = EntityState.Modified;
+            var existingEvent = _context.Events.Find(id);
+            if (existingEvent == null) return NotFound();
+
+            existingEvent.EventName = ev.EventName;
+            existingEvent.EventStart = ev.EventStart;
+            existingEvent.EventEnd = ev.EventEnd;
+
             _context.SaveChanges();
             return NoContent();
         }

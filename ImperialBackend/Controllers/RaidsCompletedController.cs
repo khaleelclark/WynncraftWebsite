@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using ImperialBackend.DTOs;
 
 namespace ImperialBackend.Controllers
 {
@@ -30,72 +31,87 @@ namespace ImperialBackend.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var raidCompleted = _context.RaidsCompleted.FirstOrDefault(r => r.RaidCompletedId == id);
+            var raidCompleted = _context.RaidsCompleted
+                .AsNoTracking()
+                .Where(r => r.RaidCompletedId == id)
+                .Select(r => new
+                {
+                    r.RaidCompletedId,
+                    r.RaidId,
+                    r.RaidInstanceId,
+                    r.Uuid,
+                    r.CompletedDate
+                })
+                .FirstOrDefault();
+
             if (raidCompleted == null) return NotFound();
             return Ok(raidCompleted);
         }
+       
+[HttpPost("raid-bot-report")]
+public IActionResult SyncFromBot([FromBody] RaidBotReportDTO dto)
+{
+    if (dto.MinecraftUsernames == null || dto.MinecraftUsernames.Count == 0)
+        return BadRequest("minecraftUsernames must contain at least one player.");
 
-        public class RaidsCompletedDto
+    var raid = _context.Raids.Find(dto.RaidId);
+    if (raid == null)
+        return BadRequest($"Unknown RaidId {dto.RaidId}");
+
+    var completedDateUtc = (dto.CompletedDate ?? DateTimeOffset.UtcNow).UtcDateTime;
+
+    int newRaidInstanceId =
+        (_context.RaidsCompleted.Any()
+            ? _context.RaidsCompleted.Max(r => r.RaidInstanceId)
+            : 0) + 1;
+
+    var created = new List<object>();
+    var notFoundUsers = new List<string>();
+
+    foreach (var username in dto.MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase))
+    {
+        var member = _context.GuildMembers
+            .FirstOrDefault(m => m.MinecraftUsername == username);
+
+        if (member == null)
         {
-            public int RaidId { get; set; }
-            public int RaidInstanceId { get; set; }
-            public Guid Uuid { get; set; }
-            public DateTime CompletedDate { get; set; }
+            notFoundUsers.Add(username);
+            continue;
         }
 
-        [HttpPost]
-        public IActionResult Post([FromBody] RaidsCompletedDto dto)
+        var rc = new RaidCompleted
         {
-            var raidCompleted = new RaidCompleted
-            {
-                RaidId = dto.RaidId,
-                RaidInstanceId = dto.RaidInstanceId,
-                Uuid = dto.Uuid,
-                CompletedDate = dto.CompletedDate
-            };
-            _context.RaidsCompleted.Add(raidCompleted);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = raidCompleted.RaidCompletedId }, raidCompleted);
-        }
+            RaidId = dto.RaidId,
+            RaidInstanceId = newRaidInstanceId,
+            Uuid = member.Uuid,
+            CompletedDate = completedDateUtc,
+            GuildMember = member
+        };
 
-        public class RaidsCompletedBatchDto
-        {
-            public int RaidId { get; set; }
-            public DateTime CompletedDate { get; set; }
-            public List<string> MinecraftUsernames { get; set; } = new List<string>();
-        }
+        _context.RaidsCompleted.Add(rc);
 
-        [HttpPut]
-        public IActionResult BatchPut([FromBody] RaidsCompletedBatchDto dto)
+        created.Add(new
         {
-            // Generate a new RaidInstanceId for this batch
-            int newRaidInstanceId = (_context.RaidsCompleted.Any() ? _context.RaidsCompleted.Max(r => r.RaidInstanceId) : 0) + 1;
-            var created = new List<RaidCompleted>();
-            foreach (var username in dto.MinecraftUsernames)
-            {
-                var member = _context.GuildMembers.FirstOrDefault(m => m.MinecraftUsername == username);
-                if (member == null) continue; // skip if not found
-                var raidCompleted = new RaidCompleted
-                {
-                    RaidId = dto.RaidId,
-                    RaidInstanceId = newRaidInstanceId,
-                    Uuid = member.Uuid,
-                    CompletedDate = dto.CompletedDate,
-                    GuildMember = member
-                };
-                _context.RaidsCompleted.Add(raidCompleted);
-                created.Add(raidCompleted);
-            }
-            _context.SaveChanges();
-            return Ok(created.Select(r => new
-            {
-                r.RaidCompletedId,
-                r.RaidId,
-                r.RaidInstanceId,
-                r.Uuid,
-                r.CompletedDate
-            }));
-        }
+            username,
+            member.Uuid,
+            raid.RaidName,
+            newRaidInstanceId,
+            completedDateUtc
+        });
+    }
+
+    _context.SaveChanges();
+
+    return Ok(new
+    {
+        raidId = raid.RaidId,
+        raidName = raid.RaidName,
+        raidInstanceId = newRaidInstanceId,
+        completedDateUtc,
+        createdCount = created.Count,
+        notFoundUsers
+    });
+}
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)

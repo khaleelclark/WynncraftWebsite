@@ -16,6 +16,7 @@ namespace ImperialBackend.Controllers
 {
     var stats = _context.PlayerHistoricalStats
         .Include(s => s.GuildMember)
+        .OrderByDescending(s => s.SyncDate)
         .Select(s => new PlayerHistoricalStatReadDTO
         {
             StatHistoryId = s.StatHistoryId,
@@ -33,12 +34,14 @@ namespace ImperialBackend.Controllers
     return Ok(stats);
 }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        [HttpGet("by-member/{guildMemberId}")]
+        public IActionResult GetStatByGuildMemberId(int guildMemberId)
         {
             var stat = _context.PlayerHistoricalStats
                 .Include(s => s.GuildMember)
-                .Where(s => s.StatHistoryId == id)
+                //get by GuildMemberId, NOT stat id
+                .Where(s => s.GuildMemberId == guildMemberId)
+                .OrderByDescending(s => s.SyncDate)
                 .Select(s => new PlayerHistoricalStatReadDTO
                 {
                     StatHistoryId = s.StatHistoryId,
@@ -57,17 +60,12 @@ namespace ImperialBackend.Controllers
             return Ok(stat);
         }
 
-
-        //[HttpPost]
-        // public IActionResult Post([FromBody] PlayerHistoricalStat stat)
-        // {
-        //     _context.PlayerHistoricalStats.Add(stat);
-        //     _context.SaveChanges();
-        //     return CreatedAtAction(nameof(GetById), new { id = stat.StatHistoryId }, stat);
-        // }
         [HttpPost]
         public IActionResult Post([FromBody] PlayerHistoricalStatWriteDTO dto)
         {
+
+            if (dto.GuildMemberId <= 0) return BadRequest("GuildMemberId is required.");
+
             var stat = new PlayerHistoricalStat
             {
                 WeekliesCompleted = dto.WeekliesCompleted,
@@ -97,34 +95,39 @@ namespace ImperialBackend.Controllers
                 })
                 .First();
 
-            return CreatedAtAction(nameof(GetById), new { id = stat.StatHistoryId }, read);
+            return CreatedAtAction(
+            nameof(GetStatByGuildMemberId),
+            new { guildMemberId = stat.GuildMemberId },
+            read
+);
+
         }
 
 
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] PlayerHistoricalStatWriteDTO dto)
-        {
-            var stat = _context.PlayerHistoricalStats.Find(id);
-            if (stat == null) return NotFound();
+        // [HttpPut("{id}")]
+        // public IActionResult Put(int id, [FromBody] PlayerHistoricalStatWriteDTO dto)
+        // {
+        //     var stat = _context.PlayerHistoricalStats.Find(id);
+        //     if (stat == null) return NotFound();
 
-            stat.WeekliesCompleted = dto.WeekliesCompleted;
-            stat.WarsCompleted = dto.WarsCompleted;
-            stat.HoursPlayed = dto.HoursPlayed;
-            stat.SyncDate = dto.SyncDate;
-            stat.GuildMemberId = dto.GuildMemberId;
+        //     stat.WeekliesCompleted = dto.WeekliesCompleted;
+        //     stat.WarsCompleted = dto.WarsCompleted;
+        //     stat.HoursPlayed = dto.HoursPlayed;
+        //     stat.SyncDate = dto.SyncDate;
+        //     stat.GuildMemberId = dto.GuildMemberId;
 
-            _context.SaveChanges();
-            return NoContent();
-        }
+        //     _context.SaveChanges();
+        //     return NoContent();
+        // }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var stat = _context.PlayerHistoricalStats.Find(id);
-            if (stat == null) return NotFound();
-            _context.PlayerHistoricalStats.Remove(stat);
-            _context.SaveChanges();
-            return NoContent();
-        }
+        // [HttpDelete("{id}")]
+        // public IActionResult Delete(int id)
+        // {
+        //     var stat = _context.PlayerHistoricalStats.Find(id);
+        //     if (stat == null) return NotFound();
+        //     _context.PlayerHistoricalStats.Remove(stat);
+        //     _context.SaveChanges();
+        //     return NoContent();
+        // }
     }
 }

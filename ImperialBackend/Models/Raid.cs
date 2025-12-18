@@ -8,7 +8,7 @@ namespace ImperialBackend.Models
         [Key]
         public int RaidId { get; set; }
         public string? RaidName { get; set; }
-        public int SeasonRaiting { get; set; }
+        public int SeasonRating { get; set; }
         public ICollection<RaidCompleted> RaidsCompleted { get; set; } = new List<RaidCompleted>();
     }
 }
