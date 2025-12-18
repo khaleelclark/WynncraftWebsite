@@ -38,13 +38,6 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        // public IActionResult Put(int id, [FromBody] Event ev)
-        // {
-        //     if (id != ev.EventId) return BadRequest();
-        //     _context.Entry(ev).State = EntityState.Modified;
-        //     _context.SaveChanges();
-        //     return NoContent();
-        // }
         public IActionResult Put(int id, [FromBody] EventDTO ev)
         {
             var existingEvent = _context.Events.Find(id);
