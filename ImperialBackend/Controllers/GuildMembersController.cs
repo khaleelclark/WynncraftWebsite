@@ -16,13 +16,14 @@ namespace ImperialBackend.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] GuildMemberPostDTO guildMember)
         {
-            const int DefaultRankId = 6; // Imperial Citizen rank ID
 
             var existingMember = _context.GuildMembers.FirstOrDefault(m => m.Uuid == guildMember.Uuid);
             if (existingMember != null) return BadRequest("Guild member with this UUID already exists");
 
-            if (!_context.Ranks.Any(r => r.RankId == DefaultRankId))
-                return BadRequest($"Default rank id {DefaultRankId} does not exist in Ranks table.");
+            // Validate RankId
+            if (!_context.Ranks.Any(r => r.RankId == guildMember.RankId))
+                return BadRequest("Invalid RankId.");
+
 
             GuildMember newMember = new GuildMember
             {
@@ -30,7 +31,7 @@ namespace ImperialBackend.Controllers
                 DiscordTag = guildMember.DiscordTag,
                 JoinDate = guildMember.JoinDate,
                 Uuid = guildMember.Uuid,
-                RankId = DefaultRankId
+                RankId = guildMember.RankId,
             };
 
             _context.GuildMembers.Add(newMember);
