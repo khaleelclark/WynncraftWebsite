@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import theme from "./theme";
@@ -8,6 +7,8 @@ import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
 import EventTablePage from "./pages/EventTablePage";
+import { CustomForm } from "./pages/CustomForm";
+import FormTest from "./pages/FormTest";
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
@@ -46,9 +47,20 @@ const App: React.FC = () => (
         </Link>
         <Link
           to="/admin"
-          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600, marginRight: 16 }}
+          style={{
+            color: "#efdddb",
+            textDecoration: "none",
+            fontWeight: 600,
+            marginRight: 16,
+          }}
         >
           Admin Panel
+        </Link>
+        <Link
+          to="/form"
+          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600 }}
+        >
+          Custom Form
         </Link>
       </nav>
       <Routes>
@@ -57,7 +69,8 @@ const App: React.FC = () => (
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/add-event" element={<AddEvent />} />
         <Route path="/admin" element={<AdminPanel />} />
-  <Route path="/events" element={<EventTablePage />} />
+        <Route path="/form" element={<FormTest />} />
+        <Route path="/events" element={<EventTablePage />} />
       </Routes>
     </BrowserRouter>
   </ThemeProvider>
