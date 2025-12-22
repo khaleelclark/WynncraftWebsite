@@ -264,7 +264,7 @@ const Leaderboard: React.FC = () => {
         <DataGrid
           rows={entries}
           columns={columns}
-          getRowId={(row) => row.minecraftUsername}
+          getRowId={(row) => row.guildMemberId}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },
