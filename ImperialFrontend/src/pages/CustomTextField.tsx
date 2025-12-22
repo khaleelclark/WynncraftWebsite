@@ -1,4 +1,5 @@
 import TextField from "@mui/material/TextField";
+import { useCustomFormContext } from "../CustomFormContext";
 
 //TODO: Add mui form control props
 
@@ -44,6 +45,8 @@ const textFieldStyle = {
 };
 
 export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
+  const { register, formValues } = useCustomFormContext();
+
   let el = (
     <>
       <TextField
@@ -53,6 +56,8 @@ export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
         required={required}
         fullWidth
         sx={{ ...textFieldStyle }}
+        onChange={(e) => register(id, e.target.value)}
+        value={formValues[id] ?? ""}
       />
     </>
   );
