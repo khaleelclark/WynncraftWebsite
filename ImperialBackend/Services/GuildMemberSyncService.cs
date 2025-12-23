@@ -25,15 +25,16 @@ namespace ImperialBackend.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            DateTime lastNightlySync = DateTime.MinValue;
+            DateTimeOffset lastNightlySync = DateTimeOffset.MinValue;
             while (!stoppingToken.IsCancellationRequested)
             {
                 await SyncGuildMembersFromApis();
+                var now = DateTimeOffset.UtcNow;
                 // Nightly sync at midnight
-                if (DateTime.UtcNow.Hour == 0 && (DateTime.UtcNow - lastNightlySync).TotalHours > 23)
+                if (now.Hour == 0 && (now - lastNightlySync).TotalHours > 23)
                 {
                     await SyncNightlyStats();
-                    lastNightlySync = DateTime.UtcNow;
+                    lastNightlySync = now;
                 }
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Sync every 5 minutes
             }
@@ -45,7 +46,7 @@ namespace ImperialBackend.Services
             var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
             var membersToSync = db.GuildMembers
                 .Where(m => m.Uuid != Guid.Empty)
-                .OrderBy(m => m.LastSynced ?? DateTime.MinValue)
+                .OrderBy(m => m.LastSynced ?? DateTimeOffset.MinValue)
                 .Take(100)
                 .ToList();
             foreach (var member in membersToSync)
@@ -133,9 +134,18 @@ namespace ImperialBackend.Services
                 }
                 catch { /* ignore errors, keep existing Wynncraft stats */ }
                 // Set LastSynced after all syncs
-                member.LastSynced = DateTime.UtcNow;
+                member.LastSynced = DateTimeOffset.UtcNow;
             }
-            db.SaveChanges();
+            
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // A member was deleted/changed while syncing this batch; ignore this cycle.
+            }
+
         }
 
         public async Task RunNightlySyncManually()
@@ -158,12 +168,19 @@ namespace ImperialBackend.Services
                         WeekliesCompleted = member.WeekliesCompleted,
                         WarsCompleted = member.WarsCompleted,
                         HoursPlayed = member.HoursPlayed,
-                        SyncDate = DateTime.UtcNow,
+                        SyncDate = DateTimeOffset.UtcNow,
                         GuildMemberId = member.GuildMemberId
                     });
                 }
             }
-            await db.SaveChangesAsync();
+            try 
+            { 
+                await db.SaveChangesAsync(); 
+            }
+            catch (DbUpdateConcurrencyException) 
+            { 
+                // ignore errors, keep existing stats 
+            }
         }
     }
 }
