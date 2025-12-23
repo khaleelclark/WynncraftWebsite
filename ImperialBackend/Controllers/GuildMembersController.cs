@@ -63,7 +63,7 @@ namespace ImperialBackend.Controllers
 
         // GET: api/guildmembers/leaderboard?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
         [HttpGet("leaderboard")]
-        public IActionResult GetLeaderboard([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        public IActionResult GetLeaderboard([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
         {
             var members = _context.GuildMembers
                 .Include(m => m.PlayerHistoricalStats)
@@ -95,7 +95,7 @@ namespace ImperialBackend.Controllers
                     WeekliesCompleted = m.WeekliesCompleted,
                     WarsCompleted = m.WarsCompleted,
                     HoursPlayed = m.HoursPlayed,
-                    SyncDate = DateTime.Now // Use current time for ordering
+                   SyncDate = DateTimeOffset.UtcNow // Use current time for ordering
                 });
 
                 int weekliesDiff = 0;

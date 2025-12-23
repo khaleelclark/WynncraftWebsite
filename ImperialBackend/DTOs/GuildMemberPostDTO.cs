@@ -9,7 +9,7 @@ namespace ImperialBackend.Models
 
         [Required]
         public int RankId { get; set; }
-        public DateTime JoinDate { get; set; }
+        public DateOnly  JoinDate { get; set; }
 
         [Required]
         public Guid Uuid { get; set; }

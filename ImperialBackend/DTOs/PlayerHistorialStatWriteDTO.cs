@@ -5,7 +5,7 @@ namespace ImperialBackend.Models
         public int WeekliesCompleted { get; set; }
         public int WarsCompleted { get; set; }
         public int HoursPlayed { get; set; }
-        public DateTime SyncDate { get; set; }
+        public DateTimeOffset SyncDate { get; set; }
 
         public int GuildMemberId { get; set; }
     }

@@ -98,36 +98,8 @@ namespace ImperialBackend.Controllers
             return CreatedAtAction(
             nameof(GetStatByGuildMemberId),
             new { guildMemberId = stat.GuildMemberId },
-            read
-);
-
+            read 
+            );
         }
-
-
-        // [HttpPut("{id}")]
-        // public IActionResult Put(int id, [FromBody] PlayerHistoricalStatWriteDTO dto)
-        // {
-        //     var stat = _context.PlayerHistoricalStats.Find(id);
-        //     if (stat == null) return NotFound();
-
-        //     stat.WeekliesCompleted = dto.WeekliesCompleted;
-        //     stat.WarsCompleted = dto.WarsCompleted;
-        //     stat.HoursPlayed = dto.HoursPlayed;
-        //     stat.SyncDate = dto.SyncDate;
-        //     stat.GuildMemberId = dto.GuildMemberId;
-
-        //     _context.SaveChanges();
-        //     return NoContent();
-        // }
-
-        // [HttpDelete("{id}")]
-        // public IActionResult Delete(int id)
-        // {
-        //     var stat = _context.PlayerHistoricalStats.Find(id);
-        //     if (stat == null) return NotFound();
-        //     _context.PlayerHistoricalStats.Remove(stat);
-        //     _context.SaveChanges();
-        //     return NoContent();
-        // }
     }
 }
