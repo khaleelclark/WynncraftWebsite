@@ -2,11 +2,12 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { useCustomFormContext } from "../CustomFormContext";
 
 interface DropdownProps {
   id: string;
   label: string;
-  dropdownOptions: string[];
+  dropdownOptions: number[];
   required?: boolean;
   value: string;
   onChange: (value: string) => void;
@@ -49,10 +50,10 @@ export const CustomDropdown = ({
   id,
   label,
   dropdownOptions,
-  value,
-  onChange,
   required,
 }: DropdownProps) => {
+  const { register, formValues } = useCustomFormContext();
+
   let el = (
     <FormControl
       fullWidth
@@ -65,9 +66,9 @@ export const CustomDropdown = ({
       <Select
         labelId={`${id}-label`}
         id={id}
-        value={value}
+        value={formValues[id] ?? ""}
         label={label}
-        onChange={(e: SelectChangeEvent) => onChange(e.target.value)}
+        onChange={(e: SelectChangeEvent) => register(id, e.target.value)}
       >
         {dropdownOptions.map((option) => (
           <MenuItem key={option} value={option}>
