@@ -6,6 +6,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import { CustomForm } from "./CustomForm";
+import { CustomTextField } from "./CustomTextField";
 
 interface Event {
   eventId: number;
@@ -20,7 +22,7 @@ const EventTable: React.FC = () => {
   const [deleteEvent, setDeleteEvent] = useState<Event | null>(null);
   const [openEdit, setOpenEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const [openAdd, setOpenAdd] = useState(false);
+  const [openAdd, setOpenDone] = useState(false);
   const [newEvent, setNewEvent] = useState<Event>({
     eventId: 0,
     eventName: "",
@@ -103,7 +105,7 @@ const EventTable: React.FC = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(newEvent),
     });
-    setOpenAdd(false);
+    setOpenDone(false);
     setNewEvent({ eventId: 0, eventName: "", eventStart: "", eventEnd: "" });
     // Refresh
     fetch("/api/events")
@@ -132,7 +134,7 @@ const EventTable: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setOpenAdd(true)}
+          onClick={() => setOpenDone(true)}
         >
           Add Event
         </Button>
@@ -144,10 +146,9 @@ const EventTable: React.FC = () => {
         disableRowSelectionOnClick
       />
       {/* Add Dialog */}
-      <Dialog open={openAdd} onClose={() => setOpenAdd(false)}>
-        <DialogTitle>Add Event</DialogTitle>
+      <Dialog open={openAdd} onClose={() => setOpenDone(false)}>
         <DialogContent>
-          <TextField
+          {/* <TextField
             label="Name"
             value={newEvent.eventName}
             onChange={(e) =>
@@ -175,12 +176,21 @@ const EventTable: React.FC = () => {
             }
             fullWidth
             margin="normal"
-          />
+          /> */}
+
+          <CustomForm title="Add an Event" apiEndpoint="/api/events">
+            <CustomTextField id="eventName" label="Event Name" required />
+            <CustomTextField id="eventStart" label="Start Date" required />
+            <CustomTextField id="eventEnd" label="End Date" required />
+          </CustomForm>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenAdd(false)}>Cancel</Button>
-          <Button onClick={handleAddSubmit} variant="contained" color="primary">
-            Add
+          <Button
+            onClick={() => setOpenDone(false)}
+            variant="contained"
+            color="primary"
+          >
+            Done
           </Button>
         </DialogActions>
       </Dialog>
