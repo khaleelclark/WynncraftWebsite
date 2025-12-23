@@ -7,7 +7,7 @@ namespace ImperialBackend.Models
         [Key]
         public int EventId { get; set; }
         public string? EventName { get; set; }
-        public DateTime EventStart { get; set; }
-        public DateTime EventEnd { get; set; }
+        public DateTimeOffset EventStart { get; set; }
+        public DateTimeOffset EventEnd { get; set; }
     }
 }
