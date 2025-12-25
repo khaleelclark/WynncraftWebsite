@@ -1,6 +1,7 @@
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import { useCustomFormContext } from "../CustomFormContext";
+import { useEffect } from "react";
 
 interface DateSelectorProps {
   value: Dayjs | null;
@@ -23,7 +24,10 @@ export const CustomDateOnlySelector = ({
     register(id, newValue ? newValue.format("YYYY-MM-DD") : "");
   };
 
-  //use effect for having current date?
+  // Ensure default selected date is registered
+  useEffect(() => {
+    register(id, value ? value.format("YYYY-MM-DD") : "");
+  }, [id, value, register]);
 
   let el = (
     <>
