@@ -31,7 +31,7 @@ export const CustomForm = ({
   const el = (
     <CustomFormContext.Provider value={{ register, formValues }}>
       <Paper
-        sx={{ backgroundColor: "#802834ff", padding: 4, margin: 2 }}
+        sx={{ backgroundColor: "#b94352ff", padding: 4, margin: 2 }}
         elevation={3}
       >
         <Typography color="#000000ff" variant="h3" mb={3} fontWeight={600}>
@@ -49,7 +49,11 @@ export const CustomForm = ({
           }}
         >
           {children}
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "#220C0E" }}
+            onClick={handleSubmit}
+          >
             Submit
           </Button>
         </Box>

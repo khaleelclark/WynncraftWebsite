@@ -2,11 +2,8 @@ import { CustomForm } from "./CustomForm";
 import { CustomTextField } from "./CustomTextField";
 import { CustomDropdown } from "./CustomDropdown";
 import { useState } from "react";
-import Button from "@mui/material/Button";
-import { CustomDateSelector } from "./CustomDateSelector";
+import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
 import dayjs, { Dayjs } from "dayjs";
-//import { CustomDateSelector } from "./CustomDateSelector";
-//import dayjs, { Dayjs } from "dayjs";
 
 //this array would have to get all ranks from ranks table in the database
 // maybe have an apiendpoint prop and get the data from there
@@ -18,6 +15,7 @@ const FormTest: React.FC = () => {
   const [rank, setRank] = useState("");
   // const [eventStart, setEventStart] = useState<Dayjs | null>(dayjs());
   // const [eventEnd, setEventEnd] = useState<Dayjs | null>(null);
+  const [joinDate, setJoinDate] = useState<Dayjs | null>(dayjs()); // default to today
   return (
     <div style={{ padding: 32 }}>
       <CustomForm title="Add a Guild Member" apiEndpoint="/api/guildmembers">
@@ -32,11 +30,18 @@ const FormTest: React.FC = () => {
           onChange={setRank}
           required
         />
+        {/* <CustomTextField id="joinDate" label="Join Date" required /> */}
+        <CustomDateOnlySelector
+          id="joinDate"
+          label="Join Date"
+          value={joinDate}
+          onChange={setJoinDate}
+        />
       </CustomForm>
 
       {/* <CustomForm title="Add an Event" apiEndpoint="/api/events">
         <CustomTextField id="eventName" label="Event Name" required />
-        <CustomDateSelector
+        <CustomDateOnlySelector
           label="Start Date & Time"
           id="eventStart"
           value={eventStart}
@@ -44,7 +49,7 @@ const FormTest: React.FC = () => {
           required
           mode="iso-utc"
         />
-        <CustomDateSelector
+        <CustomDateOnlySelector
           label="End Date & Time"
           id="eventEnd"
           value={eventEnd}
