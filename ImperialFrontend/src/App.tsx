@@ -7,7 +7,6 @@ import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
 import EventTablePage from "./pages/EventTablePage";
-import { CustomForm } from "./pages/CustomForm";
 import FormTest from "./pages/FormTest";
 
 const App: React.FC = () => (
