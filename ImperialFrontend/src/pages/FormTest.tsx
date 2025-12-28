@@ -10,13 +10,11 @@ import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
 // maybe have an apiendpoint prop and get the data from there
 const rankOptions = [2, 3, 4, 5, 6, 7];
 
-//needs join date
-
 const FormTest: React.FC = () => {
   const [rank, setRank] = useState("");
-  const [eventStart, setEventStart] = useState<Dayjs | null>(dayjs());
+  const [eventStart, setEventStart] = useState<Dayjs | null>(null);
   const [eventEnd, setEventEnd] = useState<Dayjs | null>(null);
-  const [joinDate, setJoinDate] = useState<Dayjs | null>(dayjs()); // default to today
+  const [joinDate, setJoinDate] = useState<Dayjs | null>(null); // start empty, user must pick
   return (
     <div style={{ padding: 32 }}>
       <CustomForm title="Add a Guild Member" apiEndpoint="/api/guildmembers">
@@ -31,7 +29,6 @@ const FormTest: React.FC = () => {
           onChange={setRank}
           required
         />
-        {/* <CustomTextField id="joinDate" label="Join Date" required /> */}
         <CustomDateOnlySelector
           id="joinDate"
           label="Join Date"

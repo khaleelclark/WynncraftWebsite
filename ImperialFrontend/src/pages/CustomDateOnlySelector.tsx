@@ -1,7 +1,6 @@
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import { useCustomFormContext } from "../CustomFormContext";
-import { useEffect } from "react";
 
 interface DateSelectorProps {
   value: Dayjs | null;
@@ -23,11 +22,6 @@ export const CustomDateOnlySelector = ({
     // register formatted value for the payload
     register(id, newValue ? newValue.format("YYYY-MM-DD") : "");
   };
-
-  // Ensure default selected date is registered
-  useEffect(() => {
-    register(id, value ? value.format("YYYY-MM-DD") : "");
-  }, [id, value, register]);
 
   let el = (
     <>

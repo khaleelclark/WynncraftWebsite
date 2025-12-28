@@ -1,7 +1,6 @@
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { Dayjs } from "dayjs";
 import { useCustomFormContext } from "../CustomFormContext";
-import { useEffect } from "react";
 
 interface DateTimeSelectorProps {
   value: Dayjs | null;
@@ -25,11 +24,6 @@ export const CustomTimeAndDateSelector = ({
     // register ISO string (UTC) for the payload -> good for DateTimeOffset
     register(id, newValue ? newValue.toISOString() : "");
   };
-
-  // Ensure default selected date/time is registered too
-  useEffect(() => {
-    register(id, value ? value.toISOString() : "");
-  }, [id, value, register]);
 
   return (
     <DateTimePicker
