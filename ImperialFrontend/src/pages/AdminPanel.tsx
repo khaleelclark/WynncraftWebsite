@@ -9,15 +9,16 @@ import { CustomDropdown } from "./CustomDropdown";
 import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
+import { GenericGuildMemberList } from "./GenericGuildMemberList";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [guildMembersOpen, setGuildMembersOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] =
@@ -33,7 +34,6 @@ const AdminPanel: React.FC = () => {
   };
 
   const handleSubmitError = (error: unknown) => {
-    console.error(error);
     setSnackbarMessage("Failed to create guild member. Please try again.");
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
@@ -74,6 +74,25 @@ const AdminPanel: React.FC = () => {
             />
             <CustomDateOnlySelector id="joinDate" label="Join Date" />
           </CustomForm>
+        </DialogContent>
+      </Dialog>
+
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => setGuildMembersOpen(true)}
+      >
+        View Guild Members
+      </Button>
+
+      <Dialog
+        open={guildMembersOpen}
+        onClose={() => setGuildMembersOpen(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogContent dividers>
+          <GenericGuildMemberList apiEndpoint="/api/guildmembers" />
         </DialogContent>
       </Dialog>
 
