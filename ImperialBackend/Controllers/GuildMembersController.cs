@@ -150,7 +150,8 @@ namespace ImperialBackend.Controllers
                     MainUsername = m.MainUsername,
                     MinecraftUsername = m.MinecraftUsername,
                     RankId = m.RankId,
-                    WynncraftRank = m.WynncraftRank
+                    WynncraftRank = m.WynncraftRank,
+                    Uuid = m.Uuid
                 })
                 .ToList();
             return Ok(members);

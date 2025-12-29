@@ -31,7 +31,6 @@ export const GenericAdminPage = ({
   rowId,
 }: GenericAdminPageProps) => {
   const [members, setMembers] = useState<GuildMember[]>([]);
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   useEffect(() => {
     axios.get(apiEndpoint).then((res) => {
@@ -44,95 +43,13 @@ export const GenericAdminPage = ({
       ? Object.keys(members[0]).map((key) => ({
           field: key,
           headerName: key
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, (char) => char.toUpperCase()),
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (c) => c.toUpperCase())
+            .trim(),
           width: 150,
         }))
       : [];
 
-  const column1s: GridColDef[] = [
-    {
-      field: "guild_member_id",
-      headerName: "ID",
-      width: 60,
-    },
-    {
-      field: "main_username",
-      headerName: "Main Username",
-      width: 220,
-      renderCell: (params: any) => (
-        <span
-          style={{ display: "flex", alignItems: "center" }}
-          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
-        >
-          {params.row.uuid && (
-            <img
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-              alt="Skin"
-              style={{
-                width: 32,
-                height: 32,
-                marginRight: 8,
-                verticalAlign: "middle",
-                borderRadius: 4,
-              }}
-            />
-          )}
-          <span>{params.row.main_username}</span>
-        </span>
-      ),
-    },
-    { field: "discord_tag", headerName: "Discord Tag", width: 180 },
-    {
-      field: "minecraft_username",
-      headerName: "Minecraft Username",
-      width: 180,
-    },
-    { field: "rank_name", headerName: "Rank", width: 150 },
-    { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
-    {
-      field: "games",
-      headerName: "Games",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && Array.isArray(params) ? params.join(", ") : "",
-    },
-    {
-      field: "medals",
-      headerName: "Medals",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && params.row && Array.isArray(params.row.medals)
-          ? params.row.medals.join(", ")
-          : "",
-    },
-    {
-      field: "join_date",
-      headerName: "Join Date",
-      width: 120,
-    },
-    {
-      field: "profile",
-      headerName: "Profile",
-      width: 120,
-      sortable: false,
-      renderCell: (params: any) => (
-        <Button
-          style={{
-            background: "#6A001B",
-            color: "#efdddb",
-            border: "none",
-            borderRadius: 4,
-            padding: "4px 12px",
-            cursor: "pointer",
-          }}
-          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
-        >
-          View
-        </Button>
-      ),
-    },
-  ];
   const el = (
     <Box
       sx={{

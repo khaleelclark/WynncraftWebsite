@@ -10,5 +10,6 @@ namespace ImperialBackend.Models
         public string? MinecraftUsername { get; set; }
         public int RankId { get; set; }
         public string? WynncraftRank {get; set;}
+        public Guid Uuid { get; set; }
     }
 }

@@ -26,18 +26,18 @@ const GuildMemberList: React.FC = () => {
 
   const columns: GridColDef[] = [
     {
-      field: "guild_member_id",
+      field: "guildMemberId",
       headerName: "ID",
       width: 60,
     },
     {
-      field: "main_username",
+      field: "mainUsername",
       headerName: "Main Username",
       width: 220,
       renderCell: (params: any) => (
         <span
           style={{ display: "flex", alignItems: "center" }}
-          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
+          onClick={() => navigate(`/profile/${params.row.guildMemberId}`)}
         >
           {params.row.uuid && (
             <img
@@ -52,18 +52,18 @@ const GuildMemberList: React.FC = () => {
               }}
             />
           )}
-          <span>{params.row.main_username}</span>
+          <span>{params.row.mainUsername}</span>
         </span>
       ),
     },
-    { field: "discord_tag", headerName: "Discord Tag", width: 180 },
+    { field: "discordTag", headerName: "Discord Tag", width: 180 },
     {
-      field: "minecraft_username",
+      field: "minecraftUsername",
       headerName: "Minecraft Username",
       width: 180,
     },
-    { field: "rank_name", headerName: "Rank", width: 150 },
-    { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
+    { field: "rankName", headerName: "Rank", width: 150 },
+    { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
     // {
     //   field: "games",
     //   headerName: "Games",
@@ -100,7 +100,7 @@ const GuildMemberList: React.FC = () => {
             padding: "4px 12px",
             cursor: "pointer",
           }}
-          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
+          onClick={() => navigate(`/profile/${params.row.guildMemberId}`)}
         >
           View
         </Button>
@@ -134,7 +134,7 @@ const GuildMemberList: React.FC = () => {
         <DataGrid
           rows={members}
           columns={columns}
-          getRowId={(row) => row.guild_member_id}
+          getRowId={(row) => row.guildMemberId}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },
