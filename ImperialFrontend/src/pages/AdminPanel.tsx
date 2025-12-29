@@ -1,8 +1,6 @@
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
-import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomForm } from "./CustomForm";
@@ -15,7 +13,6 @@ import Snackbar from "@mui/material/Snackbar";
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [joinDate, setJoinDate] = useState<Dayjs | null>(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -76,12 +73,7 @@ const AdminPanel: React.FC = () => {
               label="Rank"
               apiEndpoint="/api/ranks"
             />
-            <CustomDateOnlySelector
-              id="joinDate"
-              label="Join Date"
-              value={joinDate}
-              onChange={setJoinDate}
-            />
+            <CustomDateOnlySelector id="joinDate" label="Join Date" />
           </CustomForm>
         </DialogContent>
       </Dialog>
