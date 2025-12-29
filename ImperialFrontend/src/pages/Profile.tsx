@@ -161,7 +161,9 @@ const Profile: React.FC = () => {
             <Typography variant="caption" sx={{ opacity: 0.7 }}>
               Last Updated
             </Typography>
-            <Typography variant="body1">{dayjs(profile.lastSynced)}</Typography>
+            <Typography variant="body1">
+              {dayjs(profile.lastSynced).format("YYYY-MM-DD hh:mm A")}
+            </Typography>
           </Grid>
 
           {/* Games */}
