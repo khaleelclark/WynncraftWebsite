@@ -53,7 +53,7 @@ const Profile: React.FC = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <h2>Profile: {profile.mainUsername}</h2>
+      <h1>{profile.mainUsername}</h1>
       <img
         src={`https://mc-heads.net/avatar/${profile.uuid}/100/nohelm`}
         alt="Skin Face"

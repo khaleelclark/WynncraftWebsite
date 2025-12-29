@@ -33,7 +33,10 @@ const GuildMemberList: React.FC = () => {
       headerName: "Main Username",
       width: 220,
       renderCell: (params: any) => (
-        <span style={{ display: "flex", alignItems: "center" }}>
+        <span
+          style={{ display: "flex", alignItems: "center" }}
+          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
+        >
           {params.row.uuid && (
             <img
               src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
@@ -58,28 +61,28 @@ const GuildMemberList: React.FC = () => {
       width: 180,
     },
     { field: "rank_name", headerName: "Rank", width: 120 },
-    {
-      field: "join_date",
-      headerName: "Join Date",
-      width: 120,
-    },
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
-    {
-      field: "games",
-      headerName: "Games",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && Array.isArray(params) ? params.join(", ") : "",
-    },
-    {
-      field: "medals",
-      headerName: "Medals",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && params.row && Array.isArray(params.row.medals)
-          ? params.row.medals.join(", ")
-          : "",
-    },
+    // {
+    //   field: "games",
+    //   headerName: "Games",
+    //   width: 200,
+    //   valueGetter: (params: any) =>
+    //     params && Array.isArray(params) ? params.join(", ") : "",
+    // },
+    // {
+    //   field: "medals",
+    //   headerName: "Medals",
+    //   width: 200,
+    //   valueGetter: (params: any) =>
+    //     params && params.row && Array.isArray(params.row.medals)
+    //       ? params.row.medals.join(", ")
+    //       : "",
+    // },
+    //     {
+    //   field: "join_date",
+    //   headerName: "Join Date",
+    //   width: 120,
+    // },
     {
       field: "profile",
       headerName: "Profile",
@@ -88,7 +91,7 @@ const GuildMemberList: React.FC = () => {
       renderCell: (params: any) => (
         <Button
           style={{
-            background: "#bc511c",
+            background: "#6A001B",
             color: "#efdddb",
             border: "none",
             borderRadius: 4,
@@ -114,7 +117,9 @@ const GuildMemberList: React.FC = () => {
         background: "#220c0e",
       }}
     >
-      <h2 style={{ color: "#efdddb", marginBottom: 16 }}>Guild Members</h2>
+      <h2 style={{ color: "#efdddb", marginBottom: 16 }}>
+        Imperial Guild Members
+      </h2>
       <DataGrid
         rows={members}
         columns={columns}
@@ -124,11 +129,10 @@ const GuildMemberList: React.FC = () => {
           pagination: { paginationModel: { pageSize: 20, page: 0 } },
         }}
         disableRowSelectionOnClick
-        autoHeight
         sx={{
-          backgroundColor: "#511220",
-          color: "#efdddb",
-          border: "1px solid #82172e",
+          backgroundColor: "#6A001B",
+          color: "#F7F2F5",
+          border: "1px solid #7A1C69",
           [`.MuiDataGrid-columnHeaders`]: {
             backgroundColor: "#82172e",
             color: "#efdddb",
@@ -138,11 +142,11 @@ const GuildMemberList: React.FC = () => {
               backgroundColor: "#220c0e",
             },
             "&:nth-of-type(odd)": {
-              backgroundColor: "#511220",
+              backgroundColor: "#3C002F",
             },
           },
           [`.MuiDataGrid-footerContainer`]: {
-            backgroundColor: "#82172e",
+            backgroundColor: "#7A1C69",
             color: "#efdddb",
           },
         }}
