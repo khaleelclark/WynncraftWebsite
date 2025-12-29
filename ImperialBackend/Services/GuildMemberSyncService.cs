@@ -133,7 +133,6 @@ namespace ImperialBackend.Services
                     }
                 }
                 catch { /* ignore errors, keep existing Wynncraft stats */ }
-                // Set LastSynced after all syncs
                 member.LastSynced = DateTimeOffset.UtcNow;
             }
             

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ImperialBackend.Models;
+using ImperialBackend.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,10 @@ builder.Services.AddDbContext<ImperialDbContext>(options =>
     )
 );
 
-builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
+//builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
+builder.Services.AddSingleton<GuildMemberSyncService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
+
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
