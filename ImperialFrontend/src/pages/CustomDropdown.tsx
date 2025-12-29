@@ -1,27 +1,21 @@
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import { useCustomFormContext } from "../CustomFormContext";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface DropdownProps {
-  id: string;
+  idColumn: string;
+  displayColumn: string;
   label: string;
-  dropdownOptions: number[];
-  required?: boolean;
-  value: string;
-  onChange: (value: string) => void;
+  apiEndpoint: string;
 }
 
 const dropdownStyle = {
   // label text + asterisk
   "& .MuiInputLabel-root": {
-    color: "#000000",
-  },
-  "& .MuiInputLabel-root.Mui-focused": {
-    color: "#000000",
-  },
-  "& .MuiFormLabel-asterisk": {
     color: "#000000",
   },
 
@@ -47,32 +41,33 @@ const dropdownStyle = {
   },
 };
 export const CustomDropdown = ({
-  id,
+  idColumn,
+  displayColumn,
   label,
-  dropdownOptions,
-  required,
+  apiEndpoint,
 }: DropdownProps) => {
   const { register, formValues } = useCustomFormContext();
+  const [dropdownOptions, setDropdownOptions] = useState([]);
 
-  let el = (
-    <FormControl
-      fullWidth
-      required={required}
-      variant="outlined"
-      sx={dropdownStyle}
-    >
-      <InputLabel id={`${id}-label`}>{label}</InputLabel>
+  useEffect(() => {
+    axios.get(apiEndpoint).then((res) => {
+      setDropdownOptions(res.data);
+    });
+  }, []);
 
+  const el = (
+    <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
+      <InputLabel id={`${idColumn}-label`}>{label}</InputLabel>
       <Select
-        labelId={`${id}-label`}
-        id={id}
-        value={formValues[id] ?? ""}
+        labelId={`${idColumn}-label`}
+        id={idColumn}
+        value={formValues[idColumn] ?? ""}
         label={label}
-        onChange={(e: SelectChangeEvent) => register(id, e.target.value)}
+        onChange={(e) => register(idColumn, e.target.value)}
       >
         {dropdownOptions.map((option) => (
-          <MenuItem key={option} value={option}>
-            {option}
+          <MenuItem key={option[idColumn]} value={option[idColumn]}>
+            {option[displayColumn]}
           </MenuItem>
         ))}
       </Select>

@@ -23,7 +23,7 @@ export const CustomDateOnlySelector = ({
     register(id, newValue ? newValue.format("YYYY-MM-DD") : "");
   };
 
-  let el = (
+  const el = (
     <>
       <DatePicker
         label={label}

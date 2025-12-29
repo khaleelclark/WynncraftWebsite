@@ -1,8 +1,47 @@
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
+import dayjs, { Dayjs } from "dayjs";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CustomForm } from "./CustomForm";
+import { CustomTextField } from "./CustomTextField";
+import { CustomDropdown } from "./CustomDropdown";
+import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
+import Alert, { AlertColor } from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [joinDate, setJoinDate] = useState<Dayjs | null>(null);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] =
+    useState<AlertColor>("success");
+
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+
+  const handleSubmitSuccess = () => {
+    setSnackbarMessage("Guild member added successfully!");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+    handleClose();
+  };
+
+  const handleSubmitError = (error: unknown) => {
+    console.error(error);
+    setSnackbarMessage("Failed to create guild member. Please try again.");
+    setSnackbarSeverity("error");
+    setSnackbarOpen(true);
+  };
+
   return (
     <div style={{ padding: 32 }}>
       <h2>Admin Panel</h2>
@@ -13,7 +52,55 @@ const AdminPanel: React.FC = () => {
       >
         Go to Event Table
       </Button>
-      {/* More admin features will go here */}
+      {/* ---------- Button that opens the dialog ---------- */}
+      <Button variant="contained" onClick={handleOpen}>
+        Add Guild Member
+      </Button>
+
+      {/* ---------- Dialog ---------- */}
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        <DialogContent dividers>
+          <CustomForm
+            title="Add a Guild Member"
+            apiEndpoint="/api/guildmembers"
+            onSubmitSuccess={handleSubmitSuccess}
+            onSubmitError={handleSubmitError}
+          >
+            <CustomTextField id="discordTag" label="Discord Tag" required />
+            <CustomTextField id="mainUsername" label="Main Username" required />
+            <CustomTextField id="uuid" label="Minecraft UUID" required />
+
+            <CustomDropdown
+              idColumn="rankId"
+              displayColumn="rankName"
+              label="Rank"
+              apiEndpoint="/api/ranks"
+            />
+            <CustomDateOnlySelector
+              id="joinDate"
+              label="Join Date"
+              value={joinDate}
+              onChange={setJoinDate}
+            />
+          </CustomForm>
+        </DialogContent>
+      </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

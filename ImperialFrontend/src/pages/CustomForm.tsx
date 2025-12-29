@@ -11,12 +11,16 @@ interface CustomFormProps {
   title: string;
   children: ReactNode;
   apiEndpoint: string;
+  onSubmitSuccess?: () => void;
+  onSubmitError?: (error: unknown) => void;
 }
 
 export const CustomForm = ({
   title,
   children,
   apiEndpoint,
+  onSubmitSuccess,
+  onSubmitError,
 }: CustomFormProps) => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
@@ -25,7 +29,18 @@ export const CustomForm = ({
   };
 
   const handleSubmit = async () => {
-    await axios.post(apiEndpoint, formValues);
+    try {
+      await axios.post(apiEndpoint, formValues);
+
+      if (onSubmitSuccess) {
+        onSubmitSuccess();
+      }
+    } catch (error) {
+      console.error("Form submission failed:", error);
+      if (onSubmitError) {
+        onSubmitError(error);
+      }
+    }
   };
 
   const el = (

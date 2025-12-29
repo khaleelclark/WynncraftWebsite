@@ -47,7 +47,7 @@ const textFieldStyle = {
 export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
   const { register, formValues } = useCustomFormContext();
 
-  let el = (
+  const el = (
     <>
       <TextField
         id={id}
@@ -55,7 +55,7 @@ export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
         variant="outlined"
         required={required}
         fullWidth
-        sx={{ ...textFieldStyle }}
+        sx={textFieldStyle}
         onChange={(e) => register(id, e.target.value)}
         value={formValues[id] ?? ""}
       />
