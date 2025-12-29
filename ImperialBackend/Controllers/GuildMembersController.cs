@@ -143,22 +143,14 @@ namespace ImperialBackend.Controllers
                 .Include(m => m.Games)
                 .Include(m => m.Medals)
                 .Include(m => m.Rank)
-                .Select(m => new
+                .Select(m => new GuildMemberPublicGetDTO
                 {
-                    guild_member_id = m.GuildMemberId,
-                    main_username = m.MainUsername,
-                    discord_tag = m.DiscordTag,
-                    minecraft_username = m.MinecraftUsername,
-                    join_date = m.JoinDate,
-                    uuid = m.Uuid,
-                    wynncraft_rank = m.WynncraftRank,
-                    hours_played = m.HoursPlayed,
-                    wars_completed = m.WarsCompleted,
-                    weeklies_completed = m.WeekliesCompleted,
-                    last_synced = m.LastSynced,
-                    rank_name = m.Rank != null ? m.Rank.RankName : null,
-                    games = m.Games.Select(g => g.Game.GameName).ToList(),
-                    medals = m.Medals.Select(md => md.Medal.MedalName).ToList(),
+                    GuildMemberId = m.GuildMemberId,
+                    DiscordTag = m.DiscordTag,
+                    MainUsername = m.MainUsername,
+                    MinecraftUsername = m.MinecraftUsername,
+                    RankId = m.RankId,
+                    WynncraftRank = m.WynncraftRank
                 })
                 .ToList();
             return Ok(members);

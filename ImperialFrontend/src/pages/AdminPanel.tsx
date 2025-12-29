@@ -9,7 +9,7 @@ import { CustomDropdown } from "./CustomDropdown";
 import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import { GenericGuildMemberList } from "./GenericGuildMemberList";
+import { GenericAdminPage } from "./GenericAdminPage";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -38,6 +38,27 @@ const AdminPanel: React.FC = () => {
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
   };
+
+  const createGuildMemberForm = (
+    <CustomForm
+      title="Add a Guild Member"
+      apiEndpoint="/api/guildmembers"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="discordTag" label="Discord Tag" required />
+      <CustomTextField id="mainUsername" label="Main Username" required />
+      <CustomTextField id="uuid" label="Minecraft UUID" required />
+
+      <CustomDropdown
+        idColumn="rankId"
+        displayColumn="rankName"
+        label="Rank"
+        apiEndpoint="/api/ranks"
+      />
+      <CustomDateOnlySelector id="joinDate" label="Join Date" />
+    </CustomForm>
+  );
 
   return (
     <div style={{ padding: 32 }}>
@@ -92,7 +113,11 @@ const AdminPanel: React.FC = () => {
         fullWidth
       >
         <DialogContent dividers>
-          <GenericGuildMemberList apiEndpoint="/api/guildmembers" />
+          <GenericAdminPage
+            apiEndpoint="/api/guildmembers"
+            rowId="guild_member_id"
+            createForm={createGuildMemberForm}
+          />
         </DialogContent>
       </Dialog>
 

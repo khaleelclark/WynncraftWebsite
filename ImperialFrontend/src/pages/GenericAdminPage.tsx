@@ -1,14 +1,18 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import { GridColDef } from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface GenericGuildMemberListProps {
+interface GenericAdminPageProps {
   apiEndpoint: string;
+  createForm: ReactElement;
+  rowId: string;
 }
 
 interface GuildMember {
@@ -21,18 +25,32 @@ interface GuildMember {
   uuid?: string;
 }
 
-export const GenericGuildMemberList = ({
+export const GenericAdminPage = ({
   apiEndpoint,
-}: GenericGuildMemberListProps) => {
+  createForm,
+  rowId,
+}: GenericAdminPageProps) => {
   const [members, setMembers] = useState<GuildMember[]>([]);
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     axios.get(apiEndpoint).then((res) => {
       setMembers(res.data);
     });
   }, []);
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef[] =
+    members.length !== 0
+      ? Object.keys(members[0]).map((key) => ({
+          field: key,
+          headerName: key
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase()),
+          width: 150,
+        }))
+      : [];
+
+  const column1s: GridColDef[] = [
     {
       field: "guild_member_id",
       headerName: "ID",
@@ -49,7 +67,7 @@ export const GenericGuildMemberList = ({
         >
           {params.row.uuid && (
             <img
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
+              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
               alt="Skin"
               style={{
                 width: 32,
@@ -127,6 +145,15 @@ export const GenericGuildMemberList = ({
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 1100 }}>
+        <Button onClick={() => setOpen(true)}>test</Button>
+        <Dialog
+          open={open}
+          onClose={() => setOpen(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogContent dividers>{createForm}</DialogContent>
+        </Dialog>
         <Typography
           sx={{
             color: "#efdddb",
@@ -141,7 +168,7 @@ export const GenericGuildMemberList = ({
         <DataGrid
           rows={members}
           columns={columns}
-          getRowId={(row) => row.guild_member_id}
+          getRowId={(row) => row[rowId]}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },

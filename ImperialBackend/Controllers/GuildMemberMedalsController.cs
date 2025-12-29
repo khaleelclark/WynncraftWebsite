@@ -12,42 +12,6 @@ namespace ImperialBackend.Controllers
         private readonly ImperialDbContext _context;
         public GuildMemberMedalsController(ImperialDbContext context) => _context = context;
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var medals = _context.GuildMemberMedals
-                .Include(m => m.Medal)
-                .Select(m => new GuildMemberMedalGetDTO
-                {
-                    GuildMemberMedalId = m.GuildMemberMedalId,
-                    MedalId = m.MedalId,
-                    MedalName = m.Medal.MedalName,
-                    GuildMemberId = m.GuildMemberId
-                })
-                .ToList();
-
-            return Ok(medals);
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var medal = _context.GuildMemberMedals
-                .Include(m => m.Medal)
-                .Where(m => m.GuildMemberMedalId == id)
-                .Select(m => new GuildMemberMedalGetDTO
-                {
-                    GuildMemberMedalId = m.GuildMemberMedalId,
-                    MedalId = m.MedalId,
-                    MedalName = m.Medal.MedalName,
-                    GuildMemberId = m.GuildMemberId
-                })
-                .FirstOrDefault();
-
-            if (medal == null) return NotFound();
-            return Ok(medal);
-        }
-
         [HttpPost]
         public IActionResult Post([FromBody] GuildMemberMedalPostDTO medal)
         {
@@ -73,9 +37,7 @@ namespace ImperialBackend.Controllers
 
             _context.GuildMemberMedals.Add(newMedal);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), 
-            new { id = newMedal.GuildMemberMedalId },
-            new { newMedal.GuildMemberMedalId, newMedal.GuildMemberId, newMedal.MedalId });
+            return Ok(newMedal);
         }
 
         [HttpDelete("{id}")]

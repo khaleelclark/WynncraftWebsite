@@ -23,7 +23,7 @@ const columns: GridColDef[] = [
       <span style={{ display: "flex", alignItems: "center" }}>
         {params.row.uuid && (
           <img
-            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
             alt="Skin"
             style={{
               width: 32,

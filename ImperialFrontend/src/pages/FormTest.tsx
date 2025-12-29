@@ -1,7 +1,7 @@
 import { CustomForm } from "./CustomForm";
 import { CustomTextField } from "./CustomTextField";
 import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
-import { GenericGuildMemberList } from "./GenericGuildMemberList";
+import { GenericAdminPage } from "./GenericAdminPage";
 
 const FormTest: React.FC = () => {
   return (
@@ -12,7 +12,7 @@ const FormTest: React.FC = () => {
         <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
       </CustomForm>
 
-      <GenericGuildMemberList apiEndpoint="/api/guildmembers" />
+      <GenericAdminPage apiEndpoint="/api/guildmembers" />
     </div>
   );
 };
