@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import axios from "axios";
+import Button from "@mui/material/Button";
 
 interface GuildMember {
   guildMemberId: number;
@@ -14,52 +16,17 @@ interface GuildMember {
 
 const GuildMemberList: React.FC = () => {
   const [members, setMembers] = useState<GuildMember[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/guildmembers")
-      .then((res) => res.json())
-      .then((data) => {
-        let arr = [];
-        if (Array.isArray(data)) {
-          arr = data;
-        } else if (Array.isArray(data.value)) {
-          arr = data.value;
-        }
-        // Map backend keys to frontend snake_case keys
-        const keyMap: Record<string, string> = {
-          GuildMemberId: "guild_member_id",
-          MainUsername: "main_username",
-          MinecraftUsername: "minecraft_username",
-          RankName: "rank_name",
-          JoinDate: "join_date",
-          WynncraftRank: "wynncraft_rank",
-          DiscordTag: "discord_tag",
-          Uuid: "uuid",
-          Games: "games",
-          Medals: "medals",
-        };
-        const mappedArr = arr.map((item: any) => {
-          const mapped: any = {};
-          Object.keys(item).forEach((key) => {
-            mapped[keyMap[key] || key] = item[key];
-          });
-          return mapped;
-        });
-        console.log("Mapped members:", mappedArr);
-        setMembers(mappedArr);
-      });
+    axios.get("/api/guildmembers").then((res) => setMembers(res.data));
   }, []);
-
-  const navigate = useNavigate();
-  const handleProfileClick = (id: number) => {
-    navigate(`/profile/${id}`);
-  };
 
   const columns: GridColDef[] = [
     {
       field: "guild_member_id",
-      headerName: "Guild Member ID",
-      width: 120,
+      headerName: "ID",
+      width: 50,
     },
     {
       field: "main_username",
@@ -95,12 +62,7 @@ const GuildMemberList: React.FC = () => {
       field: "join_date",
       headerName: "Join Date",
       width: 120,
-      valueGetter: (params: any) => {
-        console.log(params);
-        return params ? String(params).slice(0, 10) : "";
-      },
     },
-    // Removed UUID column
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
     {
       field: "games",
@@ -124,7 +86,7 @@ const GuildMemberList: React.FC = () => {
       width: 120,
       sortable: false,
       renderCell: (params: any) => (
-        <button
+        <Button
           style={{
             background: "#bc511c",
             color: "#efdddb",
@@ -133,10 +95,10 @@ const GuildMemberList: React.FC = () => {
             padding: "4px 12px",
             cursor: "pointer",
           }}
-          onClick={() => handleProfileClick(params.row.guild_member_id)}
+          onClick={() => navigate(`/profile/${params.row.guild_member_id}`)}
         >
           View
-        </button>
+        </Button>
       ),
     },
   ];

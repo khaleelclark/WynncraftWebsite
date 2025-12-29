@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
+// TODO sperate this into a public and private endpoint 
+
 namespace ImperialBackend.Controllers
 {
     [ApiController]
