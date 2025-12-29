@@ -53,7 +53,6 @@ const AdminPanel: React.FC = () => {
       <Button variant="contained" onClick={handleOpen}>
         Add Guild Member
       </Button>
-
       {/* ---------- Dialog ---------- */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogContent dividers>

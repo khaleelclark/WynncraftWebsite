@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import axios from "axios";
-import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import { GridColDef } from "@mui/x-data-grid";
+import { DataGrid } from "@mui/x-data-grid/DataGrid";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+interface GenericGuildMemberListProps {
+  apiEndpoint: string;
+}
 
 interface GuildMember {
   guildMemberId: number;
@@ -16,12 +21,15 @@ interface GuildMember {
   uuid?: string;
 }
 
-const GuildMemberList: React.FC = () => {
+export const GenericGuildMemberList = ({
+  apiEndpoint,
+}: GenericGuildMemberListProps) => {
   const [members, setMembers] = useState<GuildMember[]>([]);
   const navigate = useNavigate();
-
   useEffect(() => {
-    axios.get("/api/guildmembers").then((res) => setMembers(res.data));
+    axios.get(apiEndpoint).then((res) => {
+      setMembers(res.data);
+    });
   }, []);
 
   const columns: GridColDef[] = [
@@ -64,27 +72,27 @@ const GuildMemberList: React.FC = () => {
     },
     { field: "rank_name", headerName: "Rank", width: 150 },
     { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
-    // {
-    //   field: "games",
-    //   headerName: "Games",
-    //   width: 200,
-    //   valueGetter: (params: any) =>
-    //     params && Array.isArray(params) ? params.join(", ") : "",
-    // },
-    // {
-    //   field: "medals",
-    //   headerName: "Medals",
-    //   width: 200,
-    //   valueGetter: (params: any) =>
-    //     params && params.row && Array.isArray(params.row.medals)
-    //       ? params.row.medals.join(", ")
-    //       : "",
-    // },
-    //     {
-    //   field: "join_date",
-    //   headerName: "Join Date",
-    //   width: 120,
-    // },
+    {
+      field: "games",
+      headerName: "Games",
+      width: 200,
+      valueGetter: (params: any) =>
+        params && Array.isArray(params) ? params.join(", ") : "",
+    },
+    {
+      field: "medals",
+      headerName: "Medals",
+      width: 200,
+      valueGetter: (params: any) =>
+        params && params.row && Array.isArray(params.row.medals)
+          ? params.row.medals.join(", ")
+          : "",
+    },
+    {
+      field: "join_date",
+      headerName: "Join Date",
+      width: 120,
+    },
     {
       field: "profile",
       headerName: "Profile",
@@ -107,8 +115,7 @@ const GuildMemberList: React.FC = () => {
       ),
     },
   ];
-
-  return (
+  const el = (
     <Box
       sx={{
         padding: 3,
@@ -165,6 +172,5 @@ const GuildMemberList: React.FC = () => {
       </Box>
     </Box>
   );
+  return el;
 };
-
-export default GuildMemberList;
