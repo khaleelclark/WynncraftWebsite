@@ -11,8 +11,6 @@ const FormTest: React.FC = () => {
         <CustomTimeAndDateSelector id="eventStart" label="Start Date & Time" />
         <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
       </CustomForm>
-
-      <GenericAdminPage apiEndpoint="/api/guildmembers" />
     </div>
   );
 };

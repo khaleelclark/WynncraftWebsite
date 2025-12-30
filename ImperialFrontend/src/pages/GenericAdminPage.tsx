@@ -76,6 +76,8 @@ export const GenericAdminPage = ({
         ]
       : [];
 
+  const selectedUser = members.find((u) => u[rowId] === idToDelete);
+
   const el = (
     <>
       {members ? (
@@ -101,7 +103,7 @@ export const GenericAdminPage = ({
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 {`Are you sure you want to delete Id #${idToDelete}
-              ${members.find((u) => u[rowId] === idToDelete)[rowName]}?`}
+              ${selectedUser ? selectedUser[rowName] : ""}?`}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -194,7 +196,7 @@ export const GenericAdminPage = ({
             width: "100%",
           }}
         >
-          <CircularProgress />
+          {/* <CircularProgress /> */}
         </Box>
       )}
     </>
