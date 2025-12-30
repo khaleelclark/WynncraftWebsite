@@ -7,12 +7,13 @@ import { useState } from "react";
 import { CustomFormContext } from "../CustomFormContext";
 import Button from "@mui/material/Button";
 
-interface CustomFormProps {
+export interface CustomFormProps {
   title: string;
   children: ReactNode;
   apiEndpoint: string;
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: unknown) => void;
+  addNewRecordCallback?: (newRecord: Object) => void;
 }
 
 export const CustomForm = ({
@@ -21,6 +22,7 @@ export const CustomForm = ({
   apiEndpoint,
   onSubmitSuccess,
   onSubmitError,
+  addNewRecordCallback
 }: CustomFormProps) => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
 
@@ -30,7 +32,9 @@ export const CustomForm = ({
 
   const handleSubmit = async () => {
     try {
-      await axios.post(apiEndpoint, formValues);
+      await axios.post(apiEndpoint, formValues).then((res) => {
+        if (addNewRecordCallback) addNewRecordCallback(res.data);
+      });
 
       if (onSubmitSuccess) {
         onSubmitSuccess();

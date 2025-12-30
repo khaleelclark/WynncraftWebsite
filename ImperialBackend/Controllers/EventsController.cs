@@ -12,38 +12,62 @@ namespace ImperialBackend.Controllers
         public EventsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() => Ok(_context.Events.ToList());
+        public IActionResult GetAll() {
+            var events = _context.Events
+                .Select(e => new EventGetDTO
+                {
+                    Id = e.EventId,
+                    Name = e.EventName,
+                    EventStart = e.EventStart,
+                    EventEnd = e.EventEnd
+                })
+                .ToList();
+
+            return Ok(events);
+        }
 
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var ev = _context.Events.FirstOrDefault(e => e.EventId == id);
-            if (ev == null) return NotFound();
+            var ev = _context.Events
+                .Where(e => e.EventId == id)
+                .Select(e => new EventGetDTO
+                {
+                    Id = e.EventId,
+                    Name = e.EventName,
+                    EventStart = e.EventStart,
+                    EventEnd = e.EventEnd
+                })
+                .FirstOrDefault();
+
+            if (ev == null)
+                return NotFound();
+
             return Ok(ev);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] EventDTO ev)
+        public IActionResult Post([FromBody] EventPostDTO ev)
         {
             Event newEvent = new Event
             {
-                EventName = ev.EventName,
+                EventName = ev.Name,
                 EventStart = ev.EventStart,
                 EventEnd = ev.EventEnd
             };
 
             _context.Events.Add(newEvent);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newEvent.EventId }, ev);
+            return Ok(newEvent);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] EventDTO ev)
+        public IActionResult Put(int id, [FromBody] EventPostDTO ev)
         {
             var existingEvent = _context.Events.Find(id);
             if (existingEvent == null) return NotFound();
 
-            existingEvent.EventName = ev.EventName;
+            existingEvent.EventName = ev.Name;
             existingEvent.EventStart = ev.EventStart;
             existingEvent.EventEnd = ev.EventEnd;
 

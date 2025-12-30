@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-// TODO sperate this into a public and private endpoint 
+// TODO sperate this into a public and private GET endpoint 
+//call current get public and add a new private endpoint
 
 namespace ImperialBackend.Controllers
 {

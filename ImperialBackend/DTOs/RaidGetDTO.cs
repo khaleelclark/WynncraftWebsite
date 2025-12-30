@@ -1,10 +1,9 @@
+using ImperialBackend.Models;
+
 namespace ImperialBackend.DTOs
 {
-    public class RaidGetDTO
+    public class RaidGetDTO: GenericGetDTO
     {
-        public int RaidId { get; set; }
-        public string? RaidName { get; set; }
         public int SeasonRating { get; set; }
-        public int CompletedCount { get; set; }
     }
 }

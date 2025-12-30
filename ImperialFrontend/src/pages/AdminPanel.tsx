@@ -10,6 +10,7 @@ import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
 import Alert, { AlertColor } from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { GenericAdminPage } from "./GenericAdminPage";
+import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -41,22 +42,15 @@ const AdminPanel: React.FC = () => {
 
   const createGuildMemberForm = (
     <CustomForm
-      title="Add a Guild Member"
-      apiEndpoint="/api/guildmembers"
+      title="Add an event!"
+      apiEndpoint="/api/events"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="discordTag" label="Discord Tag" required />
-      <CustomTextField id="mainUsername" label="Main Username" required />
-      <CustomTextField id="uuid" label="Minecraft UUID" required />
+      <CustomTextField id="eventName" label="Event Name" required />
+      <CustomTimeAndDateSelector id="eventStart" label="Event Start"/>
+           <CustomTimeAndDateSelector id="eventEnd" label="Event End"/>
 
-      <CustomDropdown
-        idColumn="rankId"
-        displayColumn="rankName"
-        label="Rank"
-        apiEndpoint="/api/ranks"
-      />
-      <CustomDateOnlySelector id="joinDate" label="Join Date" />
     </CustomForm>
   );
 

@@ -16,59 +16,36 @@ namespace ImperialBackend.Controllers
         public IActionResult GetAll()
         {
             var ranks = _context.Ranks
-                .Select(r => new RankGetDTO
+                .Select(r => new GenericGetDTO
                 {
-                    RankId = r.RankId,
-                    RankName = r.RankName,
-                    MemberCount = r.GuildMembers.Count
+                    Id = r.RankId,
+                    Name = r.RankName,
                 })
                 .ToList();
 
             return Ok(ranks);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var rank = _context.Ranks
-                .Where(r => r.RankId == id)
-                .Select(r => new RankWithMembersDTO
-                {
-                    RankId = r.RankId,
-                    RankName = r.RankName,
-                    Members = r.GuildMembers.Select(m => new RankMemberDTO
-                    {
-                        GuildMemberId = m.GuildMemberId,
-                        MainUsername = m.MainUsername,
-                    }).ToList()
-                })
-                .FirstOrDefault();
-
-            if (rank == null) return NotFound();
-            return Ok(rank);
-        }
-
-        // Creates a new rank. By default MemberCount is 0, guild members will have to be assigned to the rank separately.
         [HttpPost]
-        public IActionResult Post([FromBody] RankPostDTO dto)
+        public IActionResult Post([FromBody] GenericPostDTO dto)
         {
             var rank = new Rank
             {
-                RankName = dto.RankName
+                RankName = dto.Name
             };
 
             _context.Ranks.Add(rank);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = rank.RankId }, rank);
+            return Ok(rank);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateRank(int id, [FromBody] RankPostDTO dto)
+        public IActionResult UpdateRank(int id, [FromBody] GenericPostDTO dto)
         {
             var rank = _context.Ranks.Find(id);
             if (rank == null) return NotFound();
 
-            rank.RankName = dto.RankName;
+            rank.RankName = dto.Name;
             _context.SaveChanges();
 
             return NoContent();

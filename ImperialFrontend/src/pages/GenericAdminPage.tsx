@@ -14,11 +14,13 @@ import { ReactElement, useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CircularProgress from "@mui/material/CircularProgress";
+import React from "react";
+import { CustomFormProps } from "./CustomForm";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
   apiDeleteEndpoint: string;
-  createForm: ReactElement;
+  createForm: ReactElement<CustomFormProps>;
   rowId: string;
   rowName: string;
 }
@@ -78,6 +80,13 @@ export const GenericAdminPage = ({
 
   const selectedUser = members.find((u) => u[rowId] === idToDelete);
 
+  const addNewRecord = (newRecord: Object) => {
+    setMembers(prev => [...prev, newRecord]);
+    setOpenCreationDialog(false);
+  }
+
+  const updatedCreateForm = React.cloneElement(createForm, {addNewRecordCallback: addNewRecord})
+
   const el = (
     <>
       {members ? (
@@ -133,14 +142,14 @@ export const GenericAdminPage = ({
             </DialogActions>
           </Dialog>
           <Box sx={{ width: "100%", maxWidth: 1100 }}>
-            <Button onClick={() => setOpenCreationDialog(true)}>test</Button>
+            <Button onClick={() => setOpenCreationDialog(true)}>Add new</Button>
             <Dialog
               open={openCreationDialog}
               onClose={() => setOpenCreationDialog(false)}
               maxWidth="sm"
               fullWidth
             >
-              <DialogContent dividers>{createForm}</DialogContent>
+              <DialogContent dividers>{updatedCreateForm}</DialogContent>
             </Dialog>
             <Typography
               sx={{

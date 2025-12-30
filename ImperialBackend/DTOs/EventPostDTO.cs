@@ -1,8 +1,7 @@
 namespace ImperialBackend.Models
 {
-    public class EventDTO
+    public class EventPostDTO: GenericPostDTO
     {
-        public string? EventName { get; set; }
         public DateTimeOffset EventStart { get; set; }
         public DateTimeOffset EventEnd { get; set; }
     }

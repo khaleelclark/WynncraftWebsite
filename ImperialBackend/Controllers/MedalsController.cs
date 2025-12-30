@@ -17,64 +17,35 @@ namespace ImperialBackend.Controllers
         {
             var medals = _context.Medals
                 .AsNoTracking()
-                .Select(m => new
+                .Select(m => new GenericGetDTO
                 {
-                    m.MedalId,
-                    m.MedalName,
-                    MemberCount = m.GuildMemberMedals.Count
+                    Id = m.MedalId,
+                    Name = m.MedalName,
                 })
                 .ToList();
             return Ok(medals);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var medal = _context.Medals
-                .AsNoTracking()
-                .Where(m => m.MedalId == id)
-                .Select(m => new
-                {
-                    m.MedalId,
-                    m.MedalName,
-                    MemberCount = m.GuildMemberMedals.Count
-                })
-                .FirstOrDefault();
-
-            if (medal == null) return NotFound();
-            return Ok(medal);
-        }
-
         [HttpPost]
-        public IActionResult Post([FromBody] MedalDTO medal)
+        public IActionResult Post([FromBody] GenericPostDTO medal)
         {
             Medal newMedal = new Medal
             {
-                MedalName = medal.MedalName
+                MedalName = medal.Name
             };
 
             _context.Medals.Add(newMedal);
             _context.SaveChanges();
-            var result = new MedalGetDTO
-            {
-                MedalId = newMedal.MedalId,
-                MedalName = newMedal.MedalName,
-                MemberCount = 0
-            };
 
-            return CreatedAtAction(nameof(GetById), new { id = newMedal.MedalId }, result);
+            return Ok(newMedal);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] MedalDTO medal)
+        public IActionResult Put(int id, [FromBody] GenericPostDTO medal)
         {
-
-            if (string.IsNullOrWhiteSpace(medal.MedalName))
-                return BadRequest("MedalName is required.");
-
             var existingMedal = _context.Medals.Find(id);
             if (existingMedal == null) return NotFound();
-            existingMedal.MedalName = medal.MedalName;
+            existingMedal.MedalName = medal.Name;
 
             _context.SaveChanges();
             return NoContent();
