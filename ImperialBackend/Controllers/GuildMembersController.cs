@@ -4,9 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-// TODO sperate this into a public and private GET endpoint 
-//call current get public and add a new private endpoint
-
 namespace ImperialBackend.Controllers
 {
     [ApiController]
@@ -64,6 +61,117 @@ namespace ImperialBackend.Controllers
             return NoContent();
         }
 
+        
+        // GET: api/guildmembers
+        [HttpGet]
+        public IActionResult GetAllPublic()
+        {
+            var members = _context.GuildMembers
+                .Include(m => m.Games)
+                .Include(m => m.Medals)
+                .Include(m => m.Rank)
+                .Select(m => new GuildMemberPublicGetDTO
+                {
+                    Id = m.GuildMemberId,
+                    DiscordTag = m.DiscordTag,
+                    Name = m.MainUsername,
+                    MinecraftUsername = m.MinecraftUsername,
+                    RankId = m.RankId,
+                    // RankId = new GenericGetDTO
+                    // {
+                    //     Id = m.RankId,
+                    //     Name = m.RankName
+                    // },
+                    WynncraftRank = m.WynncraftRank,
+                    Uuid = m.Uuid
+                })
+                .ToList();
+            return Ok(members);
+        }
+
+        // GET: api/guildmembers/admin
+        [HttpGet("admin")]
+        public IActionResult GetAllAdmin()
+        {
+            var members = _context.GuildMembers
+                .Include(m => m.Games)
+                .Include(m => m.Medals)
+                .Include(m => m.Rank)
+                .Select(m => new GuildMemberAdminGetDTO
+                {
+                    Id = m.GuildMemberId,
+                    Name = m.MainUsername,
+                    DiscordTag = m.DiscordTag,
+                    MinecraftUsername = m.MinecraftUsername,
+                    RankId = m.RankId,
+                    // RankId = new GenericGetDTO
+                    // {
+                    //     Id = m.RankId,
+                    //     Name = m.RankName
+                    // },
+                    WynncraftRank = m.WynncraftRank,
+                    Uuid = m.Uuid,
+                    JoinDate = m.JoinDate,
+                    HoursPlayed = m.HoursPlayed,
+                    WarsCompleted = m.WarsCompleted,
+                    LastSynced = m.LastSynced
+                })
+                .ToList();
+            return Ok(members);
+        }
+
+        // GET: api/guildmembers/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var member = _context.GuildMembers
+                .Include(m => m.Games)
+                    .ThenInclude(gmg => gmg.Game)
+                .Include(m => m.Medals)
+                    .ThenInclude(gmm => gmm.Medal)
+                .Include(m => m.PlayerHistoricalStats)
+                .Where(m => m.GuildMemberId == id)
+                .Include(m => m.Rank)
+                .FirstOrDefault();
+            if (member == null) return NotFound();
+
+            var oldestStat = member.PlayerHistoricalStats.OrderBy(s => s.SyncDate).FirstOrDefault();
+
+            int warsDiff = 0;
+            int weekliesDiff = 0;
+            int hoursDiff = 0;
+            if (oldestStat != null)
+            {
+                warsDiff = member.WarsCompleted - oldestStat.WarsCompleted;
+                weekliesDiff = member.WeekliesCompleted - oldestStat.WeekliesCompleted;
+                hoursDiff = member.HoursPlayed - oldestStat.HoursPlayed;
+            }
+
+            int raidsCompleted = _context.RaidsCompleted.Count(r => r.Uuid == member.Uuid);
+
+            var response = new GuildMemberProfileGetDTO
+            {
+                Id = member.GuildMemberId,
+                Name = member.MainUsername,
+                DiscordTag = member.DiscordTag,
+                MinecraftUsername = member.MinecraftUsername,
+                JoinDate = member.JoinDate,
+                Uuid = member.Uuid,
+                WynncraftRank = member.WynncraftRank,
+
+                RankId = member.RankId,
+                RankName = member.Rank?.RankName,
+
+                WarsCompleted = warsDiff,
+                HoursPlayed = hoursDiff,
+                RaidsCompleted = raidsCompleted,
+                LastSynced = member.LastSynced,
+                Games = member.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList(),
+                Medals = member.Medals.Select(md => md.Medal.MedalName).ToList()
+            };
+            return Ok(response);
+        }
+
         // GET: api/guildmembers/leaderboard?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd
         [HttpGet("leaderboard")]
         public IActionResult GetLeaderboard([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
@@ -119,97 +227,21 @@ namespace ImperialBackend.Controllers
                 }
                 // If 0 or 1 record, all stat diffs remain 0
 
-                leaderboard.Add(new
+                leaderboard.Add(new GuildMemberLeaderboardGetDTO
                 {
-                    m.GuildMemberId,
-                    m.MainUsername,
-                    m.MinecraftUsername,
-                    m.Uuid,
-                    WeekliesCompleted = weekliesDiff,
+                    Id = m.GuildMemberId,
+                    Name = m.MainUsername,
+                    MinecraftUsername = m.MinecraftUsername,
+                    Uuid = m.Uuid,
                     WarsCompleted = warsDiff,
                     HoursPlayed = hoursDiff,
                     RaidsCompleted = raidCount,
-                    m.LastSynced, 
-                    Games = m.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList()
+                    LastSynced = m.LastSynced,
                 });
             }
             return Ok(leaderboard);
         }
 
-        // GET: api/guildmembers
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var members = _context.GuildMembers
-                .Include(m => m.Games)
-                .Include(m => m.Medals)
-                .Include(m => m.Rank)
-                .Select(m => new GuildMemberPublicGetDTO
-                {
-                    GuildMemberId = m.GuildMemberId,
-                    DiscordTag = m.DiscordTag,
-                    MainUsername = m.MainUsername,
-                    MinecraftUsername = m.MinecraftUsername,
-                    RankId = m.RankId,
-                    WynncraftRank = m.WynncraftRank,
-                    Uuid = m.Uuid
-                })
-                .ToList();
-            return Ok(members);
-        }
-
-        // GET: api/guildmembers/{id}
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var member = _context.GuildMembers
-                .Include(m => m.Games)
-                    .ThenInclude(gmg => gmg.Game)
-                .Include(m => m.Medals)
-                    .ThenInclude(gmm => gmm.Medal)
-                .Include(m => m.PlayerHistoricalStats)
-                .Where(m => m.GuildMemberId == id)
-                .Include(m => m.Rank)
-                .FirstOrDefault();
-            if (member == null) return NotFound();
-
-            var oldestStat = member.PlayerHistoricalStats.OrderBy(s => s.SyncDate).FirstOrDefault();
-
-            int warsDiff = 0;
-            int weekliesDiff = 0;
-            int hoursDiff = 0;
-            if (oldestStat != null)
-            {
-                warsDiff = member.WarsCompleted - oldestStat.WarsCompleted;
-                weekliesDiff = member.WeekliesCompleted - oldestStat.WeekliesCompleted;
-                hoursDiff = member.HoursPlayed - oldestStat.HoursPlayed;
-            }
-
-            int raidsCompleted = _context.RaidsCompleted.Count(r => r.Uuid == member.Uuid);
-
-            var response = new
-            {
-                member.GuildMemberId,
-                member.MainUsername,
-                member.DiscordTag,
-                member.MinecraftUsername,
-                member.JoinDate,
-                member.Uuid,
-                member.WynncraftRank,
-
-                member.RankId,
-                member.Rank?.RankName,
-
-                WarsCompleted = warsDiff,
-                WeekliesCompleted = weekliesDiff,
-                HoursPlayed = hoursDiff,
-                RaidsCompleted = raidsCompleted,
-                member.LastSynced,
-                Games = member.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList(),
-                Medals = member.Medals.Select(md => md.Medal.MedalName).ToList()
-            };
-            return Ok(response);
-        }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
