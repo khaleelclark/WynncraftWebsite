@@ -24,10 +24,9 @@ namespace ImperialBackend.Controllers
             if (!_context.Ranks.Any(r => r.RankId == guildMember.RankId))
                 return BadRequest("Invalid RankId.");
 
-
             GuildMember newMember = new GuildMember
             {
-                MainUsername = guildMember.MainUsername,
+                MainUsername = guildMember.Name,
                 DiscordTag = guildMember.DiscordTag,
                 JoinDate = guildMember.JoinDate,
                 Uuid = guildMember.Uuid,
@@ -48,14 +47,15 @@ namespace ImperialBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GuildMemberPutDTO dto)
+        public IActionResult Put(int id, [FromBody] GuildMemberPostDTO dto)
         {
             var existingMember = _context.GuildMembers.Find(id);
             if (existingMember == null) return NotFound();
 
             existingMember.DiscordTag = dto.DiscordTag;
-            existingMember.MainUsername = dto.MainUsername;
+            existingMember.MainUsername = dto.Name;
             existingMember.RankId = dto.RankId;
+            existingMember.JoinDate = dto.JoinDate;
 
             _context.SaveChanges();
             return NoContent();
