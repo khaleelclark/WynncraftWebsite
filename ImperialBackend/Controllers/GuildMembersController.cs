@@ -24,6 +24,28 @@ namespace ImperialBackend.Controllers
             if (!_context.Ranks.Any(r => r.RankId == guildMember.Rank))
                 return BadRequest("Invalid RankId.");
 
+            // (Optional) validate medal IDs
+            if (guildMember.Medals != null && guildMember.Medals.Any())
+            {
+                var invalidMedalIds = guildMember.Medals
+                    .Except(_context.Medals.Select(m => m.MedalId))
+                    .ToList();
+
+                if (invalidMedalIds.Any())
+                    return BadRequest($"Invalid MedalIds: {string.Join(", ", invalidMedalIds)}");
+            }
+
+            // (Optional) validate game IDs
+            if (guildMember.Games != null && guildMember.Games.Any())
+            {
+                var invalidGameIds = guildMember.Games
+                    .Except(_context.Games.Select(g => g.GameId))
+                    .ToList();
+
+                if (invalidGameIds.Any())
+                    return BadRequest($"Invalid GameIds: {string.Join(", ", invalidGameIds)}");
+            }
+
             GuildMember newMember = new GuildMember
             {
                 MainUsername = guildMember.Name,
@@ -31,36 +53,71 @@ namespace ImperialBackend.Controllers
                 JoinDate = guildMember.JoinDate,
                 Uuid = guildMember.Uuid,
                 RankId = guildMember.Rank,
+                Medals = new List<GuildMemberMedal>(),
+                Games = new List<GuildMemberGame>()
             };
+
+                    // Add medals from DTO
+            if (guildMember.Medals != null)
+            {
+                foreach (var medalId in guildMember.Medals.Distinct())
+                {
+                    newMember.Medals.Add(new GuildMemberMedal
+                    {
+                        MedalId = medalId
+                    });
+                }
+            }
+
+            // Add games from DTO
+            if (guildMember.Games != null)
+            {
+                foreach (var gameId in guildMember.Games.Distinct())
+                {
+                    newMember.Games.Add(new GuildMemberGame
+                    {
+                        GameId = gameId
+                    });
+                }
+            }
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
-             _context.Entry(newMember).Reference(m => m.Rank).Load();
+
+             var createdMember = _context.GuildMembers
+            .Include(m => m.Rank)
+            .Include(m => m.Games).ThenInclude(gm => gm.Game)
+            .Include(m => m.Medals).ThenInclude(mm => mm.Medal)
+            .First(m => m.GuildMemberId == newMember.GuildMemberId);
+
             return Ok(new GuildMemberAdminGetDTO
             {
-                DiscordTag = newMember.DiscordTag,
-                Id = newMember.GuildMemberId,
-                Name = newMember.MainUsername,
-                Uuid = newMember.Uuid,
+                DiscordTag = createdMember.DiscordTag,
+                Id = createdMember.GuildMemberId,
+                Name = createdMember.MainUsername,
+                Uuid = createdMember.Uuid,
                 Rank = new GenericGetDTO
                 {
-                    Id = newMember.RankId,
-                    Name = newMember.Rank != null ? newMember.Rank.RankName : "Error loading name"
+                    Id = createdMember.RankId,
+                    Name = createdMember.Rank != null ? createdMember.Rank.RankName : "Error loading name"
                 },
-                JoinDate = newMember.JoinDate,
-                Games = newMember.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
-                    {
-                        Id = g.Game.GameId,
-                        Name = g.Game.GameName 
-                    })
-                    .ToList(),
-                
-                    Medals = newMember.Medals.Where(m => m.Medal != null).Select(m => new GenericGetDTO
-                    {
-                        Id = m.Medal.MedalId,
-                        Name = m.Medal.MedalName 
-                    })
-                    .ToList()
+                JoinDate = createdMember.JoinDate,
+                Games = createdMember.Games
+                .Where(g => g.Game != null)
+                .Select(g => new GenericGetDTO
+                {
+                    Id = g.Game.GameId,
+                    Name = g.Game.GameName
+                })
+                .ToList(),
+                Medals = createdMember.Medals
+                .Where(m => m.Medal != null)
+                .Select(m => new GenericGetDTO
+                {
+                    Id = m.Medal.MedalId,
+                    Name = m.Medal.MedalName
+                })
+                .ToList()
             });
         }
 
