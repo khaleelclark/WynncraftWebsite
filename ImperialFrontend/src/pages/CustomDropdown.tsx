@@ -5,6 +5,8 @@ import Select from "@mui/material/Select";
 import { useCustomFormContext } from "../CustomFormContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 interface DropdownProps {
   id: string;
@@ -40,6 +42,7 @@ const dropdownStyle = {
     borderColor: "#000000",
   },
 };
+
 export const CustomDropdown = ({
   id,
   label,
@@ -47,8 +50,10 @@ export const CustomDropdown = ({
   multiple = false,
 }: DropdownProps) => {
   const { register, formValues } = useCustomFormContext();
+  const [inputValue, setInputValue] = useState("");
   const [dropdownOptions, setDropdownOptions] = useState(
-    formValues[id] ? [formValues[id]] : []
+    //formValues[id] ? [formValues[id]] :
+    []
   );
 
   useEffect(() => {
@@ -83,27 +88,19 @@ export const CustomDropdown = ({
       </Select>
     </FormControl>
   ) : (
-    <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
-      <InputLabel id={`${id}-label`}>{label}</InputLabel>
-      <Select
-        labelId={`${id}-label`}
-        id={id}
-        value={formValues[id] ? formValues[id].id ?? "" : ""}
-        label={label}
-        onChange={e => {
-          const selected = dropdownOptions.find(
-            option => option.id === e.target.value
-          );
-          register(id, selected);
-        }}
-      >
-        {dropdownOptions.map((option: any) => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Autocomplete
+      value={formValues[id] ? formValues[id] ?? "" : ""}
+      onChange={(e, selectedItem) => {
+        register(id, selectedItem);
+      }}
+      getOptionLabel={option => option?.name ?? "Not Selected"}
+      id={id}
+      options={dropdownOptions}
+      fullWidth
+      renderInput={params => (
+        <TextField sx={dropdownStyle} {...params} label={label} />
+      )}
+    />
   );
   return el;
 };
