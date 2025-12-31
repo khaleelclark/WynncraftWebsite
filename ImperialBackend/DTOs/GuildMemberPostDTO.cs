@@ -1,6 +1,6 @@
 namespace ImperialBackend.Models
 {
-    public class GuildMemberPostDTO: GenericPostDTO
+    public class GuildMemberPostDTO : GenericPostDTO
     {
         public string? DiscordTag { get; set; }
         public int Rank { get; set; }

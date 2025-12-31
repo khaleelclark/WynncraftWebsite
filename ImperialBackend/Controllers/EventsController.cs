@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using ImperialBackend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
@@ -9,17 +9,19 @@ namespace ImperialBackend.Controllers
     public class EventsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
+
         public EventsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
-        public IActionResult GetAll() {
-            var events = _context.Events
-                .Select(e => new EventGetDTO
+        public IActionResult GetAll()
+        {
+            var events = _context
+                .Events.Select(e => new EventGetDTO
                 {
                     Id = e.EventId,
                     Name = e.EventName,
                     EventStart = e.EventStart,
-                    EventEnd = e.EventEnd
+                    EventEnd = e.EventEnd,
                 })
                 .ToList();
 
@@ -29,14 +31,14 @@ namespace ImperialBackend.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var ev = _context.Events
-                .Where(e => e.EventId == id)
+            var ev = _context
+                .Events.Where(e => e.EventId == id)
                 .Select(e => new EventGetDTO
                 {
                     Id = e.EventId,
                     Name = e.EventName,
                     EventStart = e.EventStart,
-                    EventEnd = e.EventEnd
+                    EventEnd = e.EventEnd,
                 })
                 .FirstOrDefault();
 
@@ -53,45 +55,51 @@ namespace ImperialBackend.Controllers
             {
                 EventName = ev.Name,
                 EventStart = ev.EventStart,
-                EventEnd = ev.EventEnd
+                EventEnd = ev.EventEnd,
             };
 
             _context.Events.Add(newEvent);
             _context.SaveChanges();
-            return Ok(new EventGetDTO
-            {
-                Id = newEvent.EventId,
-                Name = newEvent.EventName,
-                EventStart = newEvent.EventStart,
-                EventEnd = newEvent.EventEnd
-            });
+            return Ok(
+                new EventGetDTO
+                {
+                    Id = newEvent.EventId,
+                    Name = newEvent.EventName,
+                    EventStart = newEvent.EventStart,
+                    EventEnd = newEvent.EventEnd,
+                }
+            );
         }
 
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] EventPostDTO ev)
         {
             var existingEvent = _context.Events.Find(id);
-            if (existingEvent == null) return NotFound();
+            if (existingEvent == null)
+                return NotFound();
 
             existingEvent.EventName = ev.Name;
             existingEvent.EventStart = ev.EventStart;
             existingEvent.EventEnd = ev.EventEnd;
 
             _context.SaveChanges();
-            return Ok(new EventGetDTO
-            {
-                Id = existingEvent.EventId,
-                Name = existingEvent.EventName,
-                EventStart = existingEvent.EventStart,
-                EventEnd = existingEvent.EventEnd
-            });
+            return Ok(
+                new EventGetDTO
+                {
+                    Id = existingEvent.EventId,
+                    Name = existingEvent.EventName,
+                    EventStart = existingEvent.EventStart,
+                    EventEnd = existingEvent.EventEnd,
+                }
+            );
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var ev = _context.Events.Find(id);
-            if (ev == null) return NotFound();
+            if (ev == null)
+                return NotFound();
             _context.Events.Remove(ev);
             _context.SaveChanges();
             return NoContent();

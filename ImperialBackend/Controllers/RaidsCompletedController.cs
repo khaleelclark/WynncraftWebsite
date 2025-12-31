@@ -1,31 +1,31 @@
-using Microsoft.AspNetCore.Mvc;
-using ImperialBackend.Models;
-using Microsoft.EntityFrameworkCore;
 using ImperialBackend.DTOs;
+using ImperialBackend.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
-
-    // add a put for admin panel 
+    // add a put for admin panel
 
     [ApiController]
     [Route("api/raidscompleted")]
     public class RaidsCompletedController : ControllerBase
     {
         private readonly ImperialDbContext _context;
+
         public RaidsCompletedController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var raids = _context.RaidsCompleted
-                .Select(r => new
+            var raids = _context
+                .RaidsCompleted.Select(r => new
                 {
                     r.RaidCompletedId,
                     r.RaidId,
                     r.RaidInstanceId,
                     r.Uuid,
-                    r.CompletedDate
+                    r.CompletedDate,
                 })
                 .ToList();
             return Ok(raids);
@@ -56,17 +56,22 @@ namespace ImperialBackend.Controllers
             var completedDateUtc = (dto.CompletedDate ?? DateTimeOffset.UtcNow).UtcDateTime;
 
             int newRaidInstanceId =
-                (_context.RaidsCompleted.Any()
-                    ? _context.RaidsCompleted.Max(r => r.RaidInstanceId)
-                    : 0) + 1;
+                (
+                    _context.RaidsCompleted.Any()
+                        ? _context.RaidsCompleted.Max(r => r.RaidInstanceId)
+                        : 0
+                ) + 1;
 
             var created = new List<object>();
             var notFoundUsers = new List<string>();
 
-            foreach (var username in dto.MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase))
+            foreach (
+                var username in dto.MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase)
+            )
             {
-                var member = _context.GuildMembers
-                    .FirstOrDefault(m => m.MinecraftUsername == username);
+                var member = _context.GuildMembers.FirstOrDefault(m =>
+                    m.MinecraftUsername == username
+                );
 
                 if (member == null)
                 {
@@ -80,39 +85,44 @@ namespace ImperialBackend.Controllers
                     RaidInstanceId = newRaidInstanceId,
                     Uuid = member.Uuid,
                     CompletedDate = completedDateUtc,
-                    GuildMember = member
+                    GuildMember = member,
                 };
 
                 _context.RaidsCompleted.Add(rc);
 
-                created.Add(new
-                {
-                    username,
-                    member.Uuid,
-                    raid.RaidName,
-                    newRaidInstanceId,
-                    completedDateUtc
-                });
+                created.Add(
+                    new
+                    {
+                        username,
+                        member.Uuid,
+                        raid.RaidName,
+                        newRaidInstanceId,
+                        completedDateUtc,
+                    }
+                );
             }
 
             _context.SaveChanges();
 
-            return Ok(new
-            {
-                raidId = raid.RaidId,
-                raidName = raid.RaidName,
-                raidInstanceId = newRaidInstanceId,
-                completedDateUtc,
-                createdCount = created.Count,
-                notFoundUsers
-            });
+            return Ok(
+                new
+                {
+                    raidId = raid.RaidId,
+                    raidName = raid.RaidName,
+                    raidInstanceId = newRaidInstanceId,
+                    completedDateUtc,
+                    createdCount = created.Count,
+                    notFoundUsers,
+                }
+            );
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
             var raidCompleted = _context.RaidsCompleted.Find(id);
-            if (raidCompleted == null) return NotFound();
+            if (raidCompleted == null)
+                return NotFound();
             _context.RaidsCompleted.Remove(raidCompleted);
             _context.SaveChanges();
             return NoContent();

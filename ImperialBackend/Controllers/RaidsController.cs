@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using ImperialBackend.Models;
-using Microsoft.EntityFrameworkCore;
 using ImperialBackend.DTOs;
+using ImperialBackend.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ImperialBackend.Controllers
 {
@@ -10,13 +10,14 @@ namespace ImperialBackend.Controllers
     public class RaidsController : ControllerBase
     {
         private readonly ImperialDbContext _context;
+
         public RaidsController(ImperialDbContext context) => _context = context;
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            var raids = _context.Raids
-                .Select(r => new RaidGetDTO
+            var raids = _context
+                .Raids.Select(r => new RaidGetDTO
                 {
                     Id = r.RaidId,
                     Name = r.RaidName,
@@ -34,7 +35,7 @@ namespace ImperialBackend.Controllers
             {
                 RaidId = raid.Id,
                 RaidName = raid.Name,
-                SeasonRating = raid.SeasonRating
+                SeasonRating = raid.SeasonRating,
             };
 
             _context.Raids.Add(newRaid);
@@ -47,7 +48,8 @@ namespace ImperialBackend.Controllers
         public IActionResult Put(int id, [FromBody] RaidPostDTO raid)
         {
             var existingRaid = _context.Raids.Find(id);
-            if (existingRaid == null) return NotFound();
+            if (existingRaid == null)
+                return NotFound();
 
             existingRaid.RaidName = raid.Name;
             existingRaid.SeasonRating = raid.SeasonRating;
@@ -60,7 +62,8 @@ namespace ImperialBackend.Controllers
         public IActionResult Delete(int id)
         {
             var raid = _context.Raids.Find(id);
-            if (raid == null) return NotFound();
+            if (raid == null)
+                return NotFound();
             _context.Raids.Remove(raid);
             _context.SaveChanges();
             return NoContent();

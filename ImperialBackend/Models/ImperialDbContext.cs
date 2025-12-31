@@ -4,7 +4,8 @@ namespace ImperialBackend.Models
 {
     public class ImperialDbContext : DbContext
     {
-        public ImperialDbContext(DbContextOptions<ImperialDbContext> options) : base(options) { }
+        public ImperialDbContext(DbContextOptions<ImperialDbContext> options)
+            : base(options) { }
 
         public DbSet<Rank> Ranks { get; set; }
         public DbSet<Raid> Raids { get; set; }
@@ -21,11 +22,13 @@ namespace ImperialBackend.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<GuildMemberGame>()
+            modelBuilder
+                .Entity<GuildMemberGame>()
                 .HasIndex(gmg => new { gmg.GameId, gmg.GuildMemberId })
                 .IsUnique();
 
-            modelBuilder.Entity<GuildMemberMedal>()
+            modelBuilder
+                .Entity<GuildMemberMedal>()
                 .HasIndex(gmm => new { gmm.MedalId, gmm.GuildMemberId })
                 .IsUnique();
         }

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace ImperialBackend.Models
 {
@@ -10,10 +9,8 @@ namespace ImperialBackend.Models
         public int MedalId { get; set; }
         public int GuildMemberId { get; set; }
 
-        [JsonIgnore]
         public Medal Medal { get; set; } = null!;
-        
-        [JsonIgnore]
+
         public GuildMember GuildMember { get; set; } = null!;
     }
 }

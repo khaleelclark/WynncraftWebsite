@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace ImperialBackend.Models
@@ -22,7 +22,8 @@ namespace ImperialBackend.Models
         public Rank? Rank { get; set; }
         public ICollection<GuildMemberGame> Games { get; set; } = new List<GuildMemberGame>();
         public ICollection<GuildMemberMedal> Medals { get; set; } = new List<GuildMemberMedal>();
-        public ICollection<PlayerHistoricalStat> PlayerHistoricalStats { get; set; } = new List<PlayerHistoricalStat>();
+        public ICollection<PlayerHistoricalStat> PlayerHistoricalStats { get; set; } =
+            new List<PlayerHistoricalStat>();
         public DateTimeOffset? LastSynced { get; set; } // UTC timestamp of last sync
     }
 }

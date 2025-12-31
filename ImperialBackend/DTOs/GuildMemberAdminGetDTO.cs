@@ -1,6 +1,6 @@
 namespace ImperialBackend.Models
 {
-    public class GuildMemberAdminGetDTO: GenericGetDTO
+    public class GuildMemberAdminGetDTO : GenericGetDTO
     {
         public string? DiscordTag { get; set; }
         public Guid Uuid { get; set; }
