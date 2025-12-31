@@ -81,9 +81,72 @@ namespace ImperialBackend.Controllers
             existingMember.MainUsername = dto.Name;
             existingMember.RankId = dto.Rank;
             existingMember.JoinDate = dto.JoinDate;
+            var existingMedalIds = existingMember.Medals
+            .Select(mm => mm.MedalId)
+            .ToList();
+            var existingGameIds = existingMember.Games
+            .Select(gg => gg.GameId)
+            .ToList();
+
+
+    // target medal IDs from the DTO (null-safe)
+    var targetMedalIds = dto.Medals ?? new List<int>();
+    var targetGameIds = dto.Games ?? new List<int>();
+
+    // medals to remove
+    var medalsToRemove = existingMember.Medals
+        .Where(mm => !targetMedalIds.Contains(mm.MedalId))
+        .ToList();
+    var gamesToRemove = existingMember.Games
+        .Where(gg => !targetGameIds.Contains(gg.GameId))
+        .ToList();
+
+    _context.GuildMemberMedals.RemoveRange(medalsToRemove);
+    _context.GuildMemberGames.RemoveRange(gamesToRemove);
+
+    // medals to add (IDs in DTO that member doesn't currently have)
+    var medalIdsToAdd = targetMedalIds
+        .Except(existingMedalIds)
+        .ToList();
+
+        var gameIdsToAdd = targetGameIds
+        .Except(existingGameIds)
+        .ToList();
+
+    foreach (var medalId in medalIdsToAdd)
+    {
+        existingMember.Medals.Add(new GuildMemberMedal
+        {
+            GuildMemberId = existingMember.GuildMemberId,
+            MedalId = medalId
+        });
+    }
+
+    foreach (var gameId in gameIdsToAdd)
+    {
+        existingMember.Games.Add(new GuildMemberGame
+        {
+            GuildMemberId = existingMember.GuildMemberId,
+            GameId = gameId
+        });
+    }
 
             _context.SaveChanges();
              _context.Entry(existingMember).Reference(m => m.Rank).Load();
+
+             _context.Entry(existingMember)
+            .Collection(m => m.Medals)
+            .Query()
+            .Include(mm => mm.Medal)
+            .Load();
+
+            _context.Entry(existingMember)
+            .Collection(m => m.Games)
+            .Query()
+            .Include(mm => mm.Game)
+            .Load();
+
+
             return Ok(new GuildMemberAdminGetDTO
             {
                 DiscordTag = existingMember.DiscordTag,
@@ -96,19 +159,23 @@ namespace ImperialBackend.Controllers
                     Name = existingMember.Rank != null ? existingMember.Rank.RankName : "Error loading name"
                 },
                 JoinDate = existingMember.JoinDate,
-                Games = existingMember.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
+
+                Games = existingMember.Games
+                .Select(g => new GenericGetDTO
                     {
-                        Id = g.Game.GameId,
-                        Name = g.Game.GameName 
+                        Id = g.GameId,
+                        Name = g.Game!.GameName 
                     })
                     .ToList(),
                 
-                    Medals = existingMember.Medals.Where(m => m.Medal != null).Select(m => new GenericGetDTO
-                    {
-                        Id = m.Medal.MedalId,
-                        Name = m.Medal.MedalName 
-                    })
-                    .ToList()
+                Medals = existingMember.Medals
+                .Select(m => new GenericGetDTO
+                {
+                    Id = m.MedalId,
+                    Name = m.Medal!.MedalName
+                })
+                .ToList()
+
             });
         }
 

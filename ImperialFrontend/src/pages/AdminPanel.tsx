@@ -67,6 +67,12 @@ const AdminPanel: React.FC = () => {
         apiEndpoint="/api/medals"
         multiple={true}
       />
+      <CustomDropdown
+        id="games"
+        label="Games"
+        apiEndpoint="/api/games"
+        multiple={true}
+      />
       <CustomDateOnlySelector id="joinDate" label="Join Date" />
     </CustomForm>
   );

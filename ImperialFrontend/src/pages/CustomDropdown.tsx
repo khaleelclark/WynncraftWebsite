@@ -67,6 +67,8 @@ export const CustomDropdown = ({
       id={id}
       options={dropdownOptions}
       fullWidth
+      filterSelectedOptions
+      isOptionEqualToValue={(o, v) => o.id === v.id}
       renderInput={params => (
         <TextField sx={dropdownStyle} {...params} label={label} />
       )}

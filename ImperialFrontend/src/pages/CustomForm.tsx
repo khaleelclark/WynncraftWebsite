@@ -41,9 +41,25 @@ export const CustomForm = ({
   const flattenObject = (obj: any) => {
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => {
-        if (value && typeof value === "object" && !Array.isArray(value)) {
+        // 🔹 If it's an array, flatten each element the same way you flatten objects
+        if (Array.isArray(value)) {
+          return [
+            key,
+            value.map(
+              v =>
+                v && typeof v === "object"
+                  ? (v as any).id ?? v // if v has an id, use it
+                  : v // otherwise leave as-is (primitives)
+            ),
+          ];
+        }
+
+        // 🔹 If it's an object (not array), use its id if available
+        if (value && typeof value === "object") {
           return [key, (value as any).id ?? value];
         }
+
+        // 🔹 Otherwise just return the primitive value
         return [key, value];
       })
     );
