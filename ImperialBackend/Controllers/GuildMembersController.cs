@@ -67,21 +67,13 @@ namespace ImperialBackend.Controllers
         public IActionResult GetAllPublic()
         {
             var members = _context.GuildMembers
-                .Include(m => m.Games)
-                .Include(m => m.Medals)
-                .Include(m => m.Rank)
                 .Select(m => new GuildMemberPublicGetDTO
                 {
                     Id = m.GuildMemberId,
                     DiscordTag = m.DiscordTag,
                     Name = m.MainUsername,
                     MinecraftUsername = m.MinecraftUsername,
-                    RankId = m.RankId,
-                    // RankId = new GenericGetDTO
-                    // {
-                    //     Id = m.RankId,
-                    //     Name = m.RankName
-                    // },
+                    RankName = m.Rank != null ? m.Rank.RankName: "Error loading name",
                     WynncraftRank = m.WynncraftRank,
                     Uuid = m.Uuid
                 })
@@ -95,26 +87,36 @@ namespace ImperialBackend.Controllers
         {
             var members = _context.GuildMembers
                 .Include(m => m.Games)
+                    .ThenInclude(gmg => gmg.Game)
                 .Include(m => m.Medals)
-                .Include(m => m.Rank)
+                    .ThenInclude(gmm => gmm.Medal)
                 .Select(m => new GuildMemberAdminGetDTO
                 {
                     Id = m.GuildMemberId,
                     Name = m.MainUsername,
                     DiscordTag = m.DiscordTag,
                     MinecraftUsername = m.MinecraftUsername,
-                    RankId = m.RankId,
-                    // RankId = new GenericGetDTO
-                    // {
-                    //     Id = m.RankId,
-                    //     Name = m.RankName
-                    // },
+                    Rank = new GenericGetDTO
+                    {
+                        Id = m.RankId,
+                        Name = m.Rank != null ? m.Rank.RankName : "Error loading name"
+                    },
                     WynncraftRank = m.WynncraftRank,
                     Uuid = m.Uuid,
                     JoinDate = m.JoinDate,
-                    HoursPlayed = m.HoursPlayed,
-                    WarsCompleted = m.WarsCompleted,
-                    LastSynced = m.LastSynced
+                    Games = m.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
+                    {
+                        Id = g.Game.GameId,
+                        Name = g.Game.GameName 
+                    })
+                    .ToList(),
+                
+                    Medals = m.Medals.Where(m => m.Medal != null).Select(m => new GenericGetDTO
+                    {
+                        Id = m.Medal.MedalId,
+                        Name = m.Medal.MedalName 
+                    })
+                    .ToList()
                 })
                 .ToList();
             return Ok(members);
@@ -158,22 +160,13 @@ namespace ImperialBackend.Controllers
                 JoinDate = member.JoinDate,
                 Uuid = member.Uuid,
                 WynncraftRank = member.WynncraftRank,
-
-                RankId = member.RankId,
-                RankName = member.Rank?.RankName,
-
+                RankName = member.Rank != null ? member.Rank.RankName: "Error loading name",
                 WarsCompleted = warsDiff,
                 HoursPlayed = hoursDiff,
                 RaidsCompleted = raidsCompleted,
                 LastSynced = member.LastSynced,
-                Games = member.Games
-                .Select(g => g.Game?.GameName)
-                .Where(n => n != null)
-                .ToList(),
-
-                Medals = member.Medals
-                .Select(md => md.Medal.MedalName)
-                .ToList()
+                Games = member.Games.Where(g => g.Game != null).Select(g => g.Game.GameName).ToList(),
+                Medals = member.Medals.Where(m => m.Medal != null).Select(m => m.Medal.MedalName).ToList()
             };
             return Ok(response);
         }
@@ -184,7 +177,6 @@ namespace ImperialBackend.Controllers
         {
             var members = _context.GuildMembers
                 .Include(m => m.PlayerHistoricalStats)
-                .Include(m => m.Games)
                 .ToList();
 
             var raidCounts = _context.RaidsCompleted

@@ -4,8 +4,7 @@ namespace ImperialBackend.Models
     {
         public string? DiscordTag { get; set; }
         public string? MinecraftUsername { get; set; }
-        //public GenericGetDTO Rank { get; set; }
-        public int RankId { get; set;}
+        public string? RankName { get; set; }
         public string? WynncraftRank { get; set;}
         public Guid Uuid { get; set; }
     }
