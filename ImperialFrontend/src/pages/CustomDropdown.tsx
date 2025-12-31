@@ -10,6 +10,7 @@ interface DropdownProps {
   id: string;
   label: string;
   apiEndpoint: string;
+  multiple?: boolean;
 }
 
 const dropdownStyle = {
@@ -39,22 +40,55 @@ const dropdownStyle = {
     borderColor: "#000000",
   },
 };
-export const CustomDropdown = ({ id, label, apiEndpoint }: DropdownProps) => {
+export const CustomDropdown = ({
+  id,
+  label,
+  apiEndpoint,
+  multiple = false,
+}: DropdownProps) => {
   const { register, formValues } = useCustomFormContext();
-  const [dropdownOptions, setDropdownOptions] = useState([formValues[id]]);
+  const [dropdownOptions, setDropdownOptions] = useState(
+    formValues[id] ? [formValues[id]] : []
+  );
 
   useEffect(() => {
     axios.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
   }, []);
-  const el = (
+  const el = multiple ? (
+    <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
+      <InputLabel id={`${id}-label`}>{label}</InputLabel>
+      <Select
+        multiple
+        labelId={`${id}-label`}
+        id={id}
+        label={label}
+        value={formValues[id] ?? []}
+        onChange={e => {
+          const selectedIds = e.target.value;
+
+          const selectedObjects = dropdownOptions.filter(option =>
+            selectedIds.includes(option.id)
+          );
+
+          register(id, selectedObjects);
+        }}
+      >
+        {dropdownOptions.map(option => (
+          <MenuItem key={option.id} value={option.id}>
+            {option.name}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  ) : (
     <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
       <InputLabel id={`${id}-label`}>{label}</InputLabel>
       <Select
         labelId={`${id}-label`}
         id={id}
-        value={formValues[id].id ?? ""}
+        value={formValues[id] ? formValues[id].id ?? "" : ""}
         label={label}
         onChange={e => {
           const selected = dropdownOptions.find(

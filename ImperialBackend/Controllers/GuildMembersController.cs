@@ -35,14 +35,32 @@ namespace ImperialBackend.Controllers
 
             _context.GuildMembers.Add(newMember);
             _context.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = newMember.GuildMemberId }, new
+             _context.Entry(newMember).Reference(m => m.Rank).Load();
+            return Ok(new GuildMemberAdminGetDTO
             {
-                newMember.GuildMemberId,
-                newMember.MainUsername,
-                newMember.DiscordTag,
-                newMember.JoinDate,
-                newMember.Uuid,
-                newMember.RankId
+                DiscordTag = newMember.DiscordTag,
+                Id = newMember.GuildMemberId,
+                Name = newMember.MainUsername,
+                Uuid = newMember.Uuid,
+                Rank = new GenericGetDTO
+                {
+                    Id = newMember.RankId,
+                    Name = newMember.Rank != null ? newMember.Rank.RankName : "Error loading name"
+                },
+                JoinDate = newMember.JoinDate,
+                Games = newMember.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
+                    {
+                        Id = g.Game.GameId,
+                        Name = g.Game.GameName 
+                    })
+                    .ToList(),
+                
+                    Medals = newMember.Medals.Where(m => m.Medal != null).Select(m => new GenericGetDTO
+                    {
+                        Id = m.Medal.MedalId,
+                        Name = m.Medal.MedalName 
+                    })
+                    .ToList()
             });
         }
 

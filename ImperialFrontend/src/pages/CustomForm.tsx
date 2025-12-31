@@ -50,14 +50,15 @@ export const CustomForm = ({
   };
 
   const handleSubmit = async () => {
+    const flattenFormValues = flattenObject(formValues);
     try {
       if (isPost) {
-        await axios.post(apiEndpoint, formValues).then(res => {
+        await axios.post(apiEndpoint, flattenFormValues).then(res => {
           if (changeRecordsCallback) changeRecordsCallback(res.data);
         });
       } else {
         await axios
-          .put(`${apiEndpoint}/${formValues.id}`, flattenObject(formValues))
+          .put(`${apiEndpoint}/${formValues.id}`, flattenFormValues)
           .then(res => {
             if (changeRecordsCallback) changeRecordsCallback(res.data);
           });

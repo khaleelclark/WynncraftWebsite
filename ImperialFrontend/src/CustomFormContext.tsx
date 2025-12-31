@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
 type CustomFormContextType = {
-  register: (id: string, value: string) => void;
+  register: (id: string, value: any) => void;
   formValues: Record<string, any>;
 };
 
