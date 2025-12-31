@@ -60,8 +60,13 @@ const AdminPanel: React.FC = () => {
       <CustomTextField id="discordTag" label="Discord Tag" required />
       <CustomTextField id="name" label="Main Username" required />
       <CustomTextField id="uuid" label="Minecraft UUID" required />
-
       <CustomDropdown id="rank" label="Rank" apiEndpoint="/api/ranks" />
+      <CustomDropdown
+        id="medals"
+        label="Medals"
+        apiEndpoint="/api/medals"
+        multiple={true}
+      />
       <CustomDateOnlySelector id="joinDate" label="Join Date" />
     </CustomForm>
   );

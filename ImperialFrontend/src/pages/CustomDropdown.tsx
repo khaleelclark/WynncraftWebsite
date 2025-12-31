@@ -47,14 +47,10 @@ export const CustomDropdown = ({
   id,
   label,
   apiEndpoint,
-  multiple = false,
+  multiple,
 }: DropdownProps) => {
   const { register, formValues } = useCustomFormContext();
-  const [inputValue, setInputValue] = useState("");
-  const [dropdownOptions, setDropdownOptions] = useState(
-    //formValues[id] ? [formValues[id]] :
-    []
-  );
+  const [dropdownOptions, setDropdownOptions] = useState([]);
 
   useEffect(() => {
     axios.get(apiEndpoint).then(res => {
@@ -62,34 +58,23 @@ export const CustomDropdown = ({
     });
   }, []);
   const el = multiple ? (
-    <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
-      <InputLabel id={`${id}-label`}>{label}</InputLabel>
-      <Select
-        multiple
-        labelId={`${id}-label`}
-        id={id}
-        label={label}
-        value={formValues[id] ?? []}
-        onChange={e => {
-          const selectedIds = e.target.value;
-
-          const selectedObjects = dropdownOptions.filter(option =>
-            selectedIds.includes(option.id)
-          );
-
-          register(id, selectedObjects);
-        }}
-      >
-        {dropdownOptions.map(option => (
-          <MenuItem key={option.id} value={option.id}>
-            {option.name}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+    <Autocomplete
+      value={formValues[id] ?? []}
+      onChange={(e, selectedItem) => {
+        register(id, selectedItem);
+      }}
+      getOptionLabel={option => option?.name ?? "Not Selected"}
+      id={id}
+      options={dropdownOptions}
+      fullWidth
+      renderInput={params => (
+        <TextField sx={dropdownStyle} {...params} label={label} />
+      )}
+      multiple={multiple}
+    />
   ) : (
     <Autocomplete
-      value={formValues[id] ? formValues[id] ?? "" : ""}
+      value={formValues[id] ?? ""}
       onChange={(e, selectedItem) => {
         register(id, selectedItem);
       }}
