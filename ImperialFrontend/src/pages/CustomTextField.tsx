@@ -46,8 +46,6 @@ const textFieldStyle = {
 
 export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
   const { register, formValues } = useCustomFormContext();
-  console.log("form values : ", formValues);
-  console.log(id);
   const el = (
     <>
       <TextField

@@ -41,15 +41,28 @@ const AdminPanel: React.FC = () => {
   };
 
   const createGuildMemberForm = (
+    // <CustomForm
+    //   title="Add an event!"
+    //   apiEndpoint="/api/events"
+    //   onSubmitSuccess={handleSubmitSuccess}
+    //   onSubmitError={handleSubmitError}
+    // >
+    //   <CustomTextField id="name" label="Event Name" required />
+    //   <CustomTimeAndDateSelector id="eventStart" label="Event Start" />
+    //   <CustomTimeAndDateSelector id="eventEnd" label="Event End" />
+    // </CustomForm>
     <CustomForm
-      title="Add an event!"
-      apiEndpoint="/api/events"
+      title="Add a Guild Member"
+      apiEndpoint="/api/guildmembers"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Event Name" required />
-      <CustomTimeAndDateSelector id="eventStart" label="Event Start" />
-      <CustomTimeAndDateSelector id="eventEnd" label="Event End" />
+      <CustomTextField id="discordTag" label="Discord Tag" required />
+      <CustomTextField id="name" label="Main Username" required />
+      <CustomTextField id="uuid" label="Minecraft UUID" required />
+
+      <CustomDropdown id="rank" label="Rank" apiEndpoint="/api/ranks" />
+      <CustomDateOnlySelector id="joinDate" label="Join Date" />
     </CustomForm>
   );
 
@@ -80,12 +93,7 @@ const AdminPanel: React.FC = () => {
             <CustomTextField id="mainUsername" label="Main Username" required />
             <CustomTextField id="uuid" label="Minecraft UUID" required />
 
-            <CustomDropdown
-              idColumn="id"
-              displayColumn="name"
-              label="Rank"
-              apiEndpoint="/api/ranks"
-            />
+            <CustomDropdown id="id" label="Rank" apiEndpoint="/api/ranks" />
             <CustomDateOnlySelector id="joinDate" label="Join Date" />
           </CustomForm>
         </DialogContent>
@@ -107,8 +115,8 @@ const AdminPanel: React.FC = () => {
       >
         <DialogContent dividers>
           <GenericAdminPage
-            apiGetEndpoint="/api/events"
-            apiDeleteEndpoint="/api/events"
+            apiGetEndpoint="/api/guildmembers/admin"
+            apiDeleteEndpoint="/api/guildmembers"
             createForm={createGuildMemberForm}
           />
         </DialogContent>

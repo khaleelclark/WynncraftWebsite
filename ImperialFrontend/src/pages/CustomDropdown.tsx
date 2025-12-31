@@ -7,8 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 interface DropdownProps {
-  idColumn: string;
-  displayColumn: string;
+  id: string;
   label: string;
   apiEndpoint: string;
 }
@@ -40,34 +39,33 @@ const dropdownStyle = {
     borderColor: "#000000",
   },
 };
-export const CustomDropdown = ({
-  idColumn,
-  displayColumn,
-  label,
-  apiEndpoint,
-}: DropdownProps) => {
+export const CustomDropdown = ({ id, label, apiEndpoint }: DropdownProps) => {
   const { register, formValues } = useCustomFormContext();
-  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [dropdownOptions, setDropdownOptions] = useState([formValues[id]]);
 
   useEffect(() => {
-    axios.get(apiEndpoint).then((res) => {
+    axios.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
   }, []);
-
   const el = (
     <FormControl fullWidth variant="outlined" sx={dropdownStyle}>
-      <InputLabel id={`${idColumn}-label`}>{label}</InputLabel>
+      <InputLabel id={`${id}-label`}>{label}</InputLabel>
       <Select
-        labelId={`${idColumn}-label`}
-        id={idColumn}
-        value={formValues[idColumn] ?? ""}
+        labelId={`${id}-label`}
+        id={id}
+        value={formValues[id].id ?? ""}
         label={label}
-        onChange={(e) => register(idColumn, e.target.value)}
+        onChange={e => {
+          const selected = dropdownOptions.find(
+            option => option.id === e.target.value
+          );
+          register(id, selected);
+        }}
       >
-        {dropdownOptions.map((option) => (
-          <MenuItem key={option[idColumn]} value={option[idColumn]}>
-            {option[displayColumn]}
+        {dropdownOptions.map((option: any) => (
+          <MenuItem key={option.id} value={option.id}>
+            {option.name}
           </MenuItem>
         ))}
       </Select>

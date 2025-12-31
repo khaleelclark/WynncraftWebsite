@@ -38,6 +38,17 @@ export const CustomForm = ({
     setFormValues(prevValues => ({ ...prevValues, [id]: value }));
   };
 
+  const flattenObject = (obj: any) => {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => {
+        if (value && typeof value === "object" && !Array.isArray(value)) {
+          return [key, (value as any).id ?? value];
+        }
+        return [key, value];
+      })
+    );
+  };
+
   const handleSubmit = async () => {
     try {
       if (isPost) {
@@ -46,7 +57,7 @@ export const CustomForm = ({
         });
       } else {
         await axios
-          .put(`${apiEndpoint}/${formValues.id}`, formValues)
+          .put(`${apiEndpoint}/${formValues.id}`, flattenObject(formValues))
           .then(res => {
             if (changeRecordsCallback) changeRecordsCallback(res.data);
           });

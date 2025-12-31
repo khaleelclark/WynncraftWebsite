@@ -21,7 +21,7 @@ namespace ImperialBackend.Controllers
             if (existingMember != null) return BadRequest("Guild member with this UUID already exists");
 
             // Validate RankId
-            if (!_context.Ranks.Any(r => r.RankId == guildMember.RankId))
+            if (!_context.Ranks.Any(r => r.RankId == guildMember.Rank))
                 return BadRequest("Invalid RankId.");
 
             GuildMember newMember = new GuildMember
@@ -30,7 +30,7 @@ namespace ImperialBackend.Controllers
                 DiscordTag = guildMember.DiscordTag,
                 JoinDate = guildMember.JoinDate,
                 Uuid = guildMember.Uuid,
-                RankId = guildMember.RankId,
+                RankId = guildMember.Rank,
             };
 
             _context.GuildMembers.Add(newMember);
@@ -49,16 +49,49 @@ namespace ImperialBackend.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] GuildMemberPostDTO dto)
         {
-            var existingMember = _context.GuildMembers.Find(id);
+            var existingMember = _context.GuildMembers
+        .Include(m => m.Rank)
+        .Include(m => m.Games)
+            .ThenInclude(gm => gm.Game)
+        .Include(m => m.Medals)
+            .ThenInclude(mm => mm.Medal)
+        .FirstOrDefault(m => m.GuildMemberId == id);
+
             if (existingMember == null) return NotFound();
 
             existingMember.DiscordTag = dto.DiscordTag;
             existingMember.MainUsername = dto.Name;
-            existingMember.RankId = dto.RankId;
+            existingMember.RankId = dto.Rank;
             existingMember.JoinDate = dto.JoinDate;
 
             _context.SaveChanges();
-            return NoContent();
+             _context.Entry(existingMember).Reference(m => m.Rank).Load();
+            return Ok(new GuildMemberAdminGetDTO
+            {
+                DiscordTag = existingMember.DiscordTag,
+                Id = existingMember.GuildMemberId,
+                Name = existingMember.MainUsername,
+                Uuid = existingMember.Uuid,
+                Rank = new GenericGetDTO
+                {
+                    Id = existingMember.RankId,
+                    Name = existingMember.Rank != null ? existingMember.Rank.RankName : "Error loading name"
+                },
+                JoinDate = existingMember.JoinDate,
+                Games = existingMember.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
+                    {
+                        Id = g.Game.GameId,
+                        Name = g.Game.GameName 
+                    })
+                    .ToList(),
+                
+                    Medals = existingMember.Medals.Where(m => m.Medal != null).Select(m => new GenericGetDTO
+                    {
+                        Id = m.Medal.MedalId,
+                        Name = m.Medal.MedalName 
+                    })
+                    .ToList()
+            });
         }
 
         
@@ -95,13 +128,11 @@ namespace ImperialBackend.Controllers
                     Id = m.GuildMemberId,
                     Name = m.MainUsername,
                     DiscordTag = m.DiscordTag,
-                    MinecraftUsername = m.MinecraftUsername,
                     Rank = new GenericGetDTO
                     {
                         Id = m.RankId,
                         Name = m.Rank != null ? m.Rank.RankName : "Error loading name"
                     },
-                    WynncraftRank = m.WynncraftRank,
                     Uuid = m.Uuid,
                     JoinDate = m.JoinDate,
                     Games = m.Games.Where(g => g.Game != null).Select(g => new GenericGetDTO
