@@ -48,9 +48,8 @@ const AdminPanel: React.FC = () => {
       onSubmitError={handleSubmitError}
     >
       <CustomTextField id="eventName" label="Event Name" required />
-      <CustomTimeAndDateSelector id="eventStart" label="Event Start"/>
-           <CustomTimeAndDateSelector id="eventEnd" label="Event End"/>
-
+      <CustomTimeAndDateSelector id="eventStart" label="Event Start" />
+      <CustomTimeAndDateSelector id="eventEnd" label="Event End" />
     </CustomForm>
   );
 
@@ -82,8 +81,8 @@ const AdminPanel: React.FC = () => {
             <CustomTextField id="uuid" label="Minecraft UUID" required />
 
             <CustomDropdown
-              idColumn="rankId"
-              displayColumn="rankName"
+              idColumn="id"
+              displayColumn="name"
               label="Rank"
               apiEndpoint="/api/ranks"
             />
@@ -110,8 +109,8 @@ const AdminPanel: React.FC = () => {
           <GenericAdminPage
             apiGetEndpoint="/api/events"
             apiDeleteEndpoint="/api/events"
-            rowId="eventId"
-            rowName="eventName"
+            rowId="id"
+            rowName="name"
             createForm={createGuildMemberForm}
           />
         </DialogContent>

@@ -166,8 +166,14 @@ namespace ImperialBackend.Controllers
                 HoursPlayed = hoursDiff,
                 RaidsCompleted = raidsCompleted,
                 LastSynced = member.LastSynced,
-                Games = member.Games.Select(g => g.Game?.GameName).Where(n => n != null).ToList(),
-                Medals = member.Medals.Select(md => md.Medal.MedalName).ToList()
+                Games = member.Games
+                .Select(g => g.Game?.GameName)
+                .Where(n => n != null)
+                .ToList(),
+
+                Medals = member.Medals
+                .Select(md => md.Medal.MedalName)
+                .ToList()
             };
             return Ok(response);
         }

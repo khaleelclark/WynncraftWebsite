@@ -13,11 +13,10 @@ import Snackbar from "@mui/material/Snackbar";
 import { CustomForm } from "./CustomForm";
 import { CustomTextField } from "./CustomTextField";
 import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
-import { Dayjs } from "dayjs";
 
 interface Event {
-  eventId: number;
-  eventName: string;
+  id: number;
+  name: string;
   eventStart: string;
   eventEnd: string;
 }
@@ -31,11 +30,6 @@ const EventTable: React.FC = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [openAdd, setOpenAdd] = useState(false);
 
-  // For the add-event form
-  const [eventStart, setEventStart] = useState<Dayjs | null>(null);
-  const [eventEnd, setEventEnd] = useState<Dayjs | null>(null);
-
-  // Snackbar state (same pattern as AdminPanel)
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] =
@@ -51,8 +45,8 @@ const EventTable: React.FC = () => {
 
   const loadEvents = () => {
     fetch("/api/events")
-      .then((res) => res.json())
-      .then((data) => setEvents(Array.isArray(data) ? data : data.value ?? []));
+      .then(res => res.json())
+      .then(data => setEvents(Array.isArray(data) ? data : data.value ?? []));
   };
 
   useEffect(() => {
@@ -71,7 +65,7 @@ const EventTable: React.FC = () => {
 
   const handleEditSubmit = async () => {
     if (!editEvent) return;
-    await fetch(`/api/events/${editEvent.eventId}`, {
+    await fetch(`/api/events/${editEvent.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(editEvent),
@@ -84,7 +78,7 @@ const EventTable: React.FC = () => {
 
   const handleDeleteSubmit = async () => {
     if (!deleteEvent) return;
-    await fetch(`/api/events/${deleteEvent.eventId}`, {
+    await fetch(`/api/events/${deleteEvent.id}`, {
       method: "DELETE",
     });
     setOpenDelete(false);
@@ -93,24 +87,20 @@ const EventTable: React.FC = () => {
     showSnackbar("Event deleted.", "success");
   };
 
-  // 🔹 Called by CustomForm on successful POST /api/events
   const handleAddSuccess = () => {
     setOpenAdd(false);
-    setEventStart(null);
-    setEventEnd(null);
     loadEvents();
     showSnackbar("Event created successfully!", "success");
   };
 
-  // 🔹 Called by CustomForm on error
   const handleAddError = (error: unknown) => {
     console.error(error);
     showSnackbar("Failed to create event. Please try again.", "error");
   };
 
   const columns: GridColDef[] = [
-    { field: "eventId", headerName: "ID", width: 80 },
-    { field: "eventName", headerName: "Name", width: 180 },
+    { field: "id", headerName: "ID", width: 80 },
+    { field: "name", headerName: "Name", width: 180 },
     { field: "eventStart", headerName: "Start", width: 160 },
     { field: "eventEnd", headerName: "End", width: 160 },
     {
@@ -118,7 +108,7 @@ const EventTable: React.FC = () => {
       type: "actions",
       headerName: "Actions",
       width: 140,
-      getActions: (params) => [
+      getActions: params => [
         <GridActionsCellItem
           label="Edit"
           showInMenu
@@ -136,9 +126,9 @@ const EventTable: React.FC = () => {
   return (
     <div
       style={{
-        height: 500,
+        height: "100%",
         width: "100%",
-        background: "#fff",
+        background: "#250404ff",
         borderRadius: 8,
         padding: 16,
       }}
@@ -164,7 +154,7 @@ const EventTable: React.FC = () => {
       <DataGrid
         rows={events}
         columns={columns}
-        getRowId={(row) => row.eventId}
+        getRowId={row => row.id}
         disableRowSelectionOnClick
       />
 
@@ -182,19 +172,12 @@ const EventTable: React.FC = () => {
             onSubmitSuccess={handleAddSuccess}
             onSubmitError={handleAddError}
           >
-            <CustomTextField id="eventName" label="Event Name" required />
+            <CustomTextField id="name" label="Event Name" required />
             <CustomTimeAndDateSelector
               id="eventStart"
               label="Start Date & Time"
-              value={eventStart}
-              onChange={setEventStart}
             />
-            <CustomTimeAndDateSelector
-              id="eventEnd"
-              label="End Date & Time"
-              value={eventEnd}
-              onChange={setEventEnd}
-            />
+            <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
           </CustomForm>
         </DialogContent>
         <DialogActions>
@@ -208,11 +191,9 @@ const EventTable: React.FC = () => {
         <DialogContent>
           <TextField
             label="Name"
-            value={editEvent?.eventName ?? ""}
-            onChange={(e) =>
-              setEditEvent((ev) =>
-                ev ? { ...ev, eventName: e.target.value } : ev
-              )
+            value={editEvent?.name ?? ""}
+            onChange={e =>
+              setEditEvent(ev => (ev ? { ...ev, name: e.target.value } : ev))
             }
             fullWidth
             margin="normal"
@@ -221,8 +202,8 @@ const EventTable: React.FC = () => {
             label="Start"
             type="datetime-local"
             value={editEvent?.eventStart?.slice(0, 16) ?? ""}
-            onChange={(e) =>
-              setEditEvent((ev) =>
+            onChange={e =>
+              setEditEvent(ev =>
                 ev ? { ...ev, eventStart: e.target.value } : ev
               )
             }
@@ -233,8 +214,8 @@ const EventTable: React.FC = () => {
             label="End"
             type="datetime-local"
             value={editEvent?.eventEnd?.slice(0, 16) ?? ""}
-            onChange={(e) =>
-              setEditEvent((ev) =>
+            onChange={e =>
+              setEditEvent(ev =>
                 ev ? { ...ev, eventEnd: e.target.value } : ev
               )
             }
@@ -258,7 +239,7 @@ const EventTable: React.FC = () => {
       <Dialog open={openDelete} onClose={() => setOpenDelete(false)}>
         <DialogTitle>Delete Event</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete event "{deleteEvent?.eventName}"?
+          Are you sure you want to delete event "{deleteEvent?.name}"?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDelete(false)}>Cancel</Button>

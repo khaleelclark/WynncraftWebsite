@@ -7,10 +7,10 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 
 interface GuildMember {
-  guildMemberId: number;
-  mainUsername: string;
+  id: number;
+  name: string;
   minecraftUsername: string;
-  rankName?: string;
+  rankId?: string;
   joinDate?: string;
   wynncraftRank?: string;
   uuid?: string;
@@ -21,23 +21,23 @@ const GuildMemberList: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("/api/guildmembers").then((res) => setMembers(res.data));
+    axios.get("/api/guildmembers").then(res => setMembers(res.data));
   }, []);
 
   const columns: GridColDef[] = [
     {
-      field: "guildMemberId",
+      field: "id",
       headerName: "ID",
       width: 60,
     },
     {
-      field: "mainUsername",
+      field: "name",
       headerName: "Main Username",
       width: 220,
       renderCell: (params: any) => (
         <span
           style={{ display: "flex", alignItems: "center" }}
-          onClick={() => navigate(`/profile/${params.row.guildMemberId}`)}
+          onClick={() => navigate(`/profile/${params.row.id}`)}
         >
           {params.row.uuid && (
             <img
@@ -52,7 +52,7 @@ const GuildMemberList: React.FC = () => {
               }}
             />
           )}
-          <span>{params.row.mainUsername}</span>
+          <span>{params.row.name}</span>
         </span>
       ),
     },
@@ -62,7 +62,7 @@ const GuildMemberList: React.FC = () => {
       headerName: "Minecraft Username",
       width: 180,
     },
-    { field: "rankName", headerName: "Rank", width: 150 },
+    { field: "rankId", headerName: "Rank", width: 150 },
     { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
     // {
     //   field: "games",
@@ -100,7 +100,7 @@ const GuildMemberList: React.FC = () => {
             padding: "4px 12px",
             cursor: "pointer",
           }}
-          onClick={() => navigate(`/profile/${params.row.guildMemberId}`)}
+          onClick={() => navigate(`/profile/${params.row.id}`)}
         >
           View
         </Button>
@@ -134,7 +134,7 @@ const GuildMemberList: React.FC = () => {
         <DataGrid
           rows={members}
           columns={columns}
-          getRowId={(row) => row.guildMemberId}
+          getRowId={row => row.id}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },
