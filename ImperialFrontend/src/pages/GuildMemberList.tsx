@@ -10,7 +10,7 @@ interface GuildMember {
   id: number;
   name: string;
   minecraftUsername: string;
-  rankId?: string;
+  rankName?: string;
   joinDate?: string;
   wynncraftRank?: string;
   uuid?: string;
@@ -62,7 +62,7 @@ const GuildMemberList: React.FC = () => {
       headerName: "Minecraft Username",
       width: 180,
     },
-    { field: "rankId", headerName: "Rank", width: 150 },
+    { field: "rankName", headerName: "Rank", width: 150 },
     { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
     // {
     //   field: "games",

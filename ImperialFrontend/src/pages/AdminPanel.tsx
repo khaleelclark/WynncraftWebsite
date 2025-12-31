@@ -107,10 +107,8 @@ const AdminPanel: React.FC = () => {
       >
         <DialogContent dividers>
           <GenericAdminPage
-            apiGetEndpoint="/api/events"
-            apiDeleteEndpoint="/api/events"
-            rowId="id"
-            rowName="name"
+            apiGetEndpoint="/api/guildmembers/admin"
+            apiDeleteEndpoint="/api/guildmembers"
             createForm={createGuildMemberForm}
           />
         </DialogContent>

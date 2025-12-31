@@ -21,16 +21,12 @@ interface GenericAdminPageProps {
   apiGetEndpoint: string;
   apiDeleteEndpoint: string;
   createForm: ReactElement<CustomFormProps>;
-  rowId: string;
-  rowName: string;
 }
 
 export const GenericAdminPage = ({
   apiGetEndpoint,
   apiDeleteEndpoint,
   createForm,
-  rowId,
-  rowName,
 }: GenericAdminPageProps) => {
   const [members, setMembers] = useState<any[]>([]);
   const [openCreationDialog, setOpenCreationDialog] = useState(false);
@@ -38,7 +34,7 @@ export const GenericAdminPage = ({
   const [idToDelete, setIdToDelete] = useState(-1);
 
   useEffect(() => {
-    axios.get(apiGetEndpoint).then((res) => {
+    axios.get(apiGetEndpoint).then(res => {
       setMembers(res.data);
     });
   }, []);
@@ -46,13 +42,26 @@ export const GenericAdminPage = ({
   const columns: GridColDef[] =
     members.length !== 0
       ? [
-          ...Object.keys(members[0]).map((key) => ({
+          ...Object.keys(members[0]).map(key => ({
             field: key,
             headerName: key
               .replace(/([A-Z])/g, " $1")
-              .replace(/^./, (c) => c.toUpperCase())
+              .replace(/^./, c => c.toUpperCase())
               .trim(),
             width: 150,
+            // Custom render logic for the cell
+            valueGetter: (value: any) => {
+              if (Array.isArray(value)) {
+                // If it's an array, join the 'name' properties
+                return value.map(item => item?.name ?? "").join(", ");
+              } else if (value && typeof value === "object") {
+                // If it's an object, return its 'name'
+                return value.name ?? "";
+              } else {
+                // Otherwise, return the raw value
+                return value ?? "";
+              }
+            },
           })),
           {
             field: "actions",
@@ -66,7 +75,7 @@ export const GenericAdminPage = ({
                 <IconButton
                   sx={{ color: "#FFFFFF" }}
                   onClick={() => {
-                    setIdToDelete(params.row[rowId]);
+                    setIdToDelete(params.row.id);
                     setOpenDeletionDialog(true);
                   }}
                 >
@@ -78,14 +87,16 @@ export const GenericAdminPage = ({
         ]
       : [];
 
-  const selectedUser = members.find((u) => u[rowId] === idToDelete);
+  const selectedUser = members.find(u => u.id === idToDelete);
 
   const addNewRecord = (newRecord: Object) => {
     setMembers(prev => [...prev, newRecord]);
     setOpenCreationDialog(false);
-  }
+  };
 
-  const updatedCreateForm = React.cloneElement(createForm, {addNewRecordCallback: addNewRecord})
+  const updatedCreateForm = React.cloneElement(createForm, {
+    addNewRecordCallback: addNewRecord,
+  });
 
   const el = (
     <>
@@ -112,7 +123,7 @@ export const GenericAdminPage = ({
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 {`Are you sure you want to delete Id #${idToDelete}
-              ${selectedUser ? selectedUser[rowName] : ""}?`}
+              ${selectedUser ? selectedUser.name : ""}?`}
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -124,13 +135,11 @@ export const GenericAdminPage = ({
                   axios
                     .delete(`${apiDeleteEndpoint}/${idToDelete}`)
                     .then(() => {
-                      setMembers((prev) =>
-                        prev.filter((r) => r[rowId] !== idToDelete)
-                      );
+                      setMembers(prev => prev.filter(r => r.id !== idToDelete));
                       setIdToDelete(-1);
                       setOpenDeletionDialog(false);
                     })
-                    .catch((error) => {
+                    .catch(error => {
                       console.log(error);
                       //error dialog message
                     });
@@ -165,7 +174,7 @@ export const GenericAdminPage = ({
             <DataGrid
               rows={members}
               columns={columns}
-              getRowId={(row) => row[rowId]}
+              getRowId={row => row.id}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },
