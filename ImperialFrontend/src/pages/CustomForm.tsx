@@ -1,6 +1,6 @@
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Box from "@mui/material/Box";
 import axios from "axios";
 import { useState } from "react";
@@ -13,7 +13,9 @@ export interface CustomFormProps {
   apiEndpoint: string;
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: unknown) => void;
-  addNewRecordCallback?: (newRecord: Object) => void;
+  changeRecordsCallback?: (newRecord: Object) => void;
+  autofillData?: any;
+  isPost?: boolean; //true = post, false = put
 }
 
 export const CustomForm = ({
@@ -22,19 +24,33 @@ export const CustomForm = ({
   apiEndpoint,
   onSubmitSuccess,
   onSubmitError,
-  addNewRecordCallback
+  changeRecordsCallback,
+  autofillData,
+  isPost,
 }: CustomFormProps) => {
-  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [formValues, setFormValues] = useState<Record<string, string>>(
+    autofillData ?? {}
+  );
+
+  useEffect(() => {}, []);
 
   const register = (id: string, value: string) => {
-    setFormValues((prevValues) => ({ ...prevValues, [id]: value }));
+    setFormValues(prevValues => ({ ...prevValues, [id]: value }));
   };
 
   const handleSubmit = async () => {
     try {
-      await axios.post(apiEndpoint, formValues).then((res) => {
-        if (addNewRecordCallback) addNewRecordCallback(res.data);
-      });
+      if (isPost) {
+        await axios.post(apiEndpoint, formValues).then(res => {
+          if (changeRecordsCallback) changeRecordsCallback(res.data);
+        });
+      } else {
+        await axios
+          .put(`${apiEndpoint}/${formValues.id}`, formValues)
+          .then(res => {
+            if (changeRecordsCallback) changeRecordsCallback(res.data);
+          });
+      }
 
       if (onSubmitSuccess) {
         onSubmitSuccess();

@@ -58,7 +58,13 @@ namespace ImperialBackend.Controllers
 
             _context.Events.Add(newEvent);
             _context.SaveChanges();
-            return Ok(newEvent);
+            return Ok(new EventGetDTO
+            {
+                Id = newEvent.EventId,
+                Name = newEvent.EventName,
+                EventStart = newEvent.EventStart,
+                EventEnd = newEvent.EventEnd
+            });
         }
 
         [HttpPut("{id}")]
@@ -72,7 +78,13 @@ namespace ImperialBackend.Controllers
             existingEvent.EventEnd = ev.EventEnd;
 
             _context.SaveChanges();
-            return NoContent();
+            return Ok(new EventGetDTO
+            {
+                Id = existingEvent.EventId,
+                Name = existingEvent.EventName,
+                EventStart = existingEvent.EventStart,
+                EventEnd = existingEvent.EventEnd
+            });
         }
 
         [HttpDelete("{id}")]

@@ -30,8 +30,10 @@ export const GenericAdminPage = ({
 }: GenericAdminPageProps) => {
   const [members, setMembers] = useState<any[]>([]);
   const [openCreationDialog, setOpenCreationDialog] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openDeletionDialog, setOpenDeletionDialog] = useState(false);
   const [idToDelete, setIdToDelete] = useState(-1);
+  const [autofillData, setAutofillData] = useState({});
 
   useEffect(() => {
     axios.get(apiGetEndpoint).then(res => {
@@ -53,7 +55,7 @@ export const GenericAdminPage = ({
             valueGetter: (value: any) => {
               if (Array.isArray(value)) {
                 // If it's an array, join the 'name' properties
-                return value.map(item => item?.name ?? "").join(", ");
+                return value.map(item => item?.name ?? "").join(" | ");
               } else if (value && typeof value === "object") {
                 // If it's an object, return its 'name'
                 return value.name ?? "";
@@ -69,7 +71,13 @@ export const GenericAdminPage = ({
             width: 100,
             renderCell: (params: any) => (
               <>
-                <IconButton sx={{ color: "#FFFFFF" }}>
+                <IconButton
+                  sx={{ color: "#FFFFFF" }}
+                  onClick={() => {
+                    setAutofillData(params.row);
+                    setOpenUpdateDialog(true);
+                  }}
+                >
                   <EditIcon />
                 </IconButton>
                 <IconButton
@@ -94,8 +102,22 @@ export const GenericAdminPage = ({
     setOpenCreationDialog(false);
   };
 
+  const updateRecord = (updatedRecord: any) => {
+    setMembers(prev =>
+      prev.map(item => (item.id === updatedRecord.id ? updatedRecord : item))
+    );
+    setOpenUpdateDialog(false);
+  };
+
   const updatedCreateForm = React.cloneElement(createForm, {
-    addNewRecordCallback: addNewRecord,
+    changeRecordsCallback: addNewRecord,
+    isPost: true,
+  });
+
+  const updatedUpdateForm = React.cloneElement(createForm, {
+    changeRecordsCallback: updateRecord,
+    autofillData,
+    isPost: false,
   });
 
   const el = (
@@ -159,6 +181,14 @@ export const GenericAdminPage = ({
               fullWidth
             >
               <DialogContent dividers>{updatedCreateForm}</DialogContent>
+            </Dialog>
+            <Dialog
+              open={openUpdateDialog}
+              onClose={() => setOpenUpdateDialog(false)}
+              maxWidth="sm"
+              fullWidth
+            >
+              <DialogContent dividers>{updatedUpdateForm}</DialogContent>
             </Dialog>
             <Typography
               sx={{

@@ -47,7 +47,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="eventName" label="Event Name" required />
+      <CustomTextField id="name" label="Event Name" required />
       <CustomTimeAndDateSelector id="eventStart" label="Event Start" />
       <CustomTimeAndDateSelector id="eventEnd" label="Event End" />
     </CustomForm>
@@ -107,8 +107,8 @@ const AdminPanel: React.FC = () => {
       >
         <DialogContent dividers>
           <GenericAdminPage
-            apiGetEndpoint="/api/guildmembers/admin"
-            apiDeleteEndpoint="/api/guildmembers"
+            apiGetEndpoint="/api/events"
+            apiDeleteEndpoint="/api/events"
             createForm={createGuildMemberForm}
           />
         </DialogContent>

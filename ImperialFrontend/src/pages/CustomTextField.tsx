@@ -46,7 +46,8 @@ const textFieldStyle = {
 
 export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
   const { register, formValues } = useCustomFormContext();
-
+  console.log("form values : ", formValues);
+  console.log(id);
   const el = (
     <>
       <TextField
@@ -56,7 +57,7 @@ export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
         required={required}
         fullWidth
         sx={textFieldStyle}
-        onChange={(e) => register(id, e.target.value)}
+        onChange={e => register(id, e.target.value)}
         value={formValues[id] ?? ""}
       />
     </>
