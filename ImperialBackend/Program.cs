@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using ImperialBackend.Models;
-
+using ImperialBackend.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,12 +16,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddDbContext<ImperialDbContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions =>
-        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+    options.UseSqlServer(
+        connectionString,
+        sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
     )
 );
 
-builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
+//builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
+builder.Services.AddSingleton<GuildMemberSyncService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -32,6 +35,10 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
+    db.Database.Migrate();
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }

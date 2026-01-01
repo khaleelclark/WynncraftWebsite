@@ -1,9 +1,17 @@
 import { defineConfig } from "@rsbuild/core";
+import { pluginReact } from "@rsbuild/plugin-react";
 
 export default defineConfig({
+  source: {
+    entry: {
+      // name "index" just matches the default HTML entry
+      index: "./src/index.tsx",
+    },
+  },
   html: {
     template: "./src/index.html",
   },
+  plugins: [pluginReact()],
   tools: {
     rspack: {
       watchOptions: {

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import axios from "axios";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 interface GuildMember {
-  guildMemberId: number;
-  mainUsername: string;
+  id: number;
+  name: string;
   minecraftUsername: string;
   rankName?: string;
   joinDate?: string;
@@ -14,62 +18,30 @@ interface GuildMember {
 
 const GuildMemberList: React.FC = () => {
   const [members, setMembers] = useState<GuildMember[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/guildmembers")
-      .then((res) => res.json())
-      .then((data) => {
-        let arr = [];
-        if (Array.isArray(data)) {
-          arr = data;
-        } else if (Array.isArray(data.value)) {
-          arr = data.value;
-        }
-        // Map backend keys to frontend snake_case keys
-        const keyMap: Record<string, string> = {
-          GuildMemberId: "guild_member_id",
-          MainUsername: "main_username",
-          MinecraftUsername: "minecraft_username",
-          RankName: "rank_name",
-          JoinDate: "join_date",
-          WynncraftRank: "wynncraft_rank",
-          DiscordTag: "discord_tag",
-          Uuid: "uuid",
-          Games: "games",
-          Medals: "medals",
-        };
-        const mappedArr = arr.map((item: any) => {
-          const mapped: any = {};
-          Object.keys(item).forEach((key) => {
-            mapped[keyMap[key] || key] = item[key];
-          });
-          return mapped;
-        });
-        console.log("Mapped members:", mappedArr);
-        setMembers(mappedArr);
-      });
+    axios.get("/api/guildmembers").then(res => setMembers(res.data));
   }, []);
-
-  const navigate = useNavigate();
-  const handleProfileClick = (id: number) => {
-    navigate(`/profile/${id}`);
-  };
 
   const columns: GridColDef[] = [
     {
-      field: "guild_member_id",
-      headerName: "Guild Member ID",
-      width: 120,
+      field: "id",
+      headerName: "ID",
+      width: 60,
     },
     {
-      field: "main_username",
+      field: "name",
       headerName: "Main Username",
       width: 220,
       renderCell: (params: any) => (
-        <span style={{ display: "flex", alignItems: "center" }}>
+        <span
+          style={{ display: "flex", alignItems: "center" }}
+          onClick={() => navigate(`/profile/${params.row.id}`)}
+        >
           {params.row.uuid && (
             <img
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
+              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
               alt="Skin"
               style={{
                 width: 32,
@@ -80,112 +52,118 @@ const GuildMemberList: React.FC = () => {
               }}
             />
           )}
-          <span>{params.row.main_username}</span>
+          <span>{params.row.name}</span>
         </span>
       ),
     },
-    { field: "discord_tag", headerName: "Discord Tag", width: 150 },
+    { field: "discordTag", headerName: "Discord Tag", width: 180 },
     {
-      field: "minecraft_username",
+      field: "minecraftUsername",
       headerName: "Minecraft Username",
       width: 180,
     },
-    { field: "rank_name", headerName: "Rank", width: 120 },
-    {
-      field: "join_date",
-      headerName: "Join Date",
-      width: 120,
-      valueGetter: (params: any) => {
-        console.log(params);
-        return params ? String(params).slice(0, 10) : "";
-      },
-    },
-    // Removed UUID column
-    { field: "wynncraft_rank", headerName: "Wynncraft Rank", width: 150 },
-    {
-      field: "games",
-      headerName: "Games",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && Array.isArray(params) ? params.join(", ") : "",
-    },
-    {
-      field: "medals",
-      headerName: "Medals",
-      width: 200,
-      valueGetter: (params: any) =>
-        params && params.row && Array.isArray(params.row.medals)
-          ? params.row.medals.join(", ")
-          : "",
-    },
+    { field: "rankName", headerName: "Rank", width: 150 },
+    { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
+    // {
+    //   field: "games",
+    //   headerName: "Games",
+    //   width: 200,
+    //   valueGetter: (params: any) =>
+    //     params && Array.isArray(params) ? params.join(", ") : "",
+    // },
+    // {
+    //   field: "medals",
+    //   headerName: "Medals",
+    //   width: 200,
+    //   valueGetter: (params: any) =>
+    //     params && params.row && Array.isArray(params.row.medals)
+    //       ? params.row.medals.join(", ")
+    //       : "",
+    // },
+    //     {
+    //   field: "join_date",
+    //   headerName: "Join Date",
+    //   width: 120,
+    // },
     {
       field: "profile",
       headerName: "Profile",
       width: 120,
       sortable: false,
       renderCell: (params: any) => (
-        <button
+        <Button
           style={{
-            background: "#bc511c",
+            background: "#6A001B",
             color: "#efdddb",
             border: "none",
             borderRadius: 4,
             padding: "4px 12px",
             cursor: "pointer",
           }}
-          onClick={() => handleProfileClick(params.row.guild_member_id)}
+          onClick={() => navigate(`/profile/${params.row.id}`)}
         >
           View
-        </button>
+        </Button>
       ),
     },
   ];
 
-  // Use all members for the table
-
   return (
-    <div
-      style={{
-        padding: 24,
-        minHeight: 600,
-        width: "100%",
+    <Box
+      sx={{
+        padding: 3,
         background: "#220c0e",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
     >
-      <h2 style={{ color: "#efdddb", marginBottom: 16 }}>Guild Members</h2>
-      <DataGrid
-        rows={members}
-        columns={columns}
-        getRowId={(row) => row.guild_member_id}
-        pageSizeOptions={[20, 50, 100]}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 20, page: 0 } },
-        }}
-        disableRowSelectionOnClick
-        autoHeight
-        sx={{
-          backgroundColor: "#511220",
-          color: "#efdddb",
-          border: "1px solid #82172e",
-          [`.MuiDataGrid-columnHeaders`]: {
-            backgroundColor: "#82172e",
+      <Box sx={{ width: "100%", maxWidth: 1100 }}>
+        <Typography
+          sx={{
             color: "#efdddb",
-          },
-          [`.MuiDataGrid-row`]: {
-            "&:nth-of-type(even)": {
-              backgroundColor: "#220c0e",
+            marginBottom: 3,
+            fontWeight: 600,
+            fontSize: 30,
+            textAlign: "center",
+          }}
+        >
+          Imperial Guild Members
+        </Typography>
+        <DataGrid
+          rows={members}
+          columns={columns}
+          getRowId={row => row.id}
+          pageSizeOptions={[20, 50, 100]}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 20, page: 0 } },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            backgroundColor: "#6A001B",
+            color: "#F7F2F5",
+            border: "1px solid #7A1C69",
+            [`.MuiDataGrid-columnHeaders`]: {
+              backgroundColor: "#82172e",
+              color: "#efdddb",
             },
-            "&:nth-of-type(odd)": {
-              backgroundColor: "#511220",
+            [`.MuiDataGrid-row`]: {
+              "&:nth-of-type(even)": {
+                backgroundColor: "#220c0e",
+              },
+              "&:nth-of-type(odd)": {
+                backgroundColor: "#3C002F",
+              },
             },
-          },
-          [`.MuiDataGrid-footerContainer`]: {
-            backgroundColor: "#82172e",
-            color: "#efdddb",
-          },
-        }}
-      />
-    </div>
+            [`.MuiDataGrid-footerContainer`]: {
+              backgroundColor: "#7A1C69",
+              color: "#efdddb",
+            },
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 

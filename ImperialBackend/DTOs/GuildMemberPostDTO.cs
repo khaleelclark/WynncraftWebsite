@@ -1,17 +1,12 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ImperialBackend.Models
 {
-    public class GuildMemberPostDTO
+    public class GuildMemberPostDTO : GenericPostDTO
     {
         public string? DiscordTag { get; set; }
-        public string? MainUsername { get; set; }
-
-        [Required]
-        public int RankId { get; set; }
-        public DateTime JoinDate { get; set; }
-
-        [Required]
+        public int Rank { get; set; }
+        public DateOnly JoinDate { get; set; }
         public Guid Uuid { get; set; }
+        public List<int>? Medals { get; set; }
+        public List<int>? Games { get; set; }
     }
 }

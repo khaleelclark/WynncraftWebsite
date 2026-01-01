@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 namespace ImperialBackend.Models
 {
     public class Game
@@ -6,6 +7,7 @@ namespace ImperialBackend.Models
         [Key]
         public int GameId { get; set; }
         public string? GameName { get; set; }
-        public ICollection<GuildMemberGame> GuildMemberGames { get; set; } = new List<GuildMemberGame>();
+        public ICollection<GuildMemberGame> GuildMemberGames { get; set; } =
+            new List<GuildMemberGame>();
     }
 }

@@ -7,6 +7,7 @@ namespace ImperialBackend.Models
         [Key]
         public int MedalId { get; set; }
         public string? MedalName { get; set; }
-        public ICollection<GuildMemberMedal> GuildMemberMedals { get; set; } = new List<GuildMemberMedal>();
+        public ICollection<GuildMemberMedal> GuildMemberMedals { get; set; } =
+            new List<GuildMemberMedal>();
     }
 }

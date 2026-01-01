@@ -1,6 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace ImperialBackend.Models
@@ -13,7 +13,7 @@ namespace ImperialBackend.Models
         public string? MainUsername { get; set; }
         public string? MinecraftUsername { get; set; }
         public int RankId { get; set; }
-        public DateTime JoinDate { get; set; }
+        public DateOnly JoinDate { get; set; }
         public Guid Uuid { get; set; }
         public string? WynncraftRank { get; set; }
         public int HoursPlayed { get; set; }
@@ -22,7 +22,8 @@ namespace ImperialBackend.Models
         public Rank? Rank { get; set; }
         public ICollection<GuildMemberGame> Games { get; set; } = new List<GuildMemberGame>();
         public ICollection<GuildMemberMedal> Medals { get; set; } = new List<GuildMemberMedal>();
-        public ICollection<PlayerHistoricalStat> PlayerHistoricalStats { get; set; } = new List<PlayerHistoricalStat>();
-        public DateTime? LastSynced { get; set; } // UTC timestamp of last sync
+        public ICollection<PlayerHistoricalStat> PlayerHistoricalStats { get; set; } =
+            new List<PlayerHistoricalStat>();
+        public DateTimeOffset? LastSynced { get; set; } // UTC timestamp of last sync
     }
 }

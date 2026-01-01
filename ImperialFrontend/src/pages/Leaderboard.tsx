@@ -5,7 +5,6 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 interface LeaderboardEntry {
   minecraftUsername: string;
   uuid?: string;
-  weekliesCompleted: number;
   warsCompleted: number;
   hoursPlayed: number;
   raidsCompleted: number;
@@ -19,11 +18,11 @@ const columns: GridColDef[] = [
     field: "minecraftUsername",
     headerName: "Player",
     width: 220,
-    renderCell: (params) => (
+    renderCell: params => (
       <span style={{ display: "flex", alignItems: "center" }}>
         {params.row.uuid && (
           <img
-            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/nohelm`}
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
             alt="Skin"
             style={{
               width: 32,
@@ -46,9 +45,7 @@ const columns: GridColDef[] = [
             cursor: "pointer",
             fontWeight: 600,
           }}
-          onClick={() =>
-            (window.location.href = `/profile/${params.row.guildMemberId}`)
-          }
+          onClick={() => (window.location.href = `/profile/${params.row.id}`)}
         >
           Profile
         </button>
@@ -56,19 +53,13 @@ const columns: GridColDef[] = [
     ),
   },
   { field: "raidsCompleted", headerName: "Raids", width: 120, type: "number" },
-  {
-    field: "weekliesCompleted",
-    headerName: "Weeklies",
-    width: 120,
-    type: "number",
-  },
   { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
   { field: "hoursPlayed", headerName: "Hours", width: 120, type: "number" },
   {
     field: "lastSynced",
     headerName: "Last Updated",
     width: 180,
-    valueFormatter: (value) =>
+    valueFormatter: value =>
       value
         ? new Date(value as string).toLocaleString(undefined, {
             dateStyle: "short",
@@ -99,8 +90,8 @@ const Leaderboard: React.FC = () => {
     fetch(
       `/api/guildmembers/leaderboard?startDate=${startDateTime}&endDate=${endDateTime}`
     )
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         const arr = data.value ?? data ?? [];
         // Sort by raidsCompleted descending
         arr.sort(
@@ -192,7 +183,7 @@ const Leaderboard: React.FC = () => {
             <input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={e => setStartDate(e.target.value)}
               style={{
                 marginLeft: 8,
                 marginRight: 16,
@@ -210,7 +201,7 @@ const Leaderboard: React.FC = () => {
             <input
               type="time"
               value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
+              onChange={e => setStartTime(e.target.value)}
               style={{
                 marginLeft: 8,
                 marginRight: 16,
@@ -228,7 +219,7 @@ const Leaderboard: React.FC = () => {
             <input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={e => setEndDate(e.target.value)}
               style={{
                 marginLeft: 8,
                 marginRight: 16,
@@ -246,7 +237,7 @@ const Leaderboard: React.FC = () => {
             <input
               type="time"
               value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
+              onChange={e => setEndTime(e.target.value)}
               style={{
                 marginLeft: 8,
                 background: "#511220",
@@ -264,7 +255,7 @@ const Leaderboard: React.FC = () => {
         <DataGrid
           rows={entries}
           columns={columns}
-          getRowId={(row) => row.minecraftUsername}
+          getRowId={row => row.id}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },

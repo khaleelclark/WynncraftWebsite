@@ -4,6 +4,7 @@ using ImperialBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImperialBackend.Migrations
 {
     [DbContext(typeof(ImperialDbContext))]
-    partial class ImperialDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223162934_DateOnlyAndDateTimeOffset")]
+    partial class DateOnlyAndDateTimeOffset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,14 +33,14 @@ namespace ImperialBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"));
 
-                    b.Property<DateTimeOffset>("EventEnd")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("EventEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("EventName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("EventStart")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("EventStart")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("EventId");
 
@@ -229,8 +232,8 @@ namespace ImperialBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RaidCompletedId"));
 
-                    b.Property<DateTimeOffset>("CompletedDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CompletedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("GuildMemberId")
                         .HasColumnType("int");

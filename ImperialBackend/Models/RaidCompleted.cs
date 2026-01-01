@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace ImperialBackend.Models
 {
@@ -10,7 +10,7 @@ namespace ImperialBackend.Models
         public int RaidId { get; set; }
         public int RaidInstanceId { get; set; }
         public Guid Uuid { get; set; }
-        public DateTime CompletedDate { get; set; }
+        public DateTimeOffset CompletedDate { get; set; }
         public Raid? Raid { get; set; }
         public GuildMember? GuildMember { get; set; }
     }

@@ -10,7 +10,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb_New;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True"
     depends_on:
       - db
 

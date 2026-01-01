@@ -1,4 +1,3 @@
-import React from "react";
 import EventTable from "./EventTable";
 
 const EventTablePage: React.FC = () => (
