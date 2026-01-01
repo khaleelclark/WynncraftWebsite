@@ -31,7 +31,7 @@ namespace ImperialBackend.Controllers
             _context.Medals.Add(newMedal);
             _context.SaveChanges();
 
-            return Ok(newMedal);
+            return Ok(new GenericGetDTO { Id = newMedal.MedalId, Name = newMedal.MedalName });
         }
 
         [HttpPut("{id}")]
@@ -43,7 +43,9 @@ namespace ImperialBackend.Controllers
             existingMedal.MedalName = medal.Name;
 
             _context.SaveChanges();
-            return NoContent();
+            return Ok(
+                new GenericGetDTO { Id = existingMedal.MedalId, Name = existingMedal.MedalName }
+            );
         }
 
         [HttpDelete("{id}")]
