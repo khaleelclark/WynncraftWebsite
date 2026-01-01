@@ -49,6 +49,10 @@ namespace ImperialBackend.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
+            if (_context.GuildMemberMedals.Any(m => m.MedalId == id))
+                return BadRequest(
+                    "Cannot delete medal with guild members. Remove guild members first"
+                );
             var medal = _context.Medals.Find(id);
             if (medal == null)
                 return NotFound();
