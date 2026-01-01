@@ -14,6 +14,12 @@ import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
+import GroupIcon from "@mui/icons-material/Group";
+import EventIcon from "@mui/icons-material/Event";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -127,152 +133,325 @@ const AdminPanel: React.FC = () => {
         justifyContent: "center",
       }}
     >
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", maxWidth: 1200 }}>
         <Paper
           sx={{
-            p: 3,
+            p: 4,
             maxWidth: "100%",
             bgcolor: "#501117ff",
             color: "#efdddb",
-            borderRadius: 2,
-            boxShadow: 4,
+            borderRadius: 3,
+            boxShadow: 6,
           }}
         >
-          <Typography variant="h2" textAlign={"center"}>
+          <Typography variant="h3" textAlign="center" gutterBottom>
             Admin Panel
           </Typography>
-
-          {/* ----- Guild Members ----- */}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setGuildMembersOpen(true)}
+          <Typography
+            variant="subtitle1"
+            textAlign="center"
+            sx={{ opacity: 0.8, mb: 4 }}
           >
-            View Guild Members
-          </Button>
+            Manage your guild data, events, and rankings in one place.
+          </Typography>
 
-          <Dialog
-            open={guildMembersOpen}
-            onClose={() => setGuildMembersOpen(false)}
-            maxWidth="lg"
-            fullWidth
+          {/* --- TILE GRID --- */}
+          <Grid
+            container
+            spacing={3}
+            justifyContent="center" // --- center the whole grid
+            alignItems="stretch"
+            sx={{
+              mt: 1,
+            }}
           >
-            <DialogContent dividers>
-              <GenericAdminPage
-                label="Guild Members"
-                apiGetEndpoint="/api/guildmembers/admin"
-                apiDeleteEndpoint="/api/guildmembers"
-                createForm={createGuildMemberForm}
-              />
-            </DialogContent>
-          </Dialog>
+            {/* Guild Members */}
+            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
+              <Paper
+                onClick={() => setGuildMembersOpen(true)}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  borderRadius: 3,
+                  bgcolor: "#82172e",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  boxShadow: 3,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      p: 1.2,
+                      borderRadius: "999px",
+                      bgcolor: "rgba(0,0,0,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <GroupIcon />
+                  </Box>
+                  <Typography variant="h5">Guild Members</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
+                  View, edit, and manage all guild members and their details.
+                </Typography>
 
-          {/* ----- Events ----- */}
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    alignSelf: "flex-start",
+                    bgcolor: "#efdddb",
+                    color: "#501117ff",
+                    "&:hover": {
+                      bgcolor: "#f6e8e6",
+                    },
+                  }}
+                >
+                  Open
+                </Button>
+              </Paper>
+            </Grid>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setEventsOpen(true)}
-          >
-            View Events
-          </Button>
+            {/* Events */}
+            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
+              <Paper
+                onClick={() => setEventsOpen(true)}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  borderRadius: 3,
+                  bgcolor: "#82172e",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  boxShadow: 3,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      p: 1.2,
+                      borderRadius: "999px",
+                      bgcolor: "rgba(0,0,0,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <EventIcon />
+                  </Box>
+                  <Typography variant="h5">Events</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
+                  Configure upcoming raids, wars, and guild activities.
+                </Typography>
 
-          <Dialog
-            open={eventsOpen}
-            onClose={() => setEventsOpen(false)}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogContent dividers>
-              <GenericAdminPage
-                label="Events"
-                apiGetEndpoint="/api/events"
-                apiDeleteEndpoint="/api/events"
-                createForm={createEventForm}
-              />
-            </DialogContent>
-          </Dialog>
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    alignSelf: "flex-start",
+                    bgcolor: "#efdddb",
+                    color: "#501117ff",
+                    "&:hover": {
+                      bgcolor: "#f6e8e6",
+                    },
+                  }}
+                >
+                  Open
+                </Button>
+              </Paper>
+            </Grid>
 
-          {/* ----- Games ----- */}
+            {/* Games */}
+            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
+              <Paper
+                onClick={() => setGamesOpen(true)}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  borderRadius: 3,
+                  bgcolor: "#82172e",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  boxShadow: 3,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      p: 1.2,
+                      borderRadius: "999px",
+                      bgcolor: "rgba(0,0,0,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <SportsEsportsIcon />
+                  </Box>
+                  <Typography variant="h5">Games</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
+                  Manage supported games and related configurations.
+                </Typography>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setGamesOpen(true)}
-          >
-            View Games
-          </Button>
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    alignSelf: "flex-start",
+                    bgcolor: "#efdddb",
+                    color: "#501117ff",
+                    "&:hover": {
+                      bgcolor: "#f6e8e6",
+                    },
+                  }}
+                >
+                  Open
+                </Button>
+              </Paper>
+            </Grid>
 
-          <Dialog
-            open={gamesOpen}
-            onClose={() => setGamesOpen(false)}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogContent dividers>
-              <GenericAdminPage
-                label="Games"
-                apiGetEndpoint="/api/games"
-                apiDeleteEndpoint="/api/games"
-                createForm={createGameForm}
-              />
-            </DialogContent>
-          </Dialog>
+            {/* Medals */}
+            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
+              <Paper
+                onClick={() => setMedalsOpen(true)}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  borderRadius: 3,
+                  bgcolor: "#82172e",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  boxShadow: 3,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      p: 1.2,
+                      borderRadius: "999px",
+                      bgcolor: "rgba(0,0,0,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <MilitaryTechIcon />
+                  </Box>
+                  <Typography variant="h5">Medals</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
+                  Create and assign medals to recognize achievements.
+                </Typography>
 
-          {/* ----- Medals ----- */}
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    alignSelf: "flex-start",
+                    bgcolor: "#efdddb",
+                    color: "#501117ff",
+                    "&:hover": {
+                      bgcolor: "#f6e8e6",
+                    },
+                  }}
+                >
+                  Open
+                </Button>
+              </Paper>
+            </Grid>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setMedalsOpen(true)}
-          >
-            View Medals
-          </Button>
+            {/* Ranks */}
+            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
+              <Paper
+                onClick={() => setRanksOpen(true)}
+                sx={{
+                  p: 3,
+                  height: "100%",
+                  borderRadius: 3,
+                  bgcolor: "#82172e",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                  boxShadow: 3,
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: 8,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Box
+                    sx={{
+                      mr: 2,
+                      p: 1.2,
+                      borderRadius: "999px",
+                      bgcolor: "rgba(0,0,0,0.25)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <WorkspacePremiumIcon />
+                  </Box>
+                  <Typography variant="h5">Ranks</Typography>
+                </Box>
+                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
+                  Define and edit guild ranks and permissions.
+                </Typography>
 
-          <Dialog
-            open={medalsOpen}
-            onClose={() => setMedalsOpen(false)}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogContent dividers>
-              <GenericAdminPage
-                label="Medals"
-                apiGetEndpoint="/api/medals"
-                apiDeleteEndpoint="/api/medals"
-                createForm={createMedalForm}
-              />
-            </DialogContent>
-          </Dialog>
-
-          {/* ----- Ranks ----- */}
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setRanksOpen(true)}
-          >
-            View Ranks
-          </Button>
-
-          <Dialog
-            open={ranksOpen}
-            onClose={() => setRanksOpen(false)}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogContent dividers>
-              <GenericAdminPage
-                label="Ranks"
-                apiGetEndpoint="/api/ranks"
-                apiDeleteEndpoint="/api/ranks"
-                createForm={createRankForm}
-              />
-            </DialogContent>
-          </Dialog>
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 2,
+                    alignSelf: "flex-start",
+                    bgcolor: "#efdddb",
+                    color: "#501117ff",
+                    "&:hover": {
+                      bgcolor: "#f6e8e6",
+                    },
+                  }}
+                >
+                  Open
+                </Button>
+              </Paper>
+            </Grid>
+          </Grid>
 
           {/* ----- Validation ------ */}
-
           <Snackbar
             open={snackbarOpen}
             autoHideDuration={4000}
@@ -289,6 +468,87 @@ const AdminPanel: React.FC = () => {
             </Alert>
           </Snackbar>
         </Paper>
+
+        {/* ----- Dialogs ----- */}
+        <Dialog
+          open={guildMembersOpen}
+          onClose={() => setGuildMembersOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Guild Members"
+              apiGetEndpoint="/api/guildmembers/admin"
+              apiDeleteEndpoint="/api/guildmembers"
+              createForm={createGuildMemberForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={eventsOpen}
+          onClose={() => setEventsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Events"
+              apiGetEndpoint="/api/events"
+              apiDeleteEndpoint="/api/events"
+              createForm={createEventForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={gamesOpen}
+          onClose={() => setGamesOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Games"
+              apiGetEndpoint="/api/games"
+              apiDeleteEndpoint="/api/games"
+              createForm={createGameForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={medalsOpen}
+          onClose={() => setMedalsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Medals"
+              apiGetEndpoint="/api/medals"
+              apiDeleteEndpoint="/api/medals"
+              createForm={createMedalForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={ranksOpen}
+          onClose={() => setRanksOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Ranks"
+              apiGetEndpoint="/api/ranks"
+              apiDeleteEndpoint="/api/ranks"
+              createForm={createRankForm}
+            />
+          </DialogContent>
+        </Dialog>
       </Box>
     </Box>
   );
