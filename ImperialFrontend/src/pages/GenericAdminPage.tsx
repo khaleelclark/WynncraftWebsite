@@ -21,12 +21,14 @@ interface GenericAdminPageProps {
   apiGetEndpoint: string;
   apiDeleteEndpoint: string;
   createForm: ReactElement<CustomFormProps>;
+  label: string;
 }
 
 export const GenericAdminPage = ({
   apiGetEndpoint,
   apiDeleteEndpoint,
   createForm,
+  label,
 }: GenericAdminPageProps) => {
   const [members, setMembers] = useState<any[]>([]);
   const [openCreationDialog, setOpenCreationDialog] = useState(false);
@@ -172,8 +174,13 @@ export const GenericAdminPage = ({
               </Button>
             </DialogActions>
           </Dialog>
-          <Box sx={{ width: "100%", maxWidth: 1100 }}>
-            <Button onClick={() => setOpenCreationDialog(true)}>Add new</Button>
+          <Box sx={{ width: "100%" }}>
+            <Button
+              onClick={() => setOpenCreationDialog(true)}
+              variant="contained"
+            >
+              Add new {label.replace("s", "")}
+            </Button>
             <Dialog
               open={openCreationDialog}
               onClose={() => setOpenCreationDialog(false)}
@@ -199,7 +206,7 @@ export const GenericAdminPage = ({
                 textAlign: "center",
               }}
             >
-              Imperial Guild Members
+              {label}
             </Typography>
             <DataGrid
               rows={members}
@@ -244,7 +251,7 @@ export const GenericAdminPage = ({
             width: "100%",
           }}
         >
-          {/* <CircularProgress /> */}
+          <CircularProgress />
         </Box>
       )}
     </>

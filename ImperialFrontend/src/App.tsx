@@ -7,7 +7,6 @@ import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
 import EventTablePage from "./pages/EventTablePage";
-import FormTest from "./pages/FormTest";
 
 const App: React.FC = () => (
   <ThemeProvider theme={theme}>
@@ -55,12 +54,6 @@ const App: React.FC = () => (
         >
           Admin Panel
         </Link>
-        <Link
-          to="/form"
-          style={{ color: "#efdddb", textDecoration: "none", fontWeight: 600 }}
-        >
-          Custom Form
-        </Link>
       </nav>
       <Routes>
         <Route path="/" element={<GuildMemberList />} />
@@ -68,7 +61,6 @@ const App: React.FC = () => (
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/add-event" element={<AddEvent />} />
         <Route path="/admin" element={<AdminPanel />} />
-        <Route path="/form" element={<FormTest />} />
         <Route path="/events" element={<EventTablePage />} />
       </Routes>
     </BrowserRouter>
