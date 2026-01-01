@@ -45,12 +45,16 @@ const AdminPanel: React.FC = () => {
   const handleSubmitSuccess = () => {
     // add dymanic message confirmations
     setSnackbarMessage("Entity added successfully!");
+    // add dymanic message confirmations
+    setSnackbarMessage("Entity added successfully!");
     setSnackbarSeverity("success");
     setSnackbarOpen(true);
+    setOpen(false);
     setOpen(false);
   };
 
   const handleSubmitError = (error: unknown) => {
+    setSnackbarMessage("Failed to create new entity. Please try again.");
     setSnackbarMessage("Failed to create new entity. Please try again.");
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
