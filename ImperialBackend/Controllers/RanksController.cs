@@ -30,7 +30,7 @@ namespace ImperialBackend.Controllers
 
             _context.Ranks.Add(rank);
             _context.SaveChanges();
-            return Ok(rank);
+            return Ok(new GenericGetDTO { Id = rank.RankId, Name = rank.RankName });
         }
 
         [HttpPut("{id}")]
@@ -43,7 +43,7 @@ namespace ImperialBackend.Controllers
             rank.RankName = dto.Name;
             _context.SaveChanges();
 
-            return NoContent();
+            return Ok(new GenericGetDTO { Id = rank.RankId, Name = rank.RankName });
         }
 
         [HttpDelete("{id}")]

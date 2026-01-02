@@ -64,27 +64,6 @@ const GuildMemberList: React.FC = () => {
     },
     { field: "rankName", headerName: "Rank", width: 150 },
     { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
-    // {
-    //   field: "games",
-    //   headerName: "Games",
-    //   width: 200,
-    //   valueGetter: (params: any) =>
-    //     params && Array.isArray(params) ? params.join(", ") : "",
-    // },
-    // {
-    //   field: "medals",
-    //   headerName: "Medals",
-    //   width: 200,
-    //   valueGetter: (params: any) =>
-    //     params && params.row && Array.isArray(params.row.medals)
-    //       ? params.row.medals.join(", ")
-    //       : "",
-    // },
-    //     {
-    //   field: "join_date",
-    //   headerName: "Join Date",
-    //   width: 120,
-    // },
     {
       field: "profile",
       headerName: "Profile",

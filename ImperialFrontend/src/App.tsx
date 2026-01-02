@@ -1,13 +1,8 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import {
-  ThemeProvider,
-  CssBaseline,
-  Button,
-  Box
-} from "@mui/material";
-import Menu from '@mui/material/Menu';
-import CircularProgress from '@mui/material/CircularProgress';
-import MenuItem from '@mui/material/MenuItem';
+import { ThemeProvider, CssBaseline, Button, Box } from "@mui/material";
+import Menu from "@mui/material/Menu";
+import CircularProgress from "@mui/material/CircularProgress";
+import MenuItem from "@mui/material/MenuItem";
 import theme from "./theme";
 import AdminPanel from "./pages/AdminPanel";
 import GuildMemberList from "./pages/GuildMemberList";
@@ -15,7 +10,6 @@ import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
 import EventTablePage from "./pages/EventTablePage";
-import FormTest from "./pages/FormTest";
 
 import { useUser } from "./auth/UserContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
@@ -60,7 +54,7 @@ const App: React.FC = () => {
     if (reason === "clickaway") {
       return;
     }
-    setSnackbar((prev) => ({ ...prev, open: false }));
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const handleClose = () => {
@@ -77,7 +71,7 @@ const App: React.FC = () => {
     handleClose();
   };
 
-  const el =
+  const el = (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Snackbar
@@ -137,16 +131,6 @@ const App: React.FC = () => {
                 Admin Panel
               </Link>
             )}
-            <Link
-              to="/form"
-              style={{
-                color: "#efdddb",
-                textDecoration: "none",
-                fontWeight: 600,
-              }}
-            >
-              Custom Form
-            </Link>
           </Box>
           <Box
             sx={{
@@ -208,11 +192,11 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/form" element={<FormTest />} />
           <Route path="/events" element={<EventTablePage />} />
         </Routes>
       </BrowserRouter>
-    </ThemeProvider>;
+    </ThemeProvider>
+  );
 
   return el;
 };

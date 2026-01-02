@@ -34,7 +34,7 @@ namespace ImperialBackend.Controllers
             _context.Games.Add(newGame);
             _context.SaveChanges();
 
-            return Ok(newGame);
+            return Ok(new GenericGetDTO { Id = newGame.GameId, Name = newGame.GameName });
         }
 
         [HttpPut("{id}")]
@@ -46,7 +46,7 @@ namespace ImperialBackend.Controllers
 
             game.GameName = dto.Name;
             _context.SaveChanges();
-            return NoContent();
+            return Ok(new GenericGetDTO { Id = game.GameId, Name = game.GameName });
         }
 
         [HttpDelete("{id}")]

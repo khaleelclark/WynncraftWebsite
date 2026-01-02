@@ -11,14 +11,29 @@ import Alert, { AlertColor } from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { GenericAdminPage } from "./GenericAdminPage";
 import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
+import GroupIcon from "@mui/icons-material/Group";
+import EventIcon from "@mui/icons-material/Event";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import SecurityIcon from "@mui/icons-material/Security";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { CustomAdminTile } from "./CustomAdminTile";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [guildMembersOpen, setGuildMembersOpen] = useState(false);
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [eventsOpen, setEventsOpen] = useState(false);
+  const [gamesOpen, setGamesOpen] = useState(false);
+  const [medalsOpen, setMedalsOpen] = useState(false);
+  const [ranksOpen, setRanksOpen] = useState(false);
+  const [raidsOpen, setRaidsOpen] = useState(false);
+  //const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -28,29 +43,24 @@ const AdminPanel: React.FC = () => {
   const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const handleSubmitSuccess = () => {
-    setSnackbarMessage("Guild member added successfully!");
+    // add dymanic message confirmations
+    setSnackbarMessage("Entity added successfully!");
+    // add dymanic message confirmations
+    setSnackbarMessage("Entity added successfully!");
     setSnackbarSeverity("success");
     setSnackbarOpen(true);
-    handleClose();
+    setOpen(false);
+    setOpen(false);
   };
 
   const handleSubmitError = (error: unknown) => {
-    setSnackbarMessage("Failed to create guild member. Please try again.");
+    setSnackbarMessage("Failed to create new entity. Please try again.");
+    setSnackbarMessage("Failed to create new entity. Please try again.");
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
   };
 
   const createGuildMemberForm = (
-    // <CustomForm
-    //   title="Add an event!"
-    //   apiEndpoint="/api/events"
-    //   onSubmitSuccess={handleSubmitSuccess}
-    //   onSubmitError={handleSubmitError}
-    // >
-    //   <CustomTextField id="name" label="Event Name" required />
-    //   <CustomTimeAndDateSelector id="eventStart" label="Event Start" />
-    //   <CustomTimeAndDateSelector id="eventEnd" label="Event End" />
-    // </CustomForm>
     <CustomForm
       title="Add a Guild Member"
       apiEndpoint="/api/guildmembers"
@@ -77,78 +87,286 @@ const AdminPanel: React.FC = () => {
     </CustomForm>
   );
 
+  const createEventForm = (
+    <CustomForm
+      title="Add an Event"
+      apiEndpoint="/api/events"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="name" label="Event Name" required />
+      <CustomTimeAndDateSelector id="eventStart" label="Start Date & Time" />
+      <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
+    </CustomForm>
+  );
+
+  const createGameForm = (
+    <CustomForm
+      title="Add a Game"
+      apiEndpoint="/api/games"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="name" label="Game Name" required />
+    </CustomForm>
+  );
+
+  const createMedalForm = (
+    <CustomForm
+      title="Add a Medal"
+      apiEndpoint="/api/medals"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="name" label="Medal Name" required />
+    </CustomForm>
+  );
+
+  const createRankForm = (
+    <CustomForm
+      title="Add a Rank"
+      apiEndpoint="/api/ranks"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="name" label="Rank Name" required />
+    </CustomForm>
+  );
+
+  const createRaidForm = (
+    <CustomForm
+      title="Add a Raid"
+      apiEndpoint="/api/raids"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="id" label="Raid Id" required />
+      <CustomTextField id="name" label="Raid Name" required />
+      <CustomTextField id="seasonRating" label="Season Rating" required />
+    </CustomForm>
+  );
+
+  // const createRaidCompletedForm = (
+  //   <CustomForm
+  //     title="Add a Completed Raid"
+  //     apiEndpoint="/api/raidscompleted/raid-bot-report"
+  //     onSubmitSuccess={handleSubmitSuccess}
+  //     onSubmitError={handleSubmitError}
+  //   >
+  //     <CustomTextField id="raidId" label="Raid Id" required />
+  //     <CustomTextField id="raidId" label="Raid Id" required />
+  //     <CustomTextField id="minecraftUsernames" label="Raid Id" required />
+  //     <CustomDropdown
+  //       id="minecraftUsernames"
+  //       label="Players"
+  //       apiEndpoint="/api/guildmembers"
+  //       multiple={true}
+  //     />
+  //   </CustomForm>
+  //);
+
   return (
-    <div style={{ padding: 32 }}>
-      <h2>Admin Panel</h2>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate("/events")}
-      >
-        Go to Event Table
-      </Button>
-      {/* ---------- Button that opens the dialog ---------- */}
-      <Button variant="contained" onClick={handleOpen}>
-        Add Guild Member
-      </Button>
-      {/* ---------- Dialog ---------- */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogContent dividers>
-          <CustomForm
-            title="Add a Guild Member"
-            apiEndpoint="/api/guildmembers"
-            onSubmitSuccess={handleSubmitSuccess}
-            onSubmitError={handleSubmitError}
-          >
-            <CustomTextField id="discordTag" label="Discord Tag" required />
-            <CustomTextField id="mainUsername" label="Main Username" required />
-            <CustomTextField id="uuid" label="Minecraft UUID" required />
-
-            <CustomDropdown id="id" label="Rank" apiEndpoint="/api/ranks" />
-            <CustomDateOnlySelector id="joinDate" label="Join Date" />
-          </CustomForm>
-        </DialogContent>
-      </Dialog>
-
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() => setGuildMembersOpen(true)}
-      >
-        View Guild Members
-      </Button>
-
-      <Dialog
-        open={guildMembersOpen}
-        onClose={() => setGuildMembersOpen(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogContent dividers>
-          <GenericAdminPage
-            apiGetEndpoint="/api/guildmembers/admin"
-            apiDeleteEndpoint="/api/guildmembers"
-            createForm={createGuildMemberForm}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{ width: "100%" }}
+    <Box
+      sx={{
+        p: 3,
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <Box sx={{ width: "100%", maxWidth: 1200 }}>
+        <Paper
+          sx={{
+            p: 4,
+            maxWidth: "100%",
+            bgcolor: "#501117ff",
+            color: "#efdddb",
+            borderRadius: 3,
+            boxShadow: 6,
+          }}
         >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </div>
+          <Typography
+            variant="h3"
+            textAlign="center"
+            gutterBottom
+            sx={{ fontWeight: 600 }}
+          >
+            Admin Panel
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            textAlign="center"
+            sx={{ opacity: 0.8, mb: 4 }}
+          >
+            Manage all Imperial guild information in one place.
+          </Typography>
+
+          {/* --- TILE GRID --- */}
+          <Grid
+            container
+            spacing={3}
+            justifyContent="center"
+            alignItems="stretch"
+            sx={{ mt: 1 }}
+          >
+            <CustomAdminTile
+              title="Guild Members"
+              description="View, edit, and manage all guild members and their details."
+              icon={<GroupIcon />}
+              onOpen={() => setGuildMembersOpen(true)}
+            />
+
+            <CustomAdminTile
+              title="Events"
+              description="Configure upcoming raid events, wars, and guild activities."
+              icon={<EventIcon />}
+              onOpen={() => setEventsOpen(true)}
+            />
+
+            <CustomAdminTile
+              title="Games"
+              description="Create, edit and delete supported games."
+              icon={<SportsEsportsIcon />}
+              onOpen={() => setGamesOpen(true)}
+            />
+
+            <CustomAdminTile
+              title="Medals"
+              description="Create and assign medals to recognize achievements."
+              icon={<MilitaryTechIcon />}
+              onOpen={() => setMedalsOpen(true)}
+            />
+
+            <CustomAdminTile
+              title="Ranks"
+              description="Create, edit and delete guild ranks."
+              icon={<WorkspacePremiumIcon />}
+              onOpen={() => setRanksOpen(true)}
+            />
+
+            <CustomAdminTile
+              title="Raids"
+              description="Create, edit and delete guild raids."
+              icon={<SecurityIcon />}
+              onOpen={() => setRaidsOpen(true)}
+            />
+          </Grid>
+
+          {/* ----- Validation ------ */}
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={4000}
+            onClose={handleSnackbarClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Alert
+              onClose={handleSnackbarClose}
+              severity={snackbarSeverity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
+        </Paper>
+
+        {/* ----- Dialogs ----- */}
+        <Dialog
+          open={guildMembersOpen}
+          onClose={() => setGuildMembersOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Guild Members"
+              apiGetEndpoint="/api/guildmembers/admin"
+              apiDeleteEndpoint="/api/guildmembers"
+              createForm={createGuildMemberForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={eventsOpen}
+          onClose={() => setEventsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Events"
+              apiGetEndpoint="/api/events"
+              apiDeleteEndpoint="/api/events"
+              createForm={createEventForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={gamesOpen}
+          onClose={() => setGamesOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Games"
+              apiGetEndpoint="/api/games"
+              apiDeleteEndpoint="/api/games"
+              createForm={createGameForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={medalsOpen}
+          onClose={() => setMedalsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Medals"
+              apiGetEndpoint="/api/medals"
+              apiDeleteEndpoint="/api/medals"
+              createForm={createMedalForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={ranksOpen}
+          onClose={() => setRanksOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Ranks"
+              apiGetEndpoint="/api/ranks"
+              apiDeleteEndpoint="/api/ranks"
+              createForm={createRankForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={raidsOpen}
+          onClose={() => setRaidsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Raids"
+              apiGetEndpoint="/api/raids"
+              apiDeleteEndpoint="/api/raids"
+              createForm={createRaidForm}
+            />
+          </DialogContent>
+        </Dialog>
+      </Box>
+    </Box>
   );
 };
 

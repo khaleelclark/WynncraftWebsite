@@ -41,7 +41,14 @@ namespace ImperialBackend.Controllers
             _context.Raids.Add(newRaid);
             _context.SaveChanges();
 
-            return Ok(newRaid);
+            return Ok(
+                new RaidGetDTO
+                {
+                    Id = newRaid.RaidId,
+                    Name = newRaid.RaidName,
+                    SeasonRating = newRaid.SeasonRating,
+                }
+            );
         }
 
         [HttpPut("{id}")]
@@ -55,7 +62,14 @@ namespace ImperialBackend.Controllers
             existingRaid.SeasonRating = raid.SeasonRating;
 
             _context.SaveChanges();
-            return NoContent();
+            return Ok(
+                new RaidGetDTO
+                {
+                    Id = existingRaid.RaidId,
+                    Name = existingRaid.RaidName,
+                    SeasonRating = existingRaid.SeasonRating,
+                }
+            );
         }
 
         [HttpDelete("{id}")]
@@ -64,6 +78,13 @@ namespace ImperialBackend.Controllers
             var raid = _context.Raids.Find(id);
             if (raid == null)
                 return NotFound();
+
+            var refs = _context.RaidsCompleted.Count(rc => rc.RaidId == id);
+            if (refs > 0)
+                return Conflict(
+                    $"Raid {id} can't be deleted because {refs} RaidsCompleted rows reference it."
+                );
+
             _context.Raids.Remove(raid);
             _context.SaveChanges();
             return NoContent();

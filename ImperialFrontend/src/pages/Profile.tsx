@@ -34,7 +34,7 @@ const Profile: React.FC = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
   useEffect(() => {
-    axios.get(`/api/guildmembers/${id}`).then((res) => {
+    axios.get(`/api/guildmembers/${id}`).then(res => {
       if (!res.data) {
         return setProfile(null);
       } else {
@@ -137,7 +137,11 @@ const Profile: React.FC = () => {
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Hours Played
               </Typography>
-              <Typography variant="body1">{profile.hoursPlayed}</Typography>
+              <Typography variant="body1">
+                {profile.hoursPlayed != null && profile.hoursPlayed >= 0
+                  ? profile.hoursPlayed
+                  : "Private"}
+              </Typography>
             </Grid>
 
             <Grid>
@@ -145,15 +149,6 @@ const Profile: React.FC = () => {
                 Wars Completed
               </Typography>
               <Typography variant="body1">{profile.warsCompleted}</Typography>
-            </Grid>
-
-            <Grid>
-              <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Weeklies Completed
-              </Typography>
-              <Typography variant="body1">
-                {profile.weekliesCompleted}
-              </Typography>
             </Grid>
           </Grid>
 
@@ -176,7 +171,7 @@ const Profile: React.FC = () => {
             </Typography>
             {profile.games && profile.games.length > 0 ? (
               <Stack direction="row" flexWrap="wrap" gap={1} mt={1}>
-                {profile.games.map((game) => (
+                {profile.games.map(game => (
                   <Chip
                     key={game}
                     label={game}
@@ -202,7 +197,7 @@ const Profile: React.FC = () => {
             </Typography>
             {profile.medals && profile.medals.length > 0 ? (
               <Stack direction="row" flexWrap="wrap" gap={1} mt={1}>
-                {profile.medals.map((medal) => (
+                {profile.medals.map(medal => (
                   <Chip
                     key={medal}
                     label={medal}
