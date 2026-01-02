@@ -6,7 +6,7 @@ interface LeaderboardEntry {
   minecraftUsername: string;
   uuid?: string;
   warsCompleted: number;
-  hoursPlayed: number;
+  hoursPlayed?: number | null;
   raidsCompleted: number;
   lastSynced?: string | null; // ✅
 }
@@ -54,7 +54,17 @@ const columns: GridColDef[] = [
   },
   { field: "raidsCompleted", headerName: "Raids", width: 120, type: "number" },
   { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
-  { field: "hoursPlayed", headerName: "Hours", width: 120, type: "number" },
+  {
+    field: "hoursPlayed",
+    headerName: "Hours",
+    width: 120,
+    type: "number",
+    //render cell to show private if hours played
+    renderCell: params => {
+      const hpValue = params.row.hoursPlayed;
+      return hpValue != null && hpValue >= 0 ? hpValue : "Private";
+    },
+  },
   {
     field: "lastSynced",
     headerName: "Last Updated",

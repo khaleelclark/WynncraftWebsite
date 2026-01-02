@@ -138,7 +138,7 @@ const Profile: React.FC = () => {
                 Hours Played
               </Typography>
               <Typography variant="body1">
-                {profile.hoursPlayed && profile.hoursPlayed >= 0
+                {profile.hoursPlayed != null && profile.hoursPlayed >= 0
                   ? profile.hoursPlayed
                   : "Private"}
               </Typography>
