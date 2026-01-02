@@ -131,16 +131,6 @@ const App: React.FC = () => {
                 Admin Panel
               </Link>
             )}
-            <Link
-              to="/form"
-              style={{
-                color: "#efdddb",
-                textDecoration: "none",
-                fontWeight: 600,
-              }}
-            >
-              Custom Form
-            </Link>
           </Box>
           <Box
             sx={{
@@ -202,7 +192,6 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/form" element={<FormTest />} />
           <Route path="/events" element={<EventTablePage />} />
         </Routes>
       </BrowserRouter>
