@@ -20,6 +20,9 @@ import EventIcon from "@mui/icons-material/Event";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import SecurityIcon from "@mui/icons-material/Security";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { CustomAdminTile } from "./CustomAdminTile";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +33,7 @@ const AdminPanel: React.FC = () => {
   const [medalsOpen, setMedalsOpen] = useState(false);
   const [ranksOpen, setRanksOpen] = useState(false);
   const [raidsOpen, setRaidsOpen] = useState(false);
+  //const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -125,6 +129,38 @@ const AdminPanel: React.FC = () => {
     </CustomForm>
   );
 
+  const createRaidForm = (
+    <CustomForm
+      title="Add a Raid"
+      apiEndpoint="/api/raids"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomTextField id="id" label="Raid Id" required />
+      <CustomTextField id="name" label="Raid Name" required />
+      <CustomTextField id="seasonRating" label="Season Rating" required />
+    </CustomForm>
+  );
+
+  // const createRaidCompletedForm = (
+  //   <CustomForm
+  //     title="Add a Completed Raid"
+  //     apiEndpoint="/api/raidscompleted/raid-bot-report"
+  //     onSubmitSuccess={handleSubmitSuccess}
+  //     onSubmitError={handleSubmitError}
+  //   >
+  //     <CustomTextField id="raidId" label="Raid Id" required />
+  //     <CustomTextField id="raidId" label="Raid Id" required />
+  //     <CustomTextField id="minecraftUsernames" label="Raid Id" required />
+  //     <CustomDropdown
+  //       id="minecraftUsernames"
+  //       label="Players"
+  //       apiEndpoint="/api/guildmembers"
+  //       multiple={true}
+  //     />
+  //   </CustomForm>
+  //);
+
   return (
     <Box
       sx={{
@@ -144,7 +180,12 @@ const AdminPanel: React.FC = () => {
             boxShadow: 6,
           }}
         >
-          <Typography variant="h3" textAlign="center" gutterBottom>
+          <Typography
+            variant="h3"
+            textAlign="center"
+            gutterBottom
+            sx={{ fontWeight: 600 }}
+          >
             Admin Panel
           </Typography>
           <Typography
@@ -152,303 +193,58 @@ const AdminPanel: React.FC = () => {
             textAlign="center"
             sx={{ opacity: 0.8, mb: 4 }}
           >
-            Manage your guild data, events, and rankings in one place.
+            Manage all Imperial guild information in one place.
           </Typography>
 
           {/* --- TILE GRID --- */}
           <Grid
             container
             spacing={3}
-            justifyContent="center" // --- center the whole grid
+            justifyContent="center"
             alignItems="stretch"
-            sx={{
-              mt: 1,
-            }}
+            sx={{ mt: 1 }}
           >
-            {/* Guild Members */}
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
-              <Paper
-                onClick={() => setGuildMembersOpen(true)}
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#82172e",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  boxShadow: 3,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 8,
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.2,
-                      borderRadius: "999px",
-                      bgcolor: "rgba(0,0,0,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <GroupIcon />
-                  </Box>
-                  <Typography variant="h5">Guild Members</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
-                  View, edit, and manage all guild members and their details.
-                </Typography>
+            <CustomAdminTile
+              title="Guild Members"
+              description="View, edit, and manage all guild members and their details."
+              icon={<GroupIcon />}
+              onOpen={() => setGuildMembersOpen(true)}
+            />
 
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    alignSelf: "flex-start",
-                    bgcolor: "#efdddb",
-                    color: "#501117ff",
-                    "&:hover": {
-                      bgcolor: "#f6e8e6",
-                    },
-                  }}
-                >
-                  Open
-                </Button>
-              </Paper>
-            </Grid>
+            <CustomAdminTile
+              title="Events"
+              description="Configure upcoming raid events, wars, and guild activities."
+              icon={<EventIcon />}
+              onOpen={() => setEventsOpen(true)}
+            />
 
-            {/* Events */}
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
-              <Paper
-                onClick={() => setEventsOpen(true)}
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#82172e",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  boxShadow: 3,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 8,
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.2,
-                      borderRadius: "999px",
-                      bgcolor: "rgba(0,0,0,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <EventIcon />
-                  </Box>
-                  <Typography variant="h5">Events</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
-                  Configure upcoming raids, wars, and guild activities.
-                </Typography>
+            <CustomAdminTile
+              title="Games"
+              description="Create, edit and delete supported games."
+              icon={<SportsEsportsIcon />}
+              onOpen={() => setGamesOpen(true)}
+            />
 
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    alignSelf: "flex-start",
-                    bgcolor: "#efdddb",
-                    color: "#501117ff",
-                    "&:hover": {
-                      bgcolor: "#f6e8e6",
-                    },
-                  }}
-                >
-                  Open
-                </Button>
-              </Paper>
-            </Grid>
+            <CustomAdminTile
+              title="Medals"
+              description="Create and assign medals to recognize achievements."
+              icon={<MilitaryTechIcon />}
+              onOpen={() => setMedalsOpen(true)}
+            />
 
-            {/* Games */}
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
-              <Paper
-                onClick={() => setGamesOpen(true)}
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#82172e",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  boxShadow: 3,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 8,
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.2,
-                      borderRadius: "999px",
-                      bgcolor: "rgba(0,0,0,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <SportsEsportsIcon />
-                  </Box>
-                  <Typography variant="h5">Games</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
-                  Manage supported games and related configurations.
-                </Typography>
+            <CustomAdminTile
+              title="Ranks"
+              description="Create, edit and delete guild ranks."
+              icon={<WorkspacePremiumIcon />}
+              onOpen={() => setRanksOpen(true)}
+            />
 
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    alignSelf: "flex-start",
-                    bgcolor: "#efdddb",
-                    color: "#501117ff",
-                    "&:hover": {
-                      bgcolor: "#f6e8e6",
-                    },
-                  }}
-                >
-                  Open
-                </Button>
-              </Paper>
-            </Grid>
-
-            {/* Medals */}
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
-              <Paper
-                onClick={() => setMedalsOpen(true)}
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#82172e",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  boxShadow: 3,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 8,
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.2,
-                      borderRadius: "999px",
-                      bgcolor: "rgba(0,0,0,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <MilitaryTechIcon />
-                  </Box>
-                  <Typography variant="h5">Medals</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
-                  Create and assign medals to recognize achievements.
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    alignSelf: "flex-start",
-                    bgcolor: "#efdddb",
-                    color: "#501117ff",
-                    "&:hover": {
-                      bgcolor: "#f6e8e6",
-                    },
-                  }}
-                >
-                  Open
-                </Button>
-              </Paper>
-            </Grid>
-
-            {/* Ranks */}
-            <Grid size={{ xs: 12, sm: 6, md: 6, lg: 4, xl: 3 }} display="flex">
-              <Paper
-                onClick={() => setRanksOpen(true)}
-                sx={{
-                  p: 3,
-                  height: "100%",
-                  borderRadius: 3,
-                  bgcolor: "#82172e",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "transform 0.15s ease, box-shadow 0.15s ease",
-                  boxShadow: 3,
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: 8,
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                  <Box
-                    sx={{
-                      mr: 2,
-                      p: 1.2,
-                      borderRadius: "999px",
-                      bgcolor: "rgba(0,0,0,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <WorkspacePremiumIcon />
-                  </Box>
-                  <Typography variant="h5">Ranks</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ opacity: 0.85, flexGrow: 1 }}>
-                  Define and edit guild ranks and permissions.
-                </Typography>
-
-                <Button
-                  variant="contained"
-                  sx={{
-                    mt: 2,
-                    alignSelf: "flex-start",
-                    bgcolor: "#efdddb",
-                    color: "#501117ff",
-                    "&:hover": {
-                      bgcolor: "#f6e8e6",
-                    },
-                  }}
-                >
-                  Open
-                </Button>
-              </Paper>
-            </Grid>
+            <CustomAdminTile
+              title="Raids"
+              description="Create, edit and delete guild raids."
+              icon={<SecurityIcon />}
+              onOpen={() => setRaidsOpen(true)}
+            />
           </Grid>
 
           {/* ----- Validation ------ */}
@@ -546,6 +342,22 @@ const AdminPanel: React.FC = () => {
               apiGetEndpoint="/api/ranks"
               apiDeleteEndpoint="/api/ranks"
               createForm={createRankForm}
+            />
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={raidsOpen}
+          onClose={() => setRaidsOpen(false)}
+          maxWidth="lg"
+          fullWidth
+        >
+          <DialogContent dividers>
+            <GenericAdminPage
+              label="Raids"
+              apiGetEndpoint="/api/raids"
+              apiDeleteEndpoint="/api/raids"
+              createForm={createRaidForm}
             />
           </DialogContent>
         </Dialog>
