@@ -2,7 +2,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { ReactNode, useEffect } from "react";
 import Box from "@mui/material/Box";
-import axios from "axios";
+import { adminApi } from "../api";
 import { useState } from "react";
 import { CustomFormContext } from "../CustomFormContext";
 import Button from "@mui/material/Button";
@@ -69,11 +69,11 @@ export const CustomForm = ({
     const flattenFormValues = flattenObject(formValues);
     try {
       if (isPost) {
-        await axios.post(apiEndpoint, flattenFormValues).then(res => {
+        await adminApi.post(apiEndpoint, flattenFormValues).then(res => {
           if (changeRecordsCallback) changeRecordsCallback(res.data);
         });
       } else {
-        await axios
+        await adminApi
           .put(`${apiEndpoint}/${formValues.id}`, flattenFormValues)
           .then(res => {
             if (changeRecordsCallback) changeRecordsCallback(res.data);
