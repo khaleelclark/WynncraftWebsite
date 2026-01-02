@@ -137,7 +137,11 @@ const Profile: React.FC = () => {
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Hours Played
               </Typography>
-              <Typography variant="body1">{profile.hoursPlayed}</Typography>
+              <Typography variant="body1">
+                {profile.hoursPlayed && profile.hoursPlayed >= 0
+                  ? profile.hoursPlayed
+                  : "Private"}
+              </Typography>
             </Grid>
 
             <Grid>
