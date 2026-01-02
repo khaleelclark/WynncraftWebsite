@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import AddEvent from "./pages/AddEvent";
 import EventTablePage from "./pages/EventTablePage";
+import FormTest from "./pages/FormTest";
 
 import { useUser } from "./auth/UserContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
@@ -131,6 +132,16 @@ const App: React.FC = () => {
                 Admin Panel
               </Link>
             )}
+            <Link
+              to="/form"
+              style={{
+                color: "#efdddb",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
+              Custom Form
+            </Link>
           </Box>
           <Box
             sx={{
@@ -192,6 +203,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/form" element={<FormTest />} />
           <Route path="/events" element={<EventTablePage />} />
         </Routes>
       </BrowserRouter>
