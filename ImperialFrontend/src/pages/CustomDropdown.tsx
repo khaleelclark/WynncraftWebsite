@@ -4,7 +4,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import { useCustomFormContext } from "../CustomFormContext";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { adminApi } from "../api";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 
@@ -53,7 +53,7 @@ export const CustomDropdown = ({
   const [dropdownOptions, setDropdownOptions] = useState([]);
 
   useEffect(() => {
-    axios.get(apiEndpoint).then(res => {
+    adminApi.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
   }, []);

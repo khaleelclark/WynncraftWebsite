@@ -9,7 +9,7 @@ import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 import { GridColDef } from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
-import axios from "axios";
+import { adminApi } from "../api";
 import { ReactElement, useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -36,7 +36,7 @@ export const GenericAdminPage = ({
   const [autofillData, setAutofillData] = useState({});
 
   useEffect(() => {
-    axios.get(apiGetEndpoint).then(res => {
+    adminApi.get(apiGetEndpoint).then(res => {
       setMembers(res.data);
     });
   }, []);
@@ -154,7 +154,7 @@ export const GenericAdminPage = ({
               </Button>
               <Button
                 onClick={() => {
-                  axios
+                  adminApi
                     .delete(`${apiDeleteEndpoint}/${idToDelete}`)
                     .then(() => {
                       setMembers(prev => prev.filter(r => r.id !== idToDelete));
