@@ -27,13 +27,18 @@ const GuildMemberList: React.FC = () => {
   const columns: GridColDef[] = [
     {
       field: "id",
-      headerName: "ID",
-      width: 60,
+      headerName: "Id",
+      minWidth: 70,
+      flex: 0.4,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "name",
       headerName: "Main Username",
-      width: 220,
+      minWidth: 200,
+      flex: 1.4,
+      headerAlign: "center",
       renderCell: (params: any) => (
         <span
           style={{ display: "flex", alignItems: "center" }}
@@ -44,8 +49,8 @@ const GuildMemberList: React.FC = () => {
               src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
               alt="Skin"
               style={{
-                width: 32,
-                height: 32,
+                width: 40,
+                height: 40,
                 marginRight: 8,
                 verticalAlign: "middle",
                 borderRadius: 4,
@@ -56,18 +61,46 @@ const GuildMemberList: React.FC = () => {
         </span>
       ),
     },
-    { field: "discordTag", headerName: "Discord Tag", width: 180 },
+    {
+      field: "discordTag",
+      headerName: "Discord Tag",
+      minWidth: 180,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+    },
     {
       field: "minecraftUsername",
       headerName: "Minecraft Username",
-      width: 180,
+      minWidth: 240,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
     },
-    { field: "rankName", headerName: "Rank", width: 150 },
-    { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
+    {
+      field: "rankName",
+      headerName: "Rank",
+      minWidth: 150,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "wynncraftRank",
+      headerName: "Wynncraft Rank",
+      minWidth: 180,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params: any) => params.value || "N/A",
+    },
     {
       field: "profile",
       headerName: "Profile",
-      width: 120,
+      minWidth: 120,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
       sortable: false,
       renderCell: (params: any) => (
         <Button
@@ -98,7 +131,12 @@ const GuildMemberList: React.FC = () => {
         alignItems: "center",
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 1100 }}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { xl: 1400, lg: 1200, md: "100%" },
+        }}
+      >
         <Typography
           sx={{
             color: "#efdddb",
@@ -114,15 +152,27 @@ const GuildMemberList: React.FC = () => {
           rows={members}
           columns={columns}
           getRowId={row => row.id}
+          rowHeight={60}
+          columnHeaderHeight={60}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },
           }}
           disableRowSelectionOnClick
           sx={{
+            fontSize: "1rem",
             backgroundColor: "#6A001B",
             color: "#F7F2F5",
             border: "1px solid #7A1C69",
+            "& .MuiDataGrid-virtualScroller": {
+              backgroundColor: "#220c0e",
+            },
+            "& .MuiDataGrid-filler": {
+              backgroundColor: "#220c0e",
+            },
+            "& .MuiDataGrid-scrollbarFiller": {
+              backgroundColor: "#82172e",
+            },
             [`.MuiDataGrid-columnHeaders`]: {
               backgroundColor: "#82172e",
               color: "#efdddb",
@@ -138,6 +188,17 @@ const GuildMemberList: React.FC = () => {
             [`.MuiDataGrid-footerContainer`]: {
               backgroundColor: "#7A1C69",
               color: "#efdddb",
+            },
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+              py: 2,
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              textAlign: "center",
+              width: "100%",
+              py: 2,
+              px: 2,
             },
           }}
         />
