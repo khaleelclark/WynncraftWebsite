@@ -54,7 +54,9 @@ export const GenericAdminPage = ({
               .replace(/([A-Z])/g, " $1")
               .replace(/^./, c => c.toUpperCase())
               .trim(),
-            width: 150,
+            minWidth: 150,
+            flex: 1,
+
             // Custom render logic for the cell
             valueGetter: (value: any) => {
               if (Array.isArray(value)) {
@@ -72,7 +74,7 @@ export const GenericAdminPage = ({
           {
             field: "actions",
             headerName: "Actions",
-            width: 100,
+            width: 120,
             renderCell: (params: any) => (
               <>
                 <IconButton
@@ -266,12 +268,15 @@ export const GenericAdminPage = ({
               rows={members}
               columns={columns}
               getRowId={row => row.id}
+              rowHeight={60}
+              columnHeaderHeight={60}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },
               }}
               disableRowSelectionOnClick
               sx={{
+                fontSize: "1rem",
                 backgroundColor: "#6A001B",
                 color: "#F7F2F5",
                 border: "1px solid #7A1C69",
@@ -290,6 +295,17 @@ export const GenericAdminPage = ({
                 [`.MuiDataGrid-footerContainer`]: {
                   backgroundColor: "#7A1C69",
                   color: "#efdddb",
+                },
+                "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                  py: 2,
+                },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  textAlign: "center",
+                  width: "100%",
+                  py: 2,
+                  px: 2,
                 },
               }}
             />
