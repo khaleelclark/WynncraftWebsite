@@ -28,7 +28,7 @@ const GuildMemberList: React.FC = () => {
     {
       field: "id",
       headerName: "Id",
-      minWidth: 70,
+      minWidth: 75,
       flex: 0.4,
       align: "center",
       headerAlign: "center",
@@ -97,7 +97,7 @@ const GuildMemberList: React.FC = () => {
     {
       field: "profile",
       headerName: "Profile",
-      minWidth: 120,
+      minWidth: 125,
       flex: 0.7,
       align: "center",
       headerAlign: "center",
@@ -152,8 +152,8 @@ const GuildMemberList: React.FC = () => {
           rows={members}
           columns={columns}
           getRowId={row => row.id}
-          rowHeight={60}
-          columnHeaderHeight={60}
+          rowHeight={70}
+          columnHeaderHeight={70}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },

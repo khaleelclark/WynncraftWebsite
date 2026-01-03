@@ -10,6 +10,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Grid from "@mui/material/Grid";
 
 interface LeaderboardEntry {
   id: number;
@@ -74,7 +75,7 @@ const Leaderboard: React.FC = () => {
     {
       field: "raidsCompleted",
       headerName: "Raids",
-      minWidth: 90,
+      minWidth: 150,
       flex: 0.6,
       align: "center",
       headerAlign: "center",
@@ -83,7 +84,7 @@ const Leaderboard: React.FC = () => {
     {
       field: "warsCompleted",
       headerName: "Wars",
-      minWidth: 90,
+      minWidth: 150,
       flex: 0.6,
       align: "center",
       headerAlign: "center",
@@ -92,7 +93,7 @@ const Leaderboard: React.FC = () => {
     {
       field: "hoursPlayed",
       headerName: "Hours Played",
-      minWidth: 110,
+      minWidth: 180,
       flex: 0.7,
       align: "center",
       headerAlign: "center",
@@ -105,7 +106,7 @@ const Leaderboard: React.FC = () => {
     {
       field: "lastSynced",
       headerName: "Last Updated",
-      minWidth: 150,
+      minWidth: 200,
       flex: 0.9,
       align: "center",
       headerAlign: "center",
@@ -163,20 +164,54 @@ const Leaderboard: React.FC = () => {
       : `${selectedEvent?.name} Leaderboard`;
 
   const pickerSx = {
+    width: "100%",
+
+    // Input root
     "& .MuiInputBase-root": {
       backgroundColor: "#511220",
-      color: "#efdddb",
+      color: "#ffffff", // ⬅️ text color
     },
+
+    // The actual text inside the input
+    "& .MuiInputBase-input": {
+      color: "#ffffff", // ⬅️ THIS is the missing piece
+    },
+
+    // Label (Start / End)
+    "& .MuiInputLabel-root": {
+      color: "#ffffff",
+    },
+
+    // Label when focused
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: "#ffffff",
+    },
+
+    // Outline
     "& .MuiOutlinedInput-notchedOutline": {
       borderColor: "#bc511c",
     },
-    "& .MuiInputLabel-root": {
-      color: "#efdddb",
+
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#efdddb",
     },
+
+    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#efdddb",
+    },
+
+    // Calendar icon
     "& .MuiSvgIcon-root": {
-      color: "#efdddb",
+      color: "#ffffff",
     },
-  } as const;
+
+    // Disabled state (important!)
+    "& .MuiInputBase-input.Mui-disabled": {
+      color: "#ffffff",
+      WebkitTextFillColor: "#ffffff", // 👈 REQUIRED for Chrome
+      opacity: 1, // prevent dimming
+    },
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -211,31 +246,34 @@ const Leaderboard: React.FC = () => {
           <EventSelector onSelect={setSelectedEvent} />
 
           {selectedEvent?.id === -1 ? (
-            <Typography sx={{ my: 2, color: "#efdddb", textAlign: "center" }}>
-              Date Range: <span style={{ fontWeight: "bold" }}>All Time</span>
-            </Typography>
+            <Typography
+              sx={{ my: 2, color: "#efdddb", textAlign: "center" }}
+            ></Typography>
           ) : (
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{ my: 2, flexWrap: "wrap", justifyContent: "center" }}
-            >
-              <DateTimePicker
-                label="Start"
-                value={startDateTime}
-                onChange={setStartDateTime}
-                disabled={selectedEvent?.id !== -2}
-                sx={pickerSx}
-              />
-              <DateTimePicker
-                label="End"
-                value={endDateTime}
-                onChange={setEndDateTime}
-                minDateTime={startDateTime ?? undefined}
-                disabled={selectedEvent?.id !== -2}
-                sx={pickerSx}
-              />
-            </Stack>
+            <Box sx={{ my: 2 }}>
+              <Grid container spacing={2} justifyContent="center">
+                <Grid>
+                  <DateTimePicker
+                    label="Start"
+                    value={startDateTime}
+                    onChange={setStartDateTime}
+                    disabled={selectedEvent?.id !== -2}
+                    sx={{ ...pickerSx, width: "100%" }}
+                  />
+                </Grid>
+
+                <Grid>
+                  <DateTimePicker
+                    label="End"
+                    value={endDateTime}
+                    onChange={setEndDateTime}
+                    minDateTime={startDateTime ?? undefined}
+                    disabled={selectedEvent?.id !== -2}
+                    sx={{ ...pickerSx, width: "100%" }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
           )}
 
           <Box sx={{ mt: 3 }}>
@@ -290,7 +328,6 @@ const Leaderboard: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   py: 2,
-                  px: 2,
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   textAlign: "center",
