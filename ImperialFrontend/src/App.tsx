@@ -8,9 +8,6 @@ import AdminPanel from "./pages/AdminPanel";
 import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
-import AddEvent from "./pages/AddEvent";
-import EventTablePage from "./pages/EventTablePage";
-
 import { useUser } from "./auth/UserContext";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import React from "react";
@@ -183,7 +180,6 @@ const App: React.FC = () => {
 
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/add-event" element={<AddEvent />} />
           <Route
             path="/admin"
             element={
@@ -192,7 +188,6 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/events" element={<EventTablePage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
