@@ -16,6 +16,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CircularProgress from "@mui/material/CircularProgress";
 import React from "react";
 import { CustomFormProps } from "./CustomForm";
+import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -122,6 +124,13 @@ export const GenericAdminPage = ({
     isPost: false,
   });
 
+  const blockBackdropAndEscClose =
+    (setter: React.Dispatch<React.SetStateAction<boolean>>) =>
+    (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+      if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+      setter(false);
+    };
+
   const el = (
     <>
       {members ? (
@@ -137,7 +146,8 @@ export const GenericAdminPage = ({
         >
           <Dialog
             open={openDeletionDialog}
-            onClose={() => setOpenDeletionDialog(false)}
+            onClose={blockBackdropAndEscClose(setOpenDeletionDialog)}
+            disableEscapeKeyDown
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
@@ -183,20 +193,64 @@ export const GenericAdminPage = ({
             </Button>
             <Dialog
               open={openCreationDialog}
-              onClose={() => setOpenCreationDialog(false)}
+              onClose={blockBackdropAndEscClose(setOpenCreationDialog)}
+              disableEscapeKeyDown
               maxWidth="sm"
               fullWidth
             >
-              <DialogContent dividers>{updatedCreateForm}</DialogContent>
+              <DialogContent sx={{ position: "relative", pt: 6 }}>
+                <Tooltip title="Close window" arrow>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => setOpenCreationDialog(false)}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      color: "#efdddb",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.08)",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {updatedCreateForm}
+              </DialogContent>
             </Dialog>
+
             <Dialog
               open={openUpdateDialog}
-              onClose={() => setOpenUpdateDialog(false)}
+              onClose={blockBackdropAndEscClose(setOpenUpdateDialog)}
+              disableEscapeKeyDown
               maxWidth="sm"
               fullWidth
             >
-              <DialogContent dividers>{updatedUpdateForm}</DialogContent>
+              <DialogContent sx={{ position: "relative", pt: 6 }}>
+                <Tooltip title="Close window" arrow>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => setOpenUpdateDialog(false)}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      color: "#efdddb",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.08)",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {updatedUpdateForm}
+              </DialogContent>
             </Dialog>
+
             <Typography
               sx={{
                 color: "#efdddb",

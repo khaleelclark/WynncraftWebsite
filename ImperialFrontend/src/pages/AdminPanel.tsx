@@ -23,6 +23,9 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import SecurityIcon from "@mui/icons-material/Security";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { CustomAdminTile } from "./CustomAdminTile";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -59,6 +62,13 @@ const AdminPanel: React.FC = () => {
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
   };
+
+  const blockBackdropAndEscClose =
+    (setter: React.Dispatch<React.SetStateAction<boolean>>) =>
+    (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+      if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+      setter(false);
+    };
 
   const createGuildMemberForm = (
     <CustomForm
@@ -272,11 +282,26 @@ const AdminPanel: React.FC = () => {
         {/* ----- Dialogs ----- */}
         <Dialog
           open={guildMembersOpen}
-          onClose={() => setGuildMembersOpen(false)}
+          onClose={blockBackdropAndEscClose(setGuildMembersOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setGuildMembersOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Guild Members"
               apiGetEndpoint="/api/guildmembers/admin"
@@ -288,11 +313,26 @@ const AdminPanel: React.FC = () => {
 
         <Dialog
           open={eventsOpen}
-          onClose={() => setEventsOpen(false)}
+          onClose={blockBackdropAndEscClose(setEventsOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setEventsOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Events"
               apiGetEndpoint="/api/events"
@@ -304,11 +344,26 @@ const AdminPanel: React.FC = () => {
 
         <Dialog
           open={gamesOpen}
-          onClose={() => setGamesOpen(false)}
+          onClose={blockBackdropAndEscClose(setGamesOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setGamesOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Games"
               apiGetEndpoint="/api/games"
@@ -320,11 +375,26 @@ const AdminPanel: React.FC = () => {
 
         <Dialog
           open={medalsOpen}
-          onClose={() => setMedalsOpen(false)}
+          onClose={blockBackdropAndEscClose(setMedalsOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setMedalsOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Medals"
               apiGetEndpoint="/api/medals"
@@ -336,11 +406,26 @@ const AdminPanel: React.FC = () => {
 
         <Dialog
           open={ranksOpen}
-          onClose={() => setRanksOpen(false)}
+          onClose={blockBackdropAndEscClose(setRanksOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setRanksOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Ranks"
               apiGetEndpoint="/api/ranks"
@@ -352,11 +437,26 @@ const AdminPanel: React.FC = () => {
 
         <Dialog
           open={raidsOpen}
-          onClose={() => setRaidsOpen(false)}
+          onClose={blockBackdropAndEscClose(setRaidsOpen)}
+          disableEscapeKeyDown
           maxWidth="lg"
           fullWidth
         >
-          <DialogContent dividers>
+          <DialogContent sx={{ position: "relative", pt: 6 }}>
+            <Tooltip title="Close window" arrow>
+              <IconButton
+                aria-label="close"
+                onClick={() => setRaidsOpen(false)}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: "#efdddb",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
             <GenericAdminPage
               label="Raids"
               apiGetEndpoint="/api/raids"
