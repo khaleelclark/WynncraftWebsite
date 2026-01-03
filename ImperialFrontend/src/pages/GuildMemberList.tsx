@@ -5,6 +5,7 @@ import axios from "axios";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 
 interface GuildMember {
   id: number;
@@ -40,25 +41,32 @@ const GuildMemberList: React.FC = () => {
       flex: 1.4,
       headerAlign: "center",
       renderCell: (params: any) => (
-        <span
-          style={{ display: "flex", alignItems: "center" }}
+        <Box
           onClick={() => navigate(`/profile/${params.row.id}`)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            cursor: "pointer",
+            gap: 1,
+            "&:hover": {
+              color: "text.secondary",
+            },
+          }}
         >
           {params.row.uuid && (
-            <img
+            <Box
+              component="img"
               src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
               alt="Skin"
-              style={{
-                width: 40,
-                height: 40,
-                marginRight: 8,
-                verticalAlign: "middle",
-                borderRadius: 4,
+              sx={{
+                width: 45,
+                height: 45,
+                borderRadius: 0.5,
               }}
             />
           )}
-          <span>{params.row.name}</span>
-        </span>
+          <Box component="span">{params.row.name}</Box>
+        </Box>
       ),
     },
     {
@@ -104,15 +112,14 @@ const GuildMemberList: React.FC = () => {
       sortable: false,
       renderCell: (params: any) => (
         <Button
-          style={{
-            background: "#6A001B",
-            color: "#efdddb",
-            border: "none",
-            borderRadius: 4,
-            padding: "4px 12px",
-            cursor: "pointer",
-          }}
+          variant="contained"
+          color="primary"
+          size="small"
           onClick={() => navigate(`/profile/${params.row.id}`)}
+          sx={{
+            borderRadius: 1,
+            px: 2,
+          }}
         >
           View
         </Button>
@@ -123,9 +130,11 @@ const GuildMemberList: React.FC = () => {
   return (
     <Box
       sx={{
-        padding: 3,
-        background: "#220c0e",
+        p: 3,
+        bgcolor: "background.default",
+        color: "text.primary",
         width: "100%",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -137,17 +146,26 @@ const GuildMemberList: React.FC = () => {
           maxWidth: { xl: 1400, lg: 1200, md: "100%" },
         }}
       >
-        <Typography
+        <Paper
           sx={{
-            color: "#efdddb",
-            marginBottom: 3,
-            fontWeight: 600,
-            fontSize: 30,
-            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 3,
+            mb: 3,
           }}
         >
-          Imperial Guild Members
-        </Typography>
+          <Typography
+            variant="h3"
+            sx={{
+              textAlign: "center",
+              color: "text.primary",
+              fontWeight: 800,
+            }}
+          >
+            ~ Imperial Guild Members ~
+          </Typography>
+        </Paper>
         <DataGrid
           rows={members}
           columns={columns}
@@ -161,34 +179,6 @@ const GuildMemberList: React.FC = () => {
           disableRowSelectionOnClick
           sx={{
             fontSize: "1rem",
-            backgroundColor: "#6A001B",
-            color: "#F7F2F5",
-            border: "1px solid #7A1C69",
-            "& .MuiDataGrid-virtualScroller": {
-              backgroundColor: "#220c0e",
-            },
-            "& .MuiDataGrid-filler": {
-              backgroundColor: "#220c0e",
-            },
-            "& .MuiDataGrid-scrollbarFiller": {
-              backgroundColor: "#82172e",
-            },
-            [`.MuiDataGrid-columnHeaders`]: {
-              backgroundColor: "#82172e",
-              color: "#efdddb",
-            },
-            [`.MuiDataGrid-row`]: {
-              "&:nth-of-type(even)": {
-                backgroundColor: "#220c0e",
-              },
-              "&:nth-of-type(odd)": {
-                backgroundColor: "#3C002F",
-              },
-            },
-            [`.MuiDataGrid-footerContainer`]: {
-              backgroundColor: "#7A1C69",
-              color: "#efdddb",
-            },
             "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",

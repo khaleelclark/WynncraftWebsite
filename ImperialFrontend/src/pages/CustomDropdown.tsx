@@ -15,34 +15,6 @@ interface DropdownProps {
   multiple?: boolean;
 }
 
-const dropdownStyle = {
-  // label text + asterisk
-  "& .MuiInputLabel-root": {
-    color: "#000000",
-  },
-
-  // selected value text (closed select)
-  "& .MuiSelect-select": {
-    color: "#ffffff",
-  },
-
-  // dropdown arrow
-  "& .MuiSelect-icon": {
-    color: "#000000",
-  },
-
-  // outline border
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#000000",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#000000",
-  },
-  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#000000",
-  },
-};
-
 export const CustomDropdown = ({
   id,
   label,
@@ -69,10 +41,25 @@ export const CustomDropdown = ({
       fullWidth
       filterSelectedOptions
       isOptionEqualToValue={(o, v) => o.id === v.id}
-      renderInput={params => (
-        <TextField sx={dropdownStyle} {...params} label={label} />
-      )}
+      renderInput={params => <TextField {...params} label={label} />}
       multiple={multiple}
+      sx={{
+        "& .MuiChip-root": {
+          bgcolor: theme => theme.palette.primary.main + "33",
+          color: theme => theme.palette.text.primary,
+          border: theme => `1px solid ${theme.palette.primary.main}`,
+          borderRadius: 6,
+        },
+        "& .MuiChip-deleteIcon": {
+          color: theme => theme.palette.text.secondary,
+          "&:hover": {
+            color: theme => theme.palette.error.main,
+          },
+        },
+        "& .MuiInputBase-input": {
+          color: theme => theme.palette.text.primary,
+        },
+      }}
     />
   ) : (
     <Autocomplete
@@ -84,9 +71,7 @@ export const CustomDropdown = ({
       id={id}
       options={dropdownOptions}
       fullWidth
-      renderInput={params => (
-        <TextField sx={dropdownStyle} {...params} label={label} />
-      )}
+      renderInput={params => <TextField {...params} label={label} />}
     />
   );
   return el;

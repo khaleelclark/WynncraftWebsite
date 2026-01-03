@@ -43,15 +43,20 @@ export const CustomAdminTile = ({
               p: 3,
               flexGrow: 1,
               borderRadius: 3,
-              bgcolor: "#82172e",
+
               cursor: "pointer",
               display: "flex",
               flexDirection: "column",
               transition: "transform 0.15s ease, box-shadow 0.15s ease",
-              boxShadow: 3,
+
+              color: "text.primary",
+              border: theme => `1px solid ${theme.palette.divider}`,
+              boxShadow: 6,
+
               "&:hover": {
                 transform: "translateY(-4px)",
-                boxShadow: 8,
+                boxShadow: 10,
+                borderColor: theme => theme.palette.primary.main,
               },
             }}
           >
@@ -62,10 +67,12 @@ export const CustomAdminTile = ({
                   mr: 2,
                   p: 1.2,
                   borderRadius: "999px",
-                  bgcolor: "rgba(0,0,0,0.25)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  bgcolor: theme => `${theme.palette.background.default}66`,
+                  border: theme => `1px solid ${theme.palette.primary.main}55`,
+                  color: "text.secondary",
                 }}
               >
                 {icon}
@@ -83,6 +90,7 @@ export const CustomAdminTile = ({
             {/* Button pinned to bottom */}
             <Button
               variant="contained"
+              color="primary"
               onClick={e => {
                 e.stopPropagation();
                 onOpen();
@@ -90,9 +98,11 @@ export const CustomAdminTile = ({
               sx={{
                 mt: 2,
                 alignSelf: "flex-start",
-                bgcolor: "#efdddb",
-                color: "#501117ff",
-                "&:hover": { bgcolor: "#f6e8e6" },
+                boxShadow: theme => `0 0 14px ${theme.palette.primary.main}33`,
+                "&:hover": {
+                  boxShadow: theme =>
+                    `0 0 18px ${theme.palette.primary.main}66`,
+                },
               }}
             >
               {buttonText}

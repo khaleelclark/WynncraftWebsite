@@ -164,52 +164,20 @@ const Leaderboard: React.FC = () => {
       : `${selectedEvent?.name} Leaderboard`;
 
   const pickerSx = {
-    width: "100%",
-
-    // Input root
-    "& .MuiInputBase-root": {
-      backgroundColor: "#511220",
-      color: "#ffffff", // ⬅️ text color
+    "& .MuiOutlinedInput-input.Mui-disabled": {
+      color: "#c3c3c3ff !important",
+      WebkitTextFillColor: "#c3c3c3ff !important",
+      opacity: 1,
     },
-
-    // The actual text inside the input
-    "& .MuiInputBase-input": {
-      color: "#ffffff", // ⬅️ THIS is the missing piece
-    },
-
-    // Label (Start / End)
-    "& .MuiInputLabel-root": {
-      color: "#ffffff",
-    },
-
-    // Label when focused
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#ffffff",
-    },
-
-    // Outline
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#bc511c",
-    },
-
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#efdddb",
-    },
-
-    "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#efdddb",
-    },
-
-    // Calendar icon
     "& .MuiSvgIcon-root": {
-      color: "#ffffff",
+      color: "#efdddb",
     },
-
-    // Disabled state (important!)
-    "& .MuiInputBase-input.Mui-disabled": {
-      color: "#ffffff",
-      WebkitTextFillColor: "#ffffff", // 👈 REQUIRED for Chrome
-      opacity: 1, // prevent dimming
+    "& .MuiInputLabel-root": {
+      color: "#efdddb",
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: "#3C002F",
+      borderRadius: 1.5,
     },
   };
 
@@ -217,9 +185,11 @@ const Leaderboard: React.FC = () => {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box
         sx={{
-          padding: 3,
-          background: "#220c0e",
+          p: 3,
+          bgcolor: "background.default",
+          color: "text.primary",
           width: "100%",
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -293,37 +263,6 @@ const Leaderboard: React.FC = () => {
               disableRowSelectionOnClick
               sx={{
                 fontSize: "1rem",
-                backgroundColor: "#6A001B",
-                color: "#F7F2F5",
-                border: "1px solid #7A1C69",
-                "& .MuiDataGrid-virtualScroller": {
-                  backgroundColor: "#220c0e",
-                },
-                "& .MuiDataGrid-filler": {
-                  backgroundColor: "#220c0e",
-                },
-                "& .MuiDataGrid-scrollbarFiller": {
-                  backgroundColor: "#82172e",
-                },
-                [`.MuiDataGrid-columnHeaders`]: {
-                  backgroundColor: "#82172e",
-                  color: "#efdddb",
-                },
-                [`.MuiDataGrid-row`]: {
-                  "&:nth-of-type(even)": {
-                    backgroundColor: "#220c0e",
-                  },
-                  "&:nth-of-type(odd)": {
-                    backgroundColor: "#3C002F",
-                  },
-                },
-                [`.MuiDataGrid-footerContainer`]: {
-                  backgroundColor: "#7A1C69",
-                  color: "#efdddb",
-                },
-                "& .MuiTablePagination-root": {
-                  color: "#efdddb",
-                },
                 "& .MuiDataGrid-cell": {
                   display: "flex",
                   alignItems: "center",

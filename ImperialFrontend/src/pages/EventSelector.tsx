@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 interface Event {
@@ -33,10 +34,15 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
   const [selectedId, setSelectedId] = useState<number>(-1);
 
   useEffect(() => {
-    fetch("/api/events")
-      .then(res => res.json())
-      .then(data => {
+    axios
+      .get("/api/events")
+      .then(res => {
+        const data = res.data?.value ?? res.data ?? [];
         setEvents([CUSTOM_EVENT, ALL_TIME_EVENT, ...data]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch events:", err);
+        setEvents([CUSTOM_EVENT, ALL_TIME_EVENT]);
       });
   }, []);
 
@@ -60,41 +66,34 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
         onChange={e => setSelectedId(Number(e.target.value))}
         sx={{
           width: "min(520px, 100%)",
-          "& .MuiInputBase-root": {
-            backgroundColor: "#511220",
-            color: "#ffffff",
-          },
-          "& .MuiInputBase-input": {
-            color: "#ffffff",
-          },
-          "& .MuiInputLabel-root": {
-            color: "#ffffff",
-          },
-          "& .MuiInputLabel-root.Mui-focused": {
-            color: "#ffffff",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#bc511c",
-          },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#efdddb",
-          },
-          "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-            {
-              borderColor: "#efdddb",
-            },
-          "& .MuiSvgIcon-root": {
-            color: "#ffffff",
+
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: "#3C002F",
+            borderRadius: 1.5,
           },
 
-          // dropdown menu styling
-          "& .MuiMenu-paper": {
-            backgroundColor: "#220c0e",
+          // ensure icon contrast
+          "& .MuiSvgIcon-root": {
+            color: "text.secondary",
+          },
+          "& .MuiSelect-select": {
+            color: "#ffffff",
           },
         }}
       >
         {events.map(ev => (
-          <MenuItem key={ev.id} value={ev.id}>
+          <MenuItem
+            key={ev.id}
+            value={ev.id}
+            sx={{
+              "&.Mui-selected": {
+                backgroundColor: theme => `${theme.palette.primary.main}33`,
+              },
+              "&.Mui-selected:hover": {
+                backgroundColor: theme => `${theme.palette.primary.main}44`,
+              },
+            }}
+          >
             {ev.name}
           </MenuItem>
         ))}

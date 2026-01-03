@@ -25,6 +25,17 @@ interface GenericAdminPageProps {
   createForm: ReactElement<CustomFormProps>;
   label: string;
 }
+const dialogSlotProps = {
+  paper: {
+    sx: (theme: any) => ({
+      bgcolor: "background.default",
+      color: "text.primary",
+      borderRadius: 3,
+      border: `1px solid ${theme.palette.divider}`,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+    }),
+  },
+};
 
 export const GenericAdminPage = ({
   apiGetEndpoint,
@@ -78,7 +89,13 @@ export const GenericAdminPage = ({
             renderCell: (params: any) => (
               <>
                 <IconButton
-                  sx={{ color: "#FFFFFF" }}
+                  sx={{
+                    color: "text.secondary",
+                    "&:hover": {
+                      bgcolor: theme => `${theme.palette.primary.main}22`,
+                      color: "text.primary",
+                    },
+                  }}
                   onClick={() => {
                     setAutofillData(params.row);
                     setOpenUpdateDialog(true);
@@ -87,7 +104,13 @@ export const GenericAdminPage = ({
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  sx={{ color: "#FFFFFF" }}
+                  sx={{
+                    color: "text.secondary",
+                    "&:hover": {
+                      bgcolor: theme => `${theme.palette.primary.main}22`,
+                      color: "text.primary",
+                    },
+                  }}
                   onClick={() => {
                     setIdToDelete(params.row.id);
                     setOpenDeletionDialog(true);
@@ -139,7 +162,10 @@ export const GenericAdminPage = ({
         <Box
           sx={{
             padding: 3,
-            background: "#220c0e",
+            bgcolor: "background.default",
+            color: "text.primary",
+            borderRadius: 3,
+            height: "100%",
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -199,6 +225,7 @@ export const GenericAdminPage = ({
               disableEscapeKeyDown
               maxWidth="sm"
               fullWidth
+              slotProps={dialogSlotProps}
             >
               <DialogContent sx={{ position: "relative", pt: 6 }}>
                 <Tooltip title="Close window" arrow>
@@ -209,9 +236,10 @@ export const GenericAdminPage = ({
                       position: "absolute",
                       right: 8,
                       top: 8,
-                      color: "#efdddb",
+                      color: "text.secondary",
                       "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.08)",
+                        bgcolor: theme => `${theme.palette.primary.main}22`,
+                        color: "text.primary",
                       },
                     }}
                   >
@@ -230,7 +258,13 @@ export const GenericAdminPage = ({
               maxWidth="sm"
               fullWidth
             >
-              <DialogContent sx={{ position: "relative", pt: 6 }}>
+              <DialogContent
+                sx={{
+                  position: "relative",
+                  pt: 6,
+                  bgcolor: "background.default",
+                }}
+              >
                 <Tooltip title="Close window" arrow>
                   <IconButton
                     aria-label="close"
@@ -239,9 +273,10 @@ export const GenericAdminPage = ({
                       position: "absolute",
                       right: 8,
                       top: 8,
-                      color: "#efdddb",
+                      color: "text.secondary",
                       "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.08)",
+                        bgcolor: theme => `${theme.palette.primary.main}22`,
+                        color: "text.primary",
                       },
                     }}
                   >
@@ -254,12 +289,14 @@ export const GenericAdminPage = ({
             </Dialog>
 
             <Typography
+              variant="h4"
               sx={{
-                color: "#efdddb",
-                marginBottom: 3,
-                fontWeight: 600,
-                fontSize: 30,
+                mb: 3,
+                fontWeight: 800,
                 textAlign: "center",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "text.primary",
               }}
             >
               {label}
@@ -277,25 +314,6 @@ export const GenericAdminPage = ({
               disableRowSelectionOnClick
               sx={{
                 fontSize: "1rem",
-                backgroundColor: "#6A001B",
-                color: "#F7F2F5",
-                border: "1px solid #7A1C69",
-                [`.MuiDataGrid-columnHeaders`]: {
-                  backgroundColor: "#82172e",
-                  color: "#efdddb",
-                },
-                [`.MuiDataGrid-row`]: {
-                  "&:nth-of-type(even)": {
-                    backgroundColor: "#220c0e",
-                  },
-                  "&:nth-of-type(odd)": {
-                    backgroundColor: "#3C002F",
-                  },
-                },
-                [`.MuiDataGrid-footerContainer`]: {
-                  backgroundColor: "#7A1C69",
-                  color: "#efdddb",
-                },
                 "& .MuiDataGrid-cell": {
                   display: "flex",
                   alignItems: "center",

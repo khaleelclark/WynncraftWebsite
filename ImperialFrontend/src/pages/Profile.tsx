@@ -64,16 +64,21 @@ const Profile: React.FC = () => {
           p: 3,
           display: "flex",
           justifyContent: "center",
+          bgcolor: "background.default",
+          color: "text.primary",
         }}
       >
         <Paper
+          elevation={0}
           sx={{
             p: 3,
-            maxWidth: 700,
-            bgcolor: "#220c0e",
-            color: "#efdddb",
-            borderRadius: 2,
-            boxShadow: 4,
+            width: "100%",
+            maxWidth: 760,
+            bgcolor: "background.paper",
+            color: "text.primary",
+            borderRadius: 3,
+            border: theme => `1px solid ${theme.palette.divider}`,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
           }}
         >
           {/* Header: avatar + name */}
@@ -86,22 +91,30 @@ const Profile: React.FC = () => {
                 sx={{
                   width: 72,
                   height: 72,
-                  borderRadius: 2,
-                  border: "2px solid #efdddb",
+                  borderRadius: 1,
+                  border: theme => `2px solid ${theme.palette.divider}`,
+                  bgcolor: "background.default",
                 }}
               />
             </Grid>
             <Grid>
-              <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                {profile.mainUsername}
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: 800, lineHeight: 1.1 }}
+              >
+                {profile.name}
               </Typography>
-              <Typography variant="subtitle1" sx={{ opacity: 0.8 }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ opacity: 0.8 }}
+              >
                 {profile.minecraftUsername}
               </Typography>
             </Grid>
           </Grid>
 
-          <Divider sx={{ my: 3, borderColor: "#7A1C69" }} />
+          <Divider sx={{ my: 3, borderColor: "divider" }} />
 
           {/* Basic stats in a grid */}
           <Grid container spacing={2}>
@@ -176,7 +189,10 @@ const Profile: React.FC = () => {
                     key={game}
                     label={game}
                     size="small"
-                    sx={{ bgcolor: "#3C002F", color: "#efdddb" }}
+                    sx={{
+                      bgcolor: theme => `${theme.palette.info.main}22`,
+                      border: theme => `1px solid ${theme.palette.info.main}66`,
+                    }}
                   />
                 ))}
               </Stack>
@@ -191,7 +207,7 @@ const Profile: React.FC = () => {
           <Box sx={{ mt: 2 }}>
             <Typography
               variant="caption"
-              sx={{ opacity: 0.7, display: "block" }}
+              sx={{ color: "text.secondary", display: "block" }}
             >
               Medals
             </Typography>
@@ -202,12 +218,18 @@ const Profile: React.FC = () => {
                     key={medal}
                     label={medal}
                     size="small"
-                    sx={{ bgcolor: "#511220", color: "#efdddb" }}
+                    sx={{
+                      bgcolor: theme => `${theme.palette.warning.main}22`,
+                      border: theme =>
+                        `1px solid ${theme.palette.warning.main}66`,
+
+                      fontWeight: 600,
+                    }}
                   />
                 ))}
               </Stack>
             ) : (
-              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              <Typography variant="body2" sx={{ opacity: 0.8, mt: 2 }}>
                 None earned yet
               </Typography>
             )}

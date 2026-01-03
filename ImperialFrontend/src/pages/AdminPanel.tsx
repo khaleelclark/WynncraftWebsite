@@ -26,6 +26,7 @@ import { CustomAdminTile } from "./CustomAdminTile";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
+import { CustomAdminDialog } from "./CustomAdminDialog";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -63,16 +64,9 @@ const AdminPanel: React.FC = () => {
     setSnackbarOpen(true);
   };
 
-  const blockBackdropAndEscClose =
-    (setter: React.Dispatch<React.SetStateAction<boolean>>) =>
-    (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
-      if (reason === "backdropClick" || reason === "escapeKeyDown") return;
-      setter(false);
-    };
-
   const createGuildMemberForm = (
     <CustomForm
-      title="Add a Guild Member"
+      title="Guild Member Management"
       apiEndpoint="/api/guildmembers"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -99,7 +93,7 @@ const AdminPanel: React.FC = () => {
 
   const createEventForm = (
     <CustomForm
-      title="Add an Event"
+      title="Event Management"
       apiEndpoint="/api/events"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -112,7 +106,7 @@ const AdminPanel: React.FC = () => {
 
   const createGameForm = (
     <CustomForm
-      title="Add a Game"
+      title="Game Management"
       apiEndpoint="/api/games"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -123,7 +117,7 @@ const AdminPanel: React.FC = () => {
 
   const createMedalForm = (
     <CustomForm
-      title="Add a Medal"
+      title="Medal Management"
       apiEndpoint="/api/medals"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -134,7 +128,7 @@ const AdminPanel: React.FC = () => {
 
   const createRankForm = (
     <CustomForm
-      title="Add a Rank"
+      title="Rank Management"
       apiEndpoint="/api/ranks"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -145,7 +139,7 @@ const AdminPanel: React.FC = () => {
 
   const createRaidForm = (
     <CustomForm
-      title="Add a Raid"
+      title="Raid Management"
       apiEndpoint="/api/raids"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -181,31 +175,41 @@ const AdminPanel: React.FC = () => {
         p: 3,
         display: "flex",
         justifyContent: "center",
+        bgcolor: "background.default",
+        color: "text.primary",
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 1200 }}>
         <Paper
+          elevation={0}
           sx={{
             p: 4,
             maxWidth: "100%",
-            bgcolor: "#501117ff",
-            color: "#efdddb",
+            bgcolor: "#2e000cff",
+            color: "text.primary",
             borderRadius: 3,
-            boxShadow: 6,
+            border: theme => `1px solid ${theme.palette.divider}`,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
           }}
         >
           <Typography
             variant="h3"
             textAlign="center"
             gutterBottom
-            sx={{ fontWeight: 600 }}
+            sx={{
+              fontWeight: 800,
+              color: "text.primary",
+            }}
           >
-            Admin Panel
+            Imperial Guild Admin Panel
           </Typography>
           <Typography
             variant="subtitle1"
             textAlign="center"
-            sx={{ opacity: 0.8, mb: 4 }}
+            sx={{
+              color: "text.secondary",
+              mb: 4,
+            }}
           >
             Manage all Imperial guild information in one place.
           </Typography>
@@ -280,191 +284,82 @@ const AdminPanel: React.FC = () => {
         </Paper>
 
         {/* ----- Dialogs ----- */}
-        <Dialog
+        <CustomAdminDialog
           open={guildMembersOpen}
-          onClose={blockBackdropAndEscClose(setGuildMembersOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setGuildMembersOpen(false)}
+          title="Guild Members"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setGuildMembersOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Guild Members"
-              apiGetEndpoint="/api/guildmembers/admin"
-              apiDeleteEndpoint="/api/guildmembers"
-              createForm={createGuildMemberForm}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
+          <GenericAdminPage
+            label="Guild Members"
+            apiGetEndpoint="/api/guildmembers/admin"
+            apiDeleteEndpoint="/api/guildmembers"
+            createForm={createGuildMemberForm}
+          />
+        </CustomAdminDialog>
+        <CustomAdminDialog
           open={eventsOpen}
-          onClose={blockBackdropAndEscClose(setEventsOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setEventsOpen(false)}
+          title="Events"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setEventsOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Events"
-              apiGetEndpoint="/api/events"
-              apiDeleteEndpoint="/api/events"
-              createForm={createEventForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Events"
+            apiGetEndpoint="/api/events"
+            apiDeleteEndpoint="/api/events"
+            createForm={createEventForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={gamesOpen}
-          onClose={blockBackdropAndEscClose(setGamesOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setGamesOpen(false)}
+          title="Games"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setGamesOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Games"
-              apiGetEndpoint="/api/games"
-              apiDeleteEndpoint="/api/games"
-              createForm={createGameForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Games"
+            apiGetEndpoint="/api/games"
+            apiDeleteEndpoint="/api/games"
+            createForm={createGameForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={medalsOpen}
-          onClose={blockBackdropAndEscClose(setMedalsOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setMedalsOpen(false)}
+          title="Medals"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setMedalsOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Medals"
-              apiGetEndpoint="/api/medals"
-              apiDeleteEndpoint="/api/medals"
-              createForm={createMedalForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Medals"
+            apiGetEndpoint="/api/medals"
+            apiDeleteEndpoint="/api/medals"
+            createForm={createMedalForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={ranksOpen}
-          onClose={blockBackdropAndEscClose(setRanksOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setRanksOpen(false)}
+          title="Ranks"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setRanksOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Ranks"
-              apiGetEndpoint="/api/ranks"
-              apiDeleteEndpoint="/api/ranks"
-              createForm={createRankForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Ranks"
+            apiGetEndpoint="/api/ranks"
+            apiDeleteEndpoint="/api/ranks"
+            createForm={createRankForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={raidsOpen}
-          onClose={blockBackdropAndEscClose(setRaidsOpen)}
-          disableEscapeKeyDown
-          maxWidth="lg"
-          fullWidth
+          onClose={() => setRaidsOpen(false)}
+          title="Raids"
         >
-          <DialogContent sx={{ position: "relative", pt: 6 }}>
-            <Tooltip title="Close window" arrow>
-              <IconButton
-                aria-label="close"
-                onClick={() => setRaidsOpen(false)}
-                sx={{
-                  position: "absolute",
-                  right: 8,
-                  top: 8,
-                  color: "#efdddb",
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            <GenericAdminPage
-              label="Raids"
-              apiGetEndpoint="/api/raids"
-              apiDeleteEndpoint="/api/raids"
-              createForm={createRaidForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Raids"
+            apiGetEndpoint="/api/raids"
+            apiDeleteEndpoint="/api/raids"
+            createForm={createRaidForm}
+          />
+        </CustomAdminDialog>
       </Box>
     </Box>
   );
