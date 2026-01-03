@@ -1,3 +1,7 @@
+import Box from "@mui/material/Box";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 interface Event {
@@ -30,10 +34,15 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
   const [selectedId, setSelectedId] = useState<number>(-1);
 
   useEffect(() => {
-    fetch("/api/events")
-      .then(res => res.json())
-      .then(data => {
+    axios
+      .get("/api/events")
+      .then(res => {
+        const data = res.data?.value ?? res.data ?? [];
         setEvents([CUSTOM_EVENT, ALL_TIME_EVENT, ...data]);
+      })
+      .catch(err => {
+        console.error("Failed to fetch events:", err);
+        setEvents([CUSTOM_EVENT, ALL_TIME_EVENT]);
       });
   }, []);
 
@@ -43,26 +52,53 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
   }, [selectedId, events, onSelect]);
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ color: "#efdddb", marginRight: 8 }}>Type:</label>
-      <select
+    <Box
+      sx={{
+        my: 2,
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <TextField
+        select
+        label="Date Range"
         value={selectedId}
         onChange={e => setSelectedId(Number(e.target.value))}
-        style={{
-          background: "#511220",
-          color: "#efdddb",
-          border: "1px solid #bc511c",
-          borderRadius: 4,
-          padding: 4,
+        sx={{
+          width: "min(520px, 100%)",
+
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: "#3C002F",
+            borderRadius: 1.5,
+          },
+
+          // ensure icon contrast
+          "& .MuiSvgIcon-root": {
+            color: "text.secondary",
+          },
+          "& .MuiSelect-select": {
+            color: "#ffffff",
+          },
         }}
       >
         {events.map(ev => (
-          <option key={ev.id} value={ev.id}>
+          <MenuItem
+            key={ev.id}
+            value={ev.id}
+            sx={{
+              "&.Mui-selected": {
+                backgroundColor: theme => `${theme.palette.primary.main}33`,
+              },
+              "&.Mui-selected:hover": {
+                backgroundColor: theme => `${theme.palette.primary.main}44`,
+              },
+            }}
+          >
             {ev.name}
-          </option>
+          </MenuItem>
         ))}
-      </select>
-    </div>
+      </TextField>
+    </Box>
   );
 };
 

@@ -94,10 +94,25 @@ export const CustomForm = ({
   const el = (
     <CustomFormContext.Provider value={{ register, formValues }}>
       <Paper
-        sx={{ backgroundColor: "#b94352ff", padding: 4, margin: 2 }}
+        sx={{
+          padding: 4,
+          margin: 2,
+          bgcolor: "background.paper",
+          color: "text.primary",
+          borderRadius: 3,
+          border: theme => `1px solid ${theme.palette.divider}`,
+        }}
         elevation={3}
       >
-        <Typography color="#000000ff" variant="h3" mb={3} fontWeight={600}>
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 3,
+            fontWeight: 800,
+            color: "text.primary",
+            textAlign: "center",
+          }}
+        >
           {title}
         </Typography>
 
@@ -114,8 +129,17 @@ export const CustomForm = ({
           {children}
           <Button
             variant="contained"
-            sx={{ backgroundColor: "#220C0E" }}
+            color="primary"
             onClick={handleSubmit}
+            sx={{
+              px: 3,
+
+              // optional: extra glow without hardcoding hex
+              boxShadow: theme => `0 0 16px ${theme.palette.primary.main}33`,
+              "&:hover": {
+                boxShadow: theme => `0 0 22px ${theme.palette.primary.main}66`,
+              },
+            }}
           >
             Submit
           </Button>

@@ -5,6 +5,7 @@ import axios from "axios";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 
 interface GuildMember {
   id: number;
@@ -27,59 +28,98 @@ const GuildMemberList: React.FC = () => {
   const columns: GridColDef[] = [
     {
       field: "id",
-      headerName: "ID",
-      width: 60,
+      headerName: "Id",
+      minWidth: 75,
+      flex: 0.4,
+      align: "center",
+      headerAlign: "center",
     },
     {
       field: "name",
       headerName: "Main Username",
-      width: 220,
+      minWidth: 200,
+      flex: 1.4,
+      headerAlign: "center",
       renderCell: (params: any) => (
-        <span
-          style={{ display: "flex", alignItems: "center" }}
+        <Box
           onClick={() => navigate(`/profile/${params.row.id}`)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            cursor: "pointer",
+            gap: 1,
+            "&:hover": {
+              color: "text.secondary",
+            },
+          }}
         >
           {params.row.uuid && (
-            <img
+            <Box
+              component="img"
               src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
               alt="Skin"
-              style={{
-                width: 32,
-                height: 32,
-                marginRight: 8,
-                verticalAlign: "middle",
-                borderRadius: 4,
+              sx={{
+                width: 45,
+                height: 45,
+                borderRadius: 0.5,
               }}
             />
           )}
-          <span>{params.row.name}</span>
-        </span>
+          <Box component="span">{params.row.name}</Box>
+        </Box>
       ),
     },
-    { field: "discordTag", headerName: "Discord Tag", width: 180 },
+    {
+      field: "discordTag",
+      headerName: "Discord Tag",
+      minWidth: 180,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+    },
     {
       field: "minecraftUsername",
       headerName: "Minecraft Username",
-      width: 180,
+      minWidth: 240,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
     },
-    { field: "rankName", headerName: "Rank", width: 150 },
-    { field: "wynncraftRank", headerName: "Wynncraft Rank", width: 150 },
+    {
+      field: "rankName",
+      headerName: "Rank",
+      minWidth: 150,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "wynncraftRank",
+      headerName: "Wynncraft Rank",
+      minWidth: 180,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params: any) => params.value || "N/A",
+    },
     {
       field: "profile",
       headerName: "Profile",
-      width: 120,
+      minWidth: 125,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
       sortable: false,
       renderCell: (params: any) => (
         <Button
-          style={{
-            background: "#6A001B",
-            color: "#efdddb",
-            border: "none",
-            borderRadius: 4,
-            padding: "4px 12px",
-            cursor: "pointer",
-          }}
+          variant="contained"
+          color="primary"
+          size="small"
           onClick={() => navigate(`/profile/${params.row.id}`)}
+          sx={{
+            borderRadius: 1,
+            px: 2,
+          }}
         >
           View
         </Button>
@@ -90,54 +130,65 @@ const GuildMemberList: React.FC = () => {
   return (
     <Box
       sx={{
-        padding: 3,
-        background: "#220c0e",
+        p: 3,
+        bgcolor: "background.default",
+        color: "text.primary",
         width: "100%",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 1100 }}>
-        <Typography
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: { xl: 1400, lg: 1200, md: "100%" },
+        }}
+      >
+        <Paper
           sx={{
-            color: "#efdddb",
-            marginBottom: 3,
-            fontWeight: 600,
-            fontSize: 30,
-            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 3,
+            mb: 3,
           }}
         >
-          Imperial Guild Members
-        </Typography>
+          <Typography
+            variant="h3"
+            sx={{
+              textAlign: "center",
+              color: "text.primary",
+              fontWeight: 800,
+            }}
+          >
+            ~ Imperial Guild Members ~
+          </Typography>
+        </Paper>
         <DataGrid
           rows={members}
           columns={columns}
           getRowId={row => row.id}
+          rowHeight={70}
+          columnHeaderHeight={70}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
             pagination: { paginationModel: { pageSize: 20, page: 0 } },
           }}
           disableRowSelectionOnClick
           sx={{
-            backgroundColor: "#6A001B",
-            color: "#F7F2F5",
-            border: "1px solid #7A1C69",
-            [`.MuiDataGrid-columnHeaders`]: {
-              backgroundColor: "#82172e",
-              color: "#efdddb",
+            fontSize: "1rem",
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+              py: 2,
             },
-            [`.MuiDataGrid-row`]: {
-              "&:nth-of-type(even)": {
-                backgroundColor: "#220c0e",
-              },
-              "&:nth-of-type(odd)": {
-                backgroundColor: "#3C002F",
-              },
-            },
-            [`.MuiDataGrid-footerContainer`]: {
-              backgroundColor: "#7A1C69",
-              color: "#efdddb",
+            "& .MuiDataGrid-columnHeaderTitle": {
+              textAlign: "center",
+              width: "100%",
+              py: 2,
+              px: 2,
             },
           }}
         />

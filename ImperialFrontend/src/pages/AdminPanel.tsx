@@ -23,6 +23,10 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import SecurityIcon from "@mui/icons-material/Security";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { CustomAdminTile } from "./CustomAdminTile";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
+import { CustomAdminDialog } from "./CustomAdminDialog";
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
@@ -62,7 +66,7 @@ const AdminPanel: React.FC = () => {
 
   const createGuildMemberForm = (
     <CustomForm
-      title="Add a Guild Member"
+      title="Guild Member Management"
       apiEndpoint="/api/guildmembers"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -89,7 +93,7 @@ const AdminPanel: React.FC = () => {
 
   const createEventForm = (
     <CustomForm
-      title="Add an Event"
+      title="Event Management"
       apiEndpoint="/api/events"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -102,7 +106,7 @@ const AdminPanel: React.FC = () => {
 
   const createGameForm = (
     <CustomForm
-      title="Add a Game"
+      title="Game Management"
       apiEndpoint="/api/games"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -113,7 +117,7 @@ const AdminPanel: React.FC = () => {
 
   const createMedalForm = (
     <CustomForm
-      title="Add a Medal"
+      title="Medal Management"
       apiEndpoint="/api/medals"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -124,7 +128,7 @@ const AdminPanel: React.FC = () => {
 
   const createRankForm = (
     <CustomForm
-      title="Add a Rank"
+      title="Rank Management"
       apiEndpoint="/api/ranks"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -135,7 +139,7 @@ const AdminPanel: React.FC = () => {
 
   const createRaidForm = (
     <CustomForm
-      title="Add a Raid"
+      title="Raid Management"
       apiEndpoint="/api/raids"
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
@@ -171,31 +175,41 @@ const AdminPanel: React.FC = () => {
         p: 3,
         display: "flex",
         justifyContent: "center",
+        bgcolor: "background.default",
+        color: "text.primary",
       }}
     >
       <Box sx={{ width: "100%", maxWidth: 1200 }}>
         <Paper
+          elevation={0}
           sx={{
             p: 4,
             maxWidth: "100%",
-            bgcolor: "#501117ff",
-            color: "#efdddb",
+            bgcolor: "#2e000cff",
+            color: "text.primary",
             borderRadius: 3,
-            boxShadow: 6,
+            border: theme => `1px solid ${theme.palette.divider}`,
+            boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
           }}
         >
           <Typography
             variant="h3"
             textAlign="center"
             gutterBottom
-            sx={{ fontWeight: 600 }}
+            sx={{
+              fontWeight: 800,
+              color: "text.primary",
+            }}
           >
-            Admin Panel
+            Imperial Guild Admin Panel
           </Typography>
           <Typography
             variant="subtitle1"
             textAlign="center"
-            sx={{ opacity: 0.8, mb: 4 }}
+            sx={{
+              color: "text.secondary",
+              mb: 4,
+            }}
           >
             Manage all Imperial guild information in one place.
           </Typography>
@@ -270,101 +284,82 @@ const AdminPanel: React.FC = () => {
         </Paper>
 
         {/* ----- Dialogs ----- */}
-        <Dialog
+        <CustomAdminDialog
           open={guildMembersOpen}
           onClose={() => setGuildMembersOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Guild Members"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Guild Members"
-              apiGetEndpoint="/api/guildmembers/admin"
-              apiDeleteEndpoint="/api/guildmembers"
-              createForm={createGuildMemberForm}
-            />
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
+          <GenericAdminPage
+            label="Guild Members"
+            apiGetEndpoint="/api/guildmembers/admin"
+            apiDeleteEndpoint="/api/guildmembers"
+            createForm={createGuildMemberForm}
+          />
+        </CustomAdminDialog>
+        <CustomAdminDialog
           open={eventsOpen}
           onClose={() => setEventsOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Events"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Events"
-              apiGetEndpoint="/api/events"
-              apiDeleteEndpoint="/api/events"
-              createForm={createEventForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Events"
+            apiGetEndpoint="/api/events"
+            apiDeleteEndpoint="/api/events"
+            createForm={createEventForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={gamesOpen}
           onClose={() => setGamesOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Games"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Games"
-              apiGetEndpoint="/api/games"
-              apiDeleteEndpoint="/api/games"
-              createForm={createGameForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Games"
+            apiGetEndpoint="/api/games"
+            apiDeleteEndpoint="/api/games"
+            createForm={createGameForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={medalsOpen}
           onClose={() => setMedalsOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Medals"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Medals"
-              apiGetEndpoint="/api/medals"
-              apiDeleteEndpoint="/api/medals"
-              createForm={createMedalForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Medals"
+            apiGetEndpoint="/api/medals"
+            apiDeleteEndpoint="/api/medals"
+            createForm={createMedalForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={ranksOpen}
           onClose={() => setRanksOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Ranks"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Ranks"
-              apiGetEndpoint="/api/ranks"
-              apiDeleteEndpoint="/api/ranks"
-              createForm={createRankForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Ranks"
+            apiGetEndpoint="/api/ranks"
+            apiDeleteEndpoint="/api/ranks"
+            createForm={createRankForm}
+          />
+        </CustomAdminDialog>
 
-        <Dialog
+        <CustomAdminDialog
           open={raidsOpen}
           onClose={() => setRaidsOpen(false)}
-          maxWidth="lg"
-          fullWidth
+          title="Raids"
         >
-          <DialogContent dividers>
-            <GenericAdminPage
-              label="Raids"
-              apiGetEndpoint="/api/raids"
-              apiDeleteEndpoint="/api/raids"
-              createForm={createRaidForm}
-            />
-          </DialogContent>
-        </Dialog>
+          <GenericAdminPage
+            label="Raids"
+            apiGetEndpoint="/api/raids"
+            apiDeleteEndpoint="/api/raids"
+            createForm={createRaidForm}
+          />
+        </CustomAdminDialog>
       </Box>
     </Box>
   );

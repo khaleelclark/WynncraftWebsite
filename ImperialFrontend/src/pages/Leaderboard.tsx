@@ -1,113 +1,137 @@
 import React, { useEffect, useState } from "react";
 import EventSelector from "./EventSelector";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import dayjs, { Dayjs } from "dayjs";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Grid from "@mui/material/Grid";
 
 interface LeaderboardEntry {
+  id: number;
   minecraftUsername: string;
   uuid?: string;
   warsCompleted: number;
   hoursPlayed?: number | null;
   raidsCompleted: number;
-  lastSynced?: string | null; // ✅
+  lastSynced?: string | null;
 }
 
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
-const columns: GridColDef[] = [
-  {
-    field: "minecraftUsername",
-    headerName: "Player",
-    width: 220,
-    renderCell: params => (
-      <span style={{ display: "flex", alignItems: "center" }}>
-        {params.row.uuid && (
-          <img
-            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-            alt="Skin"
-            style={{
-              width: 32,
-              height: 32,
-              marginRight: 8,
-              verticalAlign: "middle",
-              borderRadius: 4,
-            }}
-          />
-        )}
-        <span>{params.row.minecraftUsername}</span>
-        <button
-          style={{
-            marginLeft: 12,
-            background: "#bc511c",
-            color: "#efdddb",
-            border: "none",
-            borderRadius: 4,
-            padding: "4px 8px",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-          onClick={() => (window.location.href = `/profile/${params.row.id}`)}
-        >
-          Profile
-        </button>
-      </span>
-    ),
-  },
-  { field: "raidsCompleted", headerName: "Raids", width: 120, type: "number" },
-  { field: "warsCompleted", headerName: "Wars", width: 120, type: "number" },
-  {
-    field: "hoursPlayed",
-    headerName: "Hours",
-    width: 120,
-    type: "number",
-    //render cell to show private if hours played
-    renderCell: params => {
-      const hp = params.row.hoursPlayed;
-      return hp != null && hp >= 0 ? hp : "Private";
-    },
-  },
-  {
-    field: "lastSynced",
-    headerName: "Last Updated",
-    width: 180,
-    valueFormatter: value =>
-      value
-        ? new Date(value as string).toLocaleString(undefined, {
-            dateStyle: "short",
-            timeStyle: "short",
-          })
-        : "—",
-  },
-];
-
 const Leaderboard: React.FC = () => {
+  const navigate = useNavigate();
+
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [startTime, setStartTime] = useState("00:00");
-  const [endTime, setEndTime] = useState("23:59");
+  const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
+  const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
+
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
     name: "All Time",
-    eventStart: "2000-01-01",
-    eventEnd: "2100-01-01",
+    eventStart: "2000-01-01T00:00:00",
+    eventEnd: "2100-01-01T23:59:00",
   });
 
-  const getLeaderboard = () => {
-    if (!startDate || !endDate) return;
+  const columns: GridColDef[] = [
+    {
+      field: "minecraftUsername",
+      headerName: "Player",
+      minWidth: 240,
+      flex: 1.4,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: (params: any) => (
+        <span
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            cursor: "pointer",
+          }}
+          onClick={() => navigate(`/profile/${params.row.id}`)}
+        >
+          {params.row.uuid && (
+            <img
+              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+              alt="Skin"
+              style={{
+                width: 45,
+                height: 45,
+                marginRight: 10,
+                verticalAlign: "middle",
+                borderRadius: 6,
+              }}
+            />
+          )}
+          <span>{params.row.minecraftUsername}</span>
+        </span>
+      ),
+    },
+    {
+      field: "raidsCompleted",
+      headerName: "Raids",
+      minWidth: 150,
+      flex: 0.6,
+      align: "center",
+      headerAlign: "center",
+      type: "number",
+    },
+    {
+      field: "warsCompleted",
+      headerName: "Wars",
+      minWidth: 150,
+      flex: 0.6,
+      align: "center",
+      headerAlign: "center",
+      type: "number",
+    },
+    {
+      field: "hoursPlayed",
+      headerName: "Hours Played",
+      minWidth: 180,
+      flex: 0.7,
+      align: "center",
+      headerAlign: "center",
+      type: "number",
+      renderCell: (params: any) => {
+        const hp = params.row.hoursPlayed;
+        return hp != null && hp >= 0 ? hp : "Private";
+      },
+    },
+    {
+      field: "lastSynced",
+      headerName: "Last Updated",
+      minWidth: 200,
+      flex: 0.9,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params: any) =>
+        params.value
+          ? new Date(params.value as string).toLocaleString(undefined, {
+              dateStyle: "short",
+              timeStyle: "short",
+            })
+          : "—",
+    },
+  ];
 
-    const startDateTime = `${startDate}T${startTime}`;
-    const endDateTime = `${endDate}T${endTime}`;
+  const getLeaderboard = () => {
+    if (!startDateTime || !endDateTime) return;
 
     axios
       .get("/api/guildmembers/leaderboard", {
-        params: { startDate: startDateTime, endDate: endDateTime },
+        params: {
+          startDate: startDateTime.toISOString(),
+          endDate: endDateTime.toISOString(),
+        },
       })
       .then(res => {
         const arr = res.data?.value ?? res.data ?? [];
-        arr.sort(
-          (a: any, b: any) => (b.raidsCompleted ?? 0) - (a.raidsCompleted ?? 0)
-        );
         setEntries(arr);
       })
       .catch(err => console.error("Failed to fetch leaderboard:", err));
@@ -115,195 +139,147 @@ const Leaderboard: React.FC = () => {
 
   useEffect(() => {
     if (selectedEvent?.id === -2) {
-      // Custom: reset dates/times and clear table when switching to custom
-      setStartDate("");
-      setEndDate("");
-      setStartTime("00:00");
-      setEndTime("23:59");
+      // Custom
+      setStartDateTime(null);
+      setEndDateTime(null);
       setEntries([]);
-      return;
-    }
-    if (selectedEvent?.id === -1) {
-      // All Time: set dates/times and fetch
-      setStartDate("2000-01-01");
-      setEndDate("2100-01-01");
-      setStartTime("00:00");
-      setEndTime("23:59");
       return;
     }
 
     if (selectedEvent?.eventStart && selectedEvent?.eventEnd) {
-      // Specific event: set dates/times and fetch
-      const start = selectedEvent.eventStart.slice(0, 10);
-      const end = selectedEvent.eventEnd.slice(0, 10);
-      let startT = "00:00";
-      let endT = "23:59";
-      // If eventStart/eventEnd have time, use it
-      if (selectedEvent.eventStart.length > 10) {
-        startT = selectedEvent.eventStart.slice(11, 16);
-      }
-      if (selectedEvent.eventEnd.length > 10) {
-        endT = selectedEvent.eventEnd.slice(11, 16);
-      }
-      setStartDate(start);
-      setEndDate(end);
-      setStartTime(startT);
-      setEndTime(endT);
-      return;
+      setStartDateTime(dayjs(selectedEvent.eventStart));
+      setEndDateTime(dayjs(selectedEvent.eventEnd));
     }
   }, [selectedEvent]);
 
-  console.log(selectedEvent.id, typeof selectedEvent.id);
-
   useEffect(() => {
-    // Only fetch for custom when both dates and times are set
-    if (
-      selectedEvent?.id === -2 &&
-      startDate &&
-      endDate &&
-      startTime &&
-      endTime
-    ) {
-      getLeaderboard();
-    } else if (selectedEvent?.id !== -2) {
-      getLeaderboard();
-    }
-  }, [startDate, endDate, startTime, endTime, selectedEvent]);
+    if (startDateTime && endDateTime) getLeaderboard();
+  }, [startDateTime, endDateTime]);
+
+  const leaderboardTitle =
+    selectedEvent?.id === -1
+      ? "All Time Leaderboard"
+      : selectedEvent?.id === -2
+      ? "Custom Leaderboard"
+      : `${selectedEvent?.name} Leaderboard`;
+
+  const pickerSx = {
+    "& .MuiOutlinedInput-input.Mui-disabled": {
+      color: "#c3c3c3ff !important",
+      WebkitTextFillColor: "#c3c3c3ff !important",
+      opacity: 1,
+    },
+    "& .MuiSvgIcon-root": {
+      color: "#efdddb",
+    },
+    "& .MuiInputLabel-root": {
+      color: "#efdddb",
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: "#3C002F",
+      borderRadius: 1.5,
+    },
+  };
 
   return (
-    <div
-      style={{
-        padding: 24,
-        minHeight: 600,
-        width: "100%",
-        background: "#220c0e",
-      }}
-    >
-      <h2 style={{ color: "#efdddb", marginBottom: 16 }}>
-        {selectedEvent?.id === -1
-          ? "All Time Leaderboard"
-          : selectedEvent?.id === -2
-          ? "Custom Leaderboard"
-          : `${selectedEvent?.name} Leaderboard`}
-      </h2>
-      <EventSelector onSelect={setSelectedEvent} />
-      {selectedEvent?.id === -1 ? (
-        <div style={{ color: "#efdddb", marginBottom: 8 }}>
-          Date Range: <span style={{ fontWeight: "bold" }}>All Time</span>
-        </div>
-      ) : (
-        <>
-          <label style={{ color: "#efdddb" }}>
-            Start Date:
-            <input
-              type="date"
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-              style={{
-                marginLeft: 8,
-                marginRight: 16,
-                background: "#511220",
-                color: "#efdddb",
-                border: "1px solid #bc511c",
-                borderRadius: 4,
-                padding: 4,
-              }}
-              disabled={selectedEvent?.id !== -2}
-            />
-          </label>
-          <label style={{ color: "#efdddb", marginLeft: 16 }}>
-            Start Time:
-            <input
-              type="time"
-              value={startTime}
-              onChange={e => setStartTime(e.target.value)}
-              style={{
-                marginLeft: 8,
-                marginRight: 16,
-                background: "#511220",
-                color: "#efdddb",
-                border: "1px solid #bc511c",
-                borderRadius: 4,
-                padding: 4,
-              }}
-              disabled={selectedEvent?.id !== -2}
-            />
-          </label>
-          <label style={{ color: "#efdddb", marginLeft: 16 }}>
-            End Date:
-            <input
-              type="date"
-              value={endDate}
-              onChange={e => setEndDate(e.target.value)}
-              style={{
-                marginLeft: 8,
-                marginRight: 16,
-                background: "#511220",
-                color: "#efdddb",
-                border: "1px solid #bc511c",
-                borderRadius: 4,
-                padding: 4,
-              }}
-              disabled={selectedEvent?.id !== -2}
-            />
-          </label>
-          <label style={{ color: "#efdddb", marginLeft: 16 }}>
-            End Time:
-            <input
-              type="time"
-              value={endTime}
-              onChange={e => setEndTime(e.target.value)}
-              style={{
-                marginLeft: 8,
-                background: "#511220",
-                color: "#efdddb",
-                border: "1px solid #bc511c",
-                borderRadius: 4,
-                padding: 4,
-              }}
-              disabled={selectedEvent?.id !== -2}
-            />
-          </label>
-        </>
-      )}
-      <div style={{ marginTop: 24 }}>
-        <DataGrid
-          rows={entries}
-          columns={columns}
-          getRowId={row => row.id}
-          pageSizeOptions={[20, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 20, page: 0 } },
-            sorting: {
-              sortModel: [{ field: "raidsCompleted", sort: "desc" }],
-            },
-          }}
-          disableRowSelectionOnClick
-          autoHeight
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box
+        sx={{
+          p: 3,
+          bgcolor: "background.default",
+          color: "text.primary",
+          width: "100%",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Box
           sx={{
-            backgroundColor: "#511220",
-            color: "#efdddb",
-            border: "1px solid #82172e",
-            [`.MuiDataGrid-columnHeaders`]: {
-              backgroundColor: "#82172e",
-              color: "#efdddb",
-            },
-            [`.MuiDataGrid-row`]: {
-              "&:nth-of-type(even)": {
-                backgroundColor: "#220c0e",
-              },
-              "&:nth-of-type(odd)": {
-                backgroundColor: "#511220",
-              },
-            },
-            [`.MuiDataGrid-footerContainer`]: {
-              backgroundColor: "#82172e",
-              color: "#efdddb",
-            },
+            width: "100%",
+            maxWidth: { xl: 1400, lg: 1200, md: "100%" },
           }}
-        />
-      </div>
-    </div>
+        >
+          <Typography
+            sx={{
+              color: "#efdddb",
+              marginBottom: 3,
+              fontWeight: 600,
+              fontSize: 30,
+              textAlign: "center",
+            }}
+          >
+            {leaderboardTitle}
+          </Typography>
+
+          <EventSelector onSelect={setSelectedEvent} />
+
+          {selectedEvent?.id === -1 ? (
+            <Typography
+              sx={{ my: 2, color: "#efdddb", textAlign: "center" }}
+            ></Typography>
+          ) : (
+            <Box sx={{ my: 2 }}>
+              <Grid container spacing={2} justifyContent="center">
+                <Grid>
+                  <DateTimePicker
+                    label="Start"
+                    value={startDateTime}
+                    onChange={setStartDateTime}
+                    disabled={selectedEvent?.id !== -2}
+                    sx={{ ...pickerSx, width: "100%" }}
+                  />
+                </Grid>
+
+                <Grid>
+                  <DateTimePicker
+                    label="End"
+                    value={endDateTime}
+                    onChange={setEndDateTime}
+                    minDateTime={startDateTime ?? undefined}
+                    disabled={selectedEvent?.id !== -2}
+                    sx={{ ...pickerSx, width: "100%" }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          <Box sx={{ mt: 3 }}>
+            <DataGrid
+              rows={entries}
+              columns={columns}
+              getRowId={row => row.id}
+              rowHeight={70}
+              columnHeaderHeight={70}
+              pageSizeOptions={[20, 50, 100]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 20, page: 0 } },
+                sorting: {
+                  sortModel: [{ field: "raidsCompleted", sort: "desc" }],
+                },
+              }}
+              disableRowSelectionOnClick
+              sx={{
+                fontSize: "1rem",
+                "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                  py: 2,
+                },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  textAlign: "center",
+                  width: "100%",
+                  py: 2,
+                  px: 2,
+                },
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </LocalizationProvider>
   );
 };
 

@@ -16,6 +16,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CircularProgress from "@mui/material/CircularProgress";
 import React from "react";
 import { CustomFormProps } from "./CustomForm";
+import CloseIcon from "@mui/icons-material/Close";
+import Tooltip from "@mui/material/Tooltip";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -23,6 +25,17 @@ interface GenericAdminPageProps {
   createForm: ReactElement<CustomFormProps>;
   label: string;
 }
+const dialogSlotProps = {
+  paper: {
+    sx: (theme: any) => ({
+      bgcolor: "background.default",
+      color: "text.primary",
+      borderRadius: 3,
+      border: `1px solid ${theme.palette.divider}`,
+      boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+    }),
+  },
+};
 
 export const GenericAdminPage = ({
   apiGetEndpoint,
@@ -52,7 +65,9 @@ export const GenericAdminPage = ({
               .replace(/([A-Z])/g, " $1")
               .replace(/^./, c => c.toUpperCase())
               .trim(),
-            width: 150,
+            minWidth: 150,
+            flex: 1,
+
             // Custom render logic for the cell
             valueGetter: (value: any) => {
               if (Array.isArray(value)) {
@@ -70,11 +85,17 @@ export const GenericAdminPage = ({
           {
             field: "actions",
             headerName: "Actions",
-            width: 100,
+            width: 120,
             renderCell: (params: any) => (
               <>
                 <IconButton
-                  sx={{ color: "#FFFFFF" }}
+                  sx={{
+                    color: "text.secondary",
+                    "&:hover": {
+                      bgcolor: theme => `${theme.palette.primary.main}22`,
+                      color: "text.primary",
+                    },
+                  }}
                   onClick={() => {
                     setAutofillData(params.row);
                     setOpenUpdateDialog(true);
@@ -83,7 +104,13 @@ export const GenericAdminPage = ({
                   <EditIcon />
                 </IconButton>
                 <IconButton
-                  sx={{ color: "#FFFFFF" }}
+                  sx={{
+                    color: "text.secondary",
+                    "&:hover": {
+                      bgcolor: theme => `${theme.palette.primary.main}22`,
+                      color: "text.primary",
+                    },
+                  }}
                   onClick={() => {
                     setIdToDelete(params.row.id);
                     setOpenDeletionDialog(true);
@@ -122,13 +149,23 @@ export const GenericAdminPage = ({
     isPost: false,
   });
 
+  const blockBackdropAndEscClose =
+    (setter: React.Dispatch<React.SetStateAction<boolean>>) =>
+    (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+      if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+      setter(false);
+    };
+
   const el = (
     <>
       {members ? (
         <Box
           sx={{
             padding: 3,
-            background: "#220c0e",
+            bgcolor: "background.default",
+            color: "text.primary",
+            borderRadius: 3,
+            height: "100%",
             width: "100%",
             display: "flex",
             flexDirection: "column",
@@ -137,7 +174,8 @@ export const GenericAdminPage = ({
         >
           <Dialog
             open={openDeletionDialog}
-            onClose={() => setOpenDeletionDialog(false)}
+            onClose={blockBackdropAndEscClose(setOpenDeletionDialog)}
+            disableEscapeKeyDown
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
@@ -183,27 +221,82 @@ export const GenericAdminPage = ({
             </Button>
             <Dialog
               open={openCreationDialog}
-              onClose={() => setOpenCreationDialog(false)}
+              onClose={blockBackdropAndEscClose(setOpenCreationDialog)}
+              disableEscapeKeyDown
               maxWidth="sm"
               fullWidth
+              slotProps={dialogSlotProps}
             >
-              <DialogContent dividers>{updatedCreateForm}</DialogContent>
+              <DialogContent sx={{ position: "relative", pt: 6 }}>
+                <Tooltip title="Close window" arrow>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => setOpenCreationDialog(false)}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      color: "text.secondary",
+                      "&:hover": {
+                        bgcolor: theme => `${theme.palette.primary.main}22`,
+                        color: "text.primary",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {updatedCreateForm}
+              </DialogContent>
             </Dialog>
+
             <Dialog
               open={openUpdateDialog}
-              onClose={() => setOpenUpdateDialog(false)}
+              onClose={blockBackdropAndEscClose(setOpenUpdateDialog)}
+              disableEscapeKeyDown
               maxWidth="sm"
               fullWidth
             >
-              <DialogContent dividers>{updatedUpdateForm}</DialogContent>
+              <DialogContent
+                sx={{
+                  position: "relative",
+                  pt: 6,
+                  bgcolor: "background.default",
+                }}
+              >
+                <Tooltip title="Close window" arrow>
+                  <IconButton
+                    aria-label="close"
+                    onClick={() => setOpenUpdateDialog(false)}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      color: "text.secondary",
+                      "&:hover": {
+                        bgcolor: theme => `${theme.palette.primary.main}22`,
+                        color: "text.primary",
+                      },
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {updatedUpdateForm}
+              </DialogContent>
             </Dialog>
+
             <Typography
+              variant="h4"
               sx={{
-                color: "#efdddb",
-                marginBottom: 3,
-                fontWeight: 600,
-                fontSize: 30,
+                mb: 3,
+                fontWeight: 800,
                 textAlign: "center",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "text.primary",
               }}
             >
               {label}
@@ -212,30 +305,25 @@ export const GenericAdminPage = ({
               rows={members}
               columns={columns}
               getRowId={row => row.id}
+              rowHeight={60}
+              columnHeaderHeight={60}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },
               }}
               disableRowSelectionOnClick
               sx={{
-                backgroundColor: "#6A001B",
-                color: "#F7F2F5",
-                border: "1px solid #7A1C69",
-                [`.MuiDataGrid-columnHeaders`]: {
-                  backgroundColor: "#82172e",
-                  color: "#efdddb",
+                fontSize: "1rem",
+                "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                  py: 2,
                 },
-                [`.MuiDataGrid-row`]: {
-                  "&:nth-of-type(even)": {
-                    backgroundColor: "#220c0e",
-                  },
-                  "&:nth-of-type(odd)": {
-                    backgroundColor: "#3C002F",
-                  },
-                },
-                [`.MuiDataGrid-footerContainer`]: {
-                  backgroundColor: "#7A1C69",
-                  color: "#efdddb",
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  textAlign: "center",
+                  width: "100%",
+                  py: 2,
+                  px: 2,
                 },
               }}
             />
