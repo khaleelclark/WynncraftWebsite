@@ -61,9 +61,14 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="discordTag" label="Discord Tag" />
-      <CustomTextField id="name" label="Main Username" />
-      <CustomTextField id="uuid" label="Minecraft UUID" />
+      <CustomTextField id="discordTag" label="Discord Tag" minLength={1} />
+      <CustomTextField id="name" label="Main Username" minLength={1} />
+      <CustomTextField
+        id="uuid"
+        label="Minecraft UUID"
+        minLength={32}
+        format="UUID"
+      />
       <CustomDropdown id="rank" label="Rank" apiEndpoint="/api/ranks" />
       <CustomDropdown
         id="medals"
@@ -88,7 +93,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Event Name" />
+      <CustomTextField id="name" label="Event Name" minLength={4} />
       <CustomTimeAndDateSelector id="eventStart" label="Start Date & Time" />
       <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
     </CustomForm>
@@ -101,7 +106,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Game Name" />
+      <CustomTextField id="name" label="Game Name" minLength={2} />
     </CustomForm>
   );
 
@@ -112,7 +117,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Medal Name" />
+      <CustomTextField id="name" label="Medal Name" minLength={2} />
     </CustomForm>
   );
 
@@ -123,10 +128,11 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Rank Name" />
+      <CustomTextField id="name" label="Rank Name" minLength={2} />
     </CustomForm>
   );
 
+  // TODO add number control
   const createRaidForm = (
     <CustomForm
       title="Raid Management"
@@ -134,9 +140,9 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="id" label="Raid Id" />
-      <CustomTextField id="name" label="Raid Name" />
-      <CustomTextField id="seasonRating" label="Season Rating" />
+      <CustomTextField id="id" label="Raid Id" minLength={1} />
+      <CustomTextField id="name" label="Raid Name" minLength={3} />
+      <CustomTextField id="seasonRating" label="Season Rating" minLength={1} />
     </CustomForm>
   );
 
