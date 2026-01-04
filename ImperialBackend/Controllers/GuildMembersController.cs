@@ -37,6 +37,12 @@ public class GuildMembersController : ControllerBase
         [FromQuery] DateTimeOffset endDate
     ) => Ok(await _service.GetLeaderboardAsync(startDate, endDate));
 
+    [HttpGet("generic")]
+    public async Task<IActionResult> GetAllGeneric()
+    {
+        return Ok(await _service.GetAllGenericAsync());
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

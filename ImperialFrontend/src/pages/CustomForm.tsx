@@ -21,7 +21,7 @@ export interface CustomFormProps {
 export interface FormRegisterProps {
   id: string;
   label: string;
-  register?: (id: string, value: string, validation: boolean) => void;
+  register?: (id: string, value: any, validation: boolean) => void;
   formValues?: Record<string, any>;
   formValidations?: Record<string, any>;
 }
