@@ -7,6 +7,8 @@ public interface IGuildMemberService
     Task<List<GuildMemberPublicGetDTO>> GetAllPublicAsync();
     Task<List<GuildMemberAdminGetDTO>> GetAllAdminAsync();
     Task<GuildMemberProfileGetDTO> GetByIdAsync(int id);
+    Task<List<GenericGetDTO>> GetAllGenericAsync();
+
     Task<List<GuildMemberLeaderboardGetDTO>> GetLeaderboardAsync(
         DateTimeOffset startDate,
         DateTimeOffset endDate

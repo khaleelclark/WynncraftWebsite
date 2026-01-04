@@ -72,19 +72,20 @@ namespace ImperialBackend.Services
             member.DiscordTag = dto.DiscordTag;
             member.JoinDate = dto.JoinDate;
             member.RankId = dto.Rank;
+            member.Uuid = dto.Uuid;
 
             SyncCollection(
                 member.Medals,
                 dto.Medals,
                 m => m.MedalId,
-                id => new GuildMemberMedal { MedalId = id }
+                medalId => new GuildMemberMedal { MedalId = medalId }
             );
 
             SyncCollection(
                 member.Games,
                 dto.Games,
                 g => g.GameId,
-                id => new GuildMemberGame { GameId = id }
+                gameId => new GuildMemberGame { GameId = gameId }
             );
 
             await _context.SaveChangesAsync();
@@ -112,6 +113,19 @@ namespace ImperialBackend.Services
                     WynncraftRank = m.WynncraftRank,
                     Uuid = m.Uuid,
                 })
+                .ToListAsync();
+        }
+
+        /* ============================
+         * GET ALL (PUBLIC - GENERIC LIST)
+         * ============================ */
+
+        public async Task<List<GenericGetDTO>> GetAllGenericAsync()
+        {
+            return await _context
+                .GuildMembers.AsNoTracking()
+                .OrderBy(m => m.MainUsername)
+                .Select(m => new GenericGetDTO { Id = m.GuildMemberId, Name = m.MainUsername })
                 .ToListAsync();
         }
 
@@ -166,8 +180,8 @@ namespace ImperialBackend.Services
                 RankName = member.Rank!.RankName,
                 WarsCompleted = oldest == null ? 0 : member.WarsCompleted - oldest.WarsCompleted,
                 HoursPlayed = oldest == null ? 0 : member.HoursPlayed - oldest.HoursPlayed,
-                RaidsCompleted = await _context.RaidsCompleted.CountAsync(r =>
-                    r.Uuid == member.Uuid
+                RaidsCompleted = await _context.RaidInstances.CountAsync(ri =>
+                    ri.GuildMemberId == member.GuildMemberId
                 ),
                 LastSynced = member.LastSynced,
                 Games = member.Games.Select(g => g.Game!.GameName).ToList(),
@@ -189,12 +203,14 @@ namespace ImperialBackend.Services
                 .ToListAsync();
 
             var raidCounts = await _context
-                .RaidsCompleted.Where(r =>
-                    r.CompletedDate >= startDate && r.CompletedDate <= endDate
+                .RaidInstances.Where(ri =>
+                    ri.RaidCompleted != null
+                    && ri.RaidCompleted.CompletedDate >= startDate
+                    && ri.RaidCompleted.CompletedDate <= endDate
                 )
-                .GroupBy(r => r.Uuid)
-                .Select(g => new { g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.Key, x => x.Count);
+                .GroupBy(ri => ri.GuildMemberId)
+                .Select(g => new { GuildMemberId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.GuildMemberId, x => x.Count);
 
             var leaderboard = new List<GuildMemberLeaderboardGetDTO>();
 
@@ -234,7 +250,9 @@ namespace ImperialBackend.Services
                         Uuid = m.Uuid,
                         WarsCompleted = wars,
                         HoursPlayed = hours,
-                        RaidsCompleted = raidCounts.TryGetValue(m.Uuid, out var count) ? count : 0,
+                        RaidsCompleted = raidCounts.TryGetValue(m.GuildMemberId, out var count)
+                            ? count
+                            : 0,
                         LastSynced = m.LastSynced,
                     }
                 );
@@ -301,10 +319,10 @@ namespace ImperialBackend.Services
                     .Games.Select(g => new GenericGetDTO { Id = g.GameId, Name = g.Game!.GameName })
                     .ToList(),
                 Medals = m
-                    .Medals.Select(m => new GenericGetDTO
+                    .Medals.Select(mm => new GenericGetDTO
                     {
-                        Id = m.MedalId,
-                        Name = m.Medal!.MedalName,
+                        Id = mm.MedalId,
+                        Name = mm.Medal!.MedalName,
                     })
                     .ToList(),
             };

@@ -185,7 +185,7 @@ export const GenericAdminPage = ({
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
                 {`Are you sure you want to delete Id #${idToDelete}
-              ${selectedUser ? selectedUser.name : ""}?`}
+              ${selectedUser && selectedUser.name ? selectedUser.name : ""}?`}
               </DialogContentText>
             </DialogContent>
             <DialogActions>

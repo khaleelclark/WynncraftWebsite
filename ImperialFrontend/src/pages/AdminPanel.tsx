@@ -19,11 +19,7 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import SecurityIcon from "@mui/icons-material/Security";
 import { CustomAdminTile } from "./CustomAdminTile";
 import { CustomAdminDialog } from "./CustomAdminDialog";
-
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
-import Tooltip from "@mui/material/Tooltip";
 
 const AdminPanel: React.FC = () => {
   const [guildMembersOpen, setGuildMembersOpen] = useState(false);
@@ -32,7 +28,7 @@ const AdminPanel: React.FC = () => {
   const [medalsOpen, setMedalsOpen] = useState(false);
   const [ranksOpen, setRanksOpen] = useState(false);
   const [raidsOpen, setRaidsOpen] = useState(false);
-  //const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
+  const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -146,24 +142,26 @@ const AdminPanel: React.FC = () => {
     </CustomForm>
   );
 
-  // const createRaidCompletedForm = (
-  //   <CustomForm
-  //     title="Add a Completed Raid"
-  //     apiEndpoint="/api/raidscompleted/raid-bot-report"
-  //     onSubmitSuccess={handleSubmitSuccess}
-  //     onSubmitError={handleSubmitError}
-  //   >
-  //     <CustomTextField id="raidId" label="Raid Id"  />
-  //     <CustomTextField id="raidId" label="Raid Id"  />
-  //     <CustomTextField id="minecraftUsernames" label="Raid Id"  />
-  //     <CustomDropdown
-  //       id="minecraftUsernames"
-  //       label="Players"
-  //       apiEndpoint="/api/guildmembers"
-  //       multiple={true}
-  //     />
-  //   </CustomForm>
-  //);
+  const createRaidCompletedForm = (
+    <CustomForm
+      title="Raids Completed Management"
+      apiEndpoint="/api/raidscompleted"
+      onSubmitSuccess={handleSubmitSuccess}
+      onSubmitError={handleSubmitError}
+    >
+      <CustomDropdown id="raid" label="Raid Id" apiEndpoint="/api/raids" />
+      <CustomTimeAndDateSelector
+        id="completedDate"
+        label="Completed Time and Date"
+      />
+      <CustomDropdown
+        id="guildMembers"
+        label="Players"
+        apiEndpoint="/api/guildmembers/generic"
+        multiple={true}
+      />
+    </CustomForm>
+  );
 
   return (
     <Box
@@ -258,6 +256,12 @@ const AdminPanel: React.FC = () => {
               description="Create, edit and delete guild raids."
               icon={<SecurityIcon />}
               onOpen={() => setRaidsOpen(true)}
+            />
+            <CustomAdminTile
+              title="Raids Completed"
+              description="Create, edit and delete completed guild raids.(Rare use cases only)"
+              icon={<VerifiedUserIcon />}
+              onOpen={() => setRaidsCompletedOpen(true)}
             />
           </Grid>
 
@@ -354,6 +358,19 @@ const AdminPanel: React.FC = () => {
             apiGetEndpoint="/api/raids"
             apiDeleteEndpoint="/api/raids"
             createForm={createRaidForm}
+          />
+        </CustomAdminDialog>
+
+        <CustomAdminDialog
+          open={raidsCompletedOpen}
+          onClose={() => setRaidsCompletedOpen(false)}
+          title="Raids Completed"
+        >
+          <GenericAdminPage
+            label="Raids Completed"
+            apiGetEndpoint="/api/raidscompleted"
+            apiDeleteEndpoint="/api/raidscompleted"
+            createForm={createRaidCompletedForm}
           />
         </CustomAdminDialog>
       </Box>

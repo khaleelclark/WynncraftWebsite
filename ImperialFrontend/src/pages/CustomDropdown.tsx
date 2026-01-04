@@ -25,8 +25,13 @@ export const CustomDropdown = ({
     adminApi.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
-    register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
+    register?.(
+      id,
+      formValues?.[id] ? formValues?.[id] : multiple ? [] : "",
+      formValues?.id !== undefined
+    );
   }, []);
+  console.log(formValues?.[id]);
 
   const el = multiple ? (
     <Autocomplete

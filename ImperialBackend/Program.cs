@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ImperialDbContext>(options =>
     )
 );
 
+builder.Services.AddScoped<IRaidsCompletedService, RaidsCompletedService>();
 builder.Services.AddScoped<IGuildMemberService, GuildMemberService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IGameService, GameService>();
