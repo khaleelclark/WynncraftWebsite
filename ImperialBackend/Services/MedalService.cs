@@ -1,0 +1,51 @@
+using ImperialBackend.DTOs;
+using ImperialBackend.Models;
+using Microsoft.EntityFrameworkCore;
+
+public class MedalService : IMedalService
+{
+    private readonly ImperialDbContext _context;
+
+    public MedalService(ImperialDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<GenericGetDTO>> GetAllAsync() =>
+        await _context
+            .Medals.AsNoTracking()
+            .Select(m => new GenericGetDTO { Id = m.MedalId, Name = m.MedalName })
+            .ToListAsync();
+
+    public async Task<GenericGetDTO> CreateAsync(GenericPostDTO dto)
+    {
+        var medal = new Medal { MedalName = dto.Name };
+        _context.Medals.Add(medal);
+        await _context.SaveChangesAsync();
+
+        return new GenericGetDTO { Id = medal.MedalId, Name = medal.MedalName };
+    }
+
+    public async Task<GenericGetDTO> UpdateAsync(int id, GenericPostDTO dto)
+    {
+        var medal = await _context.Medals.FindAsync(id) ?? throw new KeyNotFoundException();
+
+        medal.MedalName = dto.Name;
+        await _context.SaveChangesAsync();
+
+        return new GenericGetDTO { Id = medal.MedalId, Name = medal.MedalName };
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        if (await _context.GuildMemberMedals.AnyAsync(m => m.MedalId == id))
+            throw new InvalidOperationException(
+                "Cannot delete medal with guild members. Remove guild members first"
+            );
+
+        var medal = await _context.Medals.FindAsync(id) ?? throw new KeyNotFoundException();
+
+        _context.Medals.Remove(medal);
+        await _context.SaveChangesAsync();
+    }
+}

@@ -1,68 +1,35 @@
-using ImperialBackend.Models;
+using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace ImperialBackend.Controllers
+namespace ImperialBackend.Controllers;
+
+[ApiController]
+[Route("api/games")]
+public class GamesController : ControllerBase
 {
-    [ApiController]
-    [Route("api/games")]
-    public class GamesController : ControllerBase
+    private readonly IGameService _service;
+
+    public GamesController(IGameService service)
     {
-        private readonly ImperialDbContext _context;
+        _service = service;
+    }
 
-        public GamesController(ImperialDbContext context) => _context = context;
+    [HttpGet]
+    [ResponseCache(Duration = 300)]
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var games = _context
-                .Games.AsNoTracking()
-                .Select(g => new GenericGetDTO { Id = g.GameId, Name = g.GameName })
-                .ToList();
-            return Ok(games);
-        }
+    [HttpPost]
+    public async Task<IActionResult> Post(GenericPostDTO dto) =>
+        Ok(await _service.CreateAsync(dto));
 
-        [HttpPost]
-        public IActionResult Post([FromBody] GenericPostDTO game)
-        {
-            var existingGame = _context.Games.FirstOrDefault(g => g.GameName == game.Name);
-            if (existingGame != null)
-                return BadRequest("Game already exists");
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, GenericPostDTO dto) =>
+        Ok(await _service.UpdateAsync(id, dto));
 
-            Game newGame = new Game { GameName = game.Name };
-
-            _context.Games.Add(newGame);
-            _context.SaveChanges();
-
-            return Ok(new GenericGetDTO { Id = newGame.GameId, Name = newGame.GameName });
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] GenericPostDTO dto)
-        {
-            var game = _context.Games.Find(id);
-            if (game == null)
-                return BadRequest();
-
-            game.GameName = dto.Name;
-            _context.SaveChanges();
-            return Ok(new GenericGetDTO { Id = game.GameId, Name = game.GameName });
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            if (_context.GuildMemberGames.Any(g => g.GameId == id))
-                return BadRequest(
-                    "Cannot delete game with guild members. Remove guild members first"
-                );
-
-            var game = _context.Games.Find(id);
-            if (game == null)
-                return NotFound();
-            _context.Games.Remove(game);
-            _context.SaveChanges();
-            return NoContent();
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _service.DeleteAsync(id);
+        return NoContent();
     }
 }

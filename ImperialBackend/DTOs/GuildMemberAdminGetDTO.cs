@@ -1,4 +1,4 @@
-namespace ImperialBackend.Models
+namespace ImperialBackend.DTOs
 {
     public class GuildMemberAdminGetDTO : GenericGetDTO
     {

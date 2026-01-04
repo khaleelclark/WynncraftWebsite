@@ -198,14 +198,7 @@ const App: React.FC = () => {
 
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminPanel />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

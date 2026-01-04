@@ -22,7 +22,13 @@ builder.Services.AddDbContext<ImperialDbContext>(options =>
     )
 );
 
-//builder.Services.AddHostedService<ImperialBackend.Services.GuildMemberSyncService>();
+builder.Services.AddScoped<IGuildMemberService, GuildMemberService>();
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IMedalService, MedalService>();
+builder.Services.AddScoped<IRankService, RankService>();
+builder.Services.AddScoped<IRaidService, RaidService>();
+
 builder.Services.AddSingleton<GuildMemberSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
 
