@@ -1,24 +1,39 @@
 import TextField from "@mui/material/TextField";
-import { useCustomFormContext } from "../CustomFormContext";
+import { FormRegisterProps } from "./CustomForm";
+import { useEffect, useState } from "react";
 
-interface TextFieldProps {
-  id: string;
-  label: string;
-  required?: boolean;
-}
+export const CustomTextField = ({
+  id,
+  label,
+  register,
+  formValues,
+  formValidations,
+}: FormRegisterProps) => {
+  const [touched, setTouched] = useState(false);
 
-export const CustomTextField = ({ id, label, required }: TextFieldProps) => {
-  const { register, formValues } = useCustomFormContext();
+  useEffect(() => {
+    register?.(id, "", false);
+  }, []);
+
   const el = (
     <>
       <TextField
         id={id}
         label={label}
         variant="outlined"
-        required={required}
+        error={!formValidations?.[id] && touched}
+        helperText={
+          !formValidations?.[id] && touched ? "This field is required" : ""
+        }
+        required
         fullWidth
-        onChange={e => register(id, e.target.value)}
-        value={formValues[id] ?? ""}
+        onChange={e => {
+          const value = e.target.value;
+          const validated = value !== "" && value.length > 10;
+          register?.(id, e.target.value, validated);
+          setTouched(true);
+        }}
+        value={formValues?.[id] ?? ""}
       />
     </>
   );

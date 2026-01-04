@@ -1,8 +1,4 @@
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import Button from "@mui/material/Button";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { CustomForm } from "./CustomForm";
 import { CustomTextField } from "./CustomTextField";
 import { CustomDropdown } from "./CustomDropdown";
@@ -21,16 +17,15 @@ import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import SecurityIcon from "@mui/icons-material/Security";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { CustomAdminTile } from "./CustomAdminTile";
+import { CustomAdminDialog } from "./CustomAdminDialog";
+
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
-import { CustomAdminDialog } from "./CustomAdminDialog";
 
 const AdminPanel: React.FC = () => {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
   const [guildMembersOpen, setGuildMembersOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
@@ -49,16 +44,11 @@ const AdminPanel: React.FC = () => {
   const handleSubmitSuccess = () => {
     // add dymanic message confirmations
     setSnackbarMessage("Entity added successfully!");
-    // add dymanic message confirmations
-    setSnackbarMessage("Entity added successfully!");
     setSnackbarSeverity("success");
     setSnackbarOpen(true);
-    setOpen(false);
-    setOpen(false);
   };
 
   const handleSubmitError = (error: unknown) => {
-    setSnackbarMessage("Failed to create new entity. Please try again.");
     setSnackbarMessage("Failed to create new entity. Please try again.");
     setSnackbarSeverity("error");
     setSnackbarOpen(true);
@@ -71,9 +61,9 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="discordTag" label="Discord Tag" required />
-      <CustomTextField id="name" label="Main Username" required />
-      <CustomTextField id="uuid" label="Minecraft UUID" required />
+      <CustomTextField id="discordTag" label="Discord Tag" />
+      <CustomTextField id="name" label="Main Username" />
+      <CustomTextField id="uuid" label="Minecraft UUID" />
       <CustomDropdown id="rank" label="Rank" apiEndpoint="/api/ranks" />
       <CustomDropdown
         id="medals"
@@ -98,7 +88,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Event Name" required />
+      <CustomTextField id="name" label="Event Name" />
       <CustomTimeAndDateSelector id="eventStart" label="Start Date & Time" />
       <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
     </CustomForm>
@@ -111,7 +101,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Game Name" required />
+      <CustomTextField id="name" label="Game Name" />
     </CustomForm>
   );
 
@@ -122,7 +112,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Medal Name" required />
+      <CustomTextField id="name" label="Medal Name" />
     </CustomForm>
   );
 
@@ -133,7 +123,7 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="name" label="Rank Name" required />
+      <CustomTextField id="name" label="Rank Name" />
     </CustomForm>
   );
 
@@ -144,9 +134,9 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="id" label="Raid Id" required />
-      <CustomTextField id="name" label="Raid Name" required />
-      <CustomTextField id="seasonRating" label="Season Rating" required />
+      <CustomTextField id="id" label="Raid Id" />
+      <CustomTextField id="name" label="Raid Name" />
+      <CustomTextField id="seasonRating" label="Season Rating" />
     </CustomForm>
   );
 
@@ -157,9 +147,9 @@ const AdminPanel: React.FC = () => {
   //     onSubmitSuccess={handleSubmitSuccess}
   //     onSubmitError={handleSubmitError}
   //   >
-  //     <CustomTextField id="raidId" label="Raid Id" required />
-  //     <CustomTextField id="raidId" label="Raid Id" required />
-  //     <CustomTextField id="minecraftUsernames" label="Raid Id" required />
+  //     <CustomTextField id="raidId" label="Raid Id"  />
+  //     <CustomTextField id="raidId" label="Raid Id"  />
+  //     <CustomTextField id="minecraftUsernames" label="Raid Id"  />
   //     <CustomDropdown
   //       id="minecraftUsernames"
   //       label="Players"

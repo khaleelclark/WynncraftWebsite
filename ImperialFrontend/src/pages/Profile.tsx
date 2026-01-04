@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
-
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
@@ -14,7 +13,7 @@ import Divider from "@mui/material/Divider";
 import dayjs from "dayjs";
 
 interface ProfileData {
-  mainUsername: string;
+  name: string;
   minecraftUsername: string;
   rankName?: string;
   joinDate?: string;
