@@ -160,6 +160,8 @@ namespace ImperialBackend.Services
                 Name = member.MainUsername,
                 DiscordTag = member.DiscordTag,
                 JoinDate = member.JoinDate,
+                MinecraftUsername = member.MinecraftUsername,
+                WynncraftRank = member.WynncraftRank,
                 Uuid = member.Uuid,
                 RankName = member.Rank!.RankName,
                 WarsCompleted = oldest == null ? 0 : member.WarsCompleted - oldest.WarsCompleted,
