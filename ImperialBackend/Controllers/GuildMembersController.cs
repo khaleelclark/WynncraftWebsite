@@ -31,6 +31,12 @@ public class GuildMembersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id) => Ok(await _service.GetByIdAsync(id));
 
+    [HttpGet("leaderboard")]
+    public async Task<IActionResult> GetLeaderboard(
+        [FromQuery] DateTimeOffset startDate,
+        [FromQuery] DateTimeOffset endDate
+    ) => Ok(await _service.GetLeaderboardAsync(startDate, endDate));
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
