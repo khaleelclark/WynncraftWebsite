@@ -31,7 +31,6 @@ export const CustomDropdown = ({
       formValues?.id !== undefined
     );
   }, []);
-  console.log(formValues?.[id]);
 
   const el = multiple ? (
     <Autocomplete

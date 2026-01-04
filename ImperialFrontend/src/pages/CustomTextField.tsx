@@ -19,6 +19,7 @@ export const CustomTextField = ({
   formValidations,
 }: TextFieldProps) => {
   const [touched, setTouched] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
@@ -27,7 +28,6 @@ export const CustomTextField = ({
   const UUIDv1 =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const UUIDv2 = /^[0-9a-f]{32}$/i;
-  const [errorMessage, setErrorMessage] = useState("");
 
   const el = (
     <>
