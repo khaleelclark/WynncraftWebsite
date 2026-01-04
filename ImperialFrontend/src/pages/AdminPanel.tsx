@@ -136,9 +136,14 @@ const AdminPanel: React.FC = () => {
       onSubmitSuccess={handleSubmitSuccess}
       onSubmitError={handleSubmitError}
     >
-      <CustomTextField id="id" label="Raid Id" minLength={1} />
+      <CustomTextField id="id" label="Raid Id" minLength={1} type="number" />
       <CustomTextField id="name" label="Raid Name" minLength={3} />
-      <CustomTextField id="seasonRating" label="Season Rating" minLength={1} />
+      <CustomTextField
+        id="seasonRating"
+        label="Season Rating"
+        minLength={1}
+        type="number"
+      />
     </CustomForm>
   );
 
