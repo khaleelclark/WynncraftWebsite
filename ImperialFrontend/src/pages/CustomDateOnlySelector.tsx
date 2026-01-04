@@ -14,7 +14,7 @@ export const CustomDateOnlySelector = ({
   const showError = touched && formValidations?.[id] === false;
 
   useEffect(() => {
-    register?.(id, "", false);
+    register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
   }, []);
 
   const el = (

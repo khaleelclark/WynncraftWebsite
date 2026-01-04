@@ -19,7 +19,7 @@ export const CustomTextField = ({
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
-    register?.(id, "", false);
+    register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
   }, []);
 
   const UUIDv1 =

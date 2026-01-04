@@ -1,108 +1,38 @@
-using ImperialBackend.Models;
+using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace ImperialBackend.Controllers
+namespace ImperialBackend.Controllers;
+
+[ApiController]
+[Route("api/events")]
+public class EventsController : ControllerBase
 {
-    [ApiController]
-    [Route("api/events")]
-    public class EventsController : ControllerBase
+    private readonly IEventService _service;
+
+    public EventsController(IEventService service)
     {
-        private readonly ImperialDbContext _context;
+        _service = service;
+    }
 
-        public EventsController(ImperialDbContext context) => _context = context;
+    [HttpGet]
+    [ResponseCache(Duration = 60)]
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var events = _context
-                .Events.Select(e => new EventGetDTO
-                {
-                    Id = e.EventId,
-                    Name = e.EventName,
-                    EventStart = e.EventStart,
-                    EventEnd = e.EventEnd,
-                })
-                .ToList();
+    [HttpGet("{id}")]
+    [ResponseCache(Duration = 60)]
+    public async Task<IActionResult> GetById(int id) => Ok(await _service.GetByIdAsync(id));
 
-            return Ok(events);
-        }
+    [HttpPost]
+    public async Task<IActionResult> Post(EventPostDTO dto) => Ok(await _service.CreateAsync(dto));
 
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
-        {
-            var ev = _context
-                .Events.Where(e => e.EventId == id)
-                .Select(e => new EventGetDTO
-                {
-                    Id = e.EventId,
-                    Name = e.EventName,
-                    EventStart = e.EventStart,
-                    EventEnd = e.EventEnd,
-                })
-                .FirstOrDefault();
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, EventPostDTO dto) =>
+        Ok(await _service.UpdateAsync(id, dto));
 
-            if (ev == null)
-                return NotFound();
-
-            return Ok(ev);
-        }
-
-        [HttpPost]
-        public IActionResult Post([FromBody] EventPostDTO ev)
-        {
-            Event newEvent = new Event
-            {
-                EventName = ev.Name,
-                EventStart = ev.EventStart,
-                EventEnd = ev.EventEnd,
-            };
-
-            _context.Events.Add(newEvent);
-            _context.SaveChanges();
-            return Ok(
-                new EventGetDTO
-                {
-                    Id = newEvent.EventId,
-                    Name = newEvent.EventName,
-                    EventStart = newEvent.EventStart,
-                    EventEnd = newEvent.EventEnd,
-                }
-            );
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] EventPostDTO ev)
-        {
-            var existingEvent = _context.Events.Find(id);
-            if (existingEvent == null)
-                return NotFound();
-
-            existingEvent.EventName = ev.Name;
-            existingEvent.EventStart = ev.EventStart;
-            existingEvent.EventEnd = ev.EventEnd;
-
-            _context.SaveChanges();
-            return Ok(
-                new EventGetDTO
-                {
-                    Id = existingEvent.EventId,
-                    Name = existingEvent.EventName,
-                    EventStart = existingEvent.EventStart,
-                    EventEnd = existingEvent.EventEnd,
-                }
-            );
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var ev = _context.Events.Find(id);
-            if (ev == null)
-                return NotFound();
-            _context.Events.Remove(ev);
-            _context.SaveChanges();
-            return NoContent();
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _service.DeleteAsync(id);
+        return NoContent();
     }
 }

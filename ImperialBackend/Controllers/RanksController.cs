@@ -1,69 +1,35 @@
 using ImperialBackend.DTOs;
-using ImperialBackend.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
-namespace ImperialBackend.Controllers
+namespace ImperialBackend.Controllers;
+
+[ApiController]
+[Route("api/ranks")]
+public class RanksController : ControllerBase
 {
-    [ApiController]
-    [Route("api/ranks")]
-    public class RanksController : ControllerBase
+    private readonly IRankService _service;
+
+    public RanksController(IRankService service)
     {
-        private readonly ImperialDbContext _context;
+        _service = service;
+    }
 
-        public RanksController(ImperialDbContext context) => _context = context;
+    [HttpGet]
+    [ResponseCache(Duration = 300)]
+    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
-        [HttpGet]
-        public IActionResult GetAll()
-        {
-            var ranks = _context
-                .Ranks.Select(r => new GenericGetDTO { Id = r.RankId, Name = r.RankName })
-                .ToList();
+    [HttpPost]
+    public async Task<IActionResult> Post(GenericPostDTO dto) =>
+        Ok(await _service.CreateAsync(dto));
 
-            return Ok(ranks);
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, GenericPostDTO dto) =>
+        Ok(await _service.UpdateAsync(id, dto));
 
-        [HttpPost]
-        public IActionResult Post([FromBody] GenericPostDTO dto)
-        {
-            var rank = new Rank { RankName = dto.Name };
-
-            _context.Ranks.Add(rank);
-            _context.SaveChanges();
-            return Ok(new GenericGetDTO { Id = rank.RankId, Name = rank.RankName });
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult UpdateRank(int id, [FromBody] GenericPostDTO dto)
-        {
-            var rank = _context.Ranks.Find(id);
-            if (rank == null)
-                return NotFound();
-
-            rank.RankName = dto.Name;
-            _context.SaveChanges();
-
-            return Ok(new GenericGetDTO { Id = rank.RankId, Name = rank.RankName });
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var rank = _context
-                .Ranks.Include(r => r.GuildMembers)
-                .FirstOrDefault(r => r.RankId == id);
-
-            if (rank == null)
-                return NotFound();
-
-            if (rank.GuildMembers.Any())
-                return Conflict(
-                    "Can't delete this rank because it still has guild members. Reassign them first."
-                );
-
-            _context.Ranks.Remove(rank);
-            _context.SaveChanges();
-            return NoContent();
-        }
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _service.DeleteAsync(id);
+        return NoContent();
     }
 }

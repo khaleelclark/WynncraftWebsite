@@ -1,5 +1,3 @@
-using ImperialBackend.Models;
-
 namespace ImperialBackend.DTOs
 {
     public class RaidPostDTO : GenericPostDTO
