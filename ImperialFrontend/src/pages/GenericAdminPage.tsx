@@ -294,8 +294,6 @@ export const GenericAdminPage = ({
                 mb: 3,
                 fontWeight: 800,
                 textAlign: "center",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
                 color: "text.primary",
               }}
             >

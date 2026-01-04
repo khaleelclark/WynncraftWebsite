@@ -85,62 +85,70 @@ const App: React.FC = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: 2,
-            borderBottom: "2px solid #bc511c",
-            background: "#82172e",
-            color: "#efdddb",
-            marginBottom: 3,
+            px: 3,
+            py: 2,
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            borderBottom: theme => `2px solid ${theme.palette.secondary.main}`,
+            flexShrink: 0,
           }}
         >
-          <Box>
-            <Link
-              to="/"
-              style={{
-                color: "#efdddb",
-                marginRight: 16,
-                textDecoration: "none",
-                fontWeight: 600,
-              }}
-            >
-              Guild Members
-            </Link>
-            <Link
-              to="/leaderboard"
-              style={{
-                color: "#efdddb",
-                textDecoration: "none",
-                fontWeight: 600,
-                marginRight: 16,
-              }}
-            >
-              Leaderboard
-            </Link>
-            {user && (
-              <Link
-                to="/admin"
-                style={{
-                  color: "#efdddb",
-                  textDecoration: "none",
-                  fontWeight: 600,
-                  marginRight: 16,
-                }}
-              >
-                Admin Panel
-              </Link>
-            )}
-          </Box>
+          {/* Left nav */}
           <Box
             sx={{
               display: "flex",
+              gap: 2,
               alignItems: "center",
-              justifyContent: "center",
-              minWidth: 150,
             }}
           >
+            <Box
+              component={Link}
+              to="/"
+              sx={{
+                color: "inherit",
+                textDecoration: "none",
+                fontWeight: 700,
+                "&:hover": { opacity: 0.9 },
+              }}
+            >
+              Guild Members
+            </Box>
+
+            <Box
+              component={Link}
+              to="/leaderboard"
+              sx={{
+                color: "inherit",
+                textDecoration: "none",
+                fontWeight: 700,
+                "&:hover": { opacity: 0.9 },
+              }}
+            >
+              Leaderboard
+            </Box>
+
+            {user && (
+              <Box
+                component={Link}
+                to="/admin"
+                sx={{
+                  color: "inherit",
+                  textDecoration: "none",
+                  fontWeight: 700,
+                  "&:hover": { opacity: 0.9 },
+                }}
+              >
+                Admin Panel
+              </Box>
+            )}
+          </Box>
+
+          {/* Right actions */}
+          <Box sx={{ display: "flex", alignItems: "center", minWidth: 180 }}>
             {isLoading ? (
               <CircularProgress size={24} color="secondary" />
             ) : user ? (
-              <div>
+              <>
                 <Button
                   id="logout-button"
                   aria-controls={open ? "logout-menu" : undefined}
@@ -152,18 +160,28 @@ const App: React.FC = () => {
                 >
                   Welcome, {user.profile.nickname}
                 </Button>
+
                 <Menu
                   id="logout-menu"
                   anchorEl={anchorEl}
                   open={open}
                   onClose={handleClose}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        bgcolor: "background.paper",
+                        color: "text.primary",
+                        border: theme => `1px solid ${theme.palette.divider}`,
+                      },
+                    },
+                  }}
                 >
                   <MenuItem onClick={handleLocalLogout}>Logout</MenuItem>
                   <MenuItem onClick={handleFullLogout}>
                     Logout from Authentik
                   </MenuItem>
                 </Menu>
-              </div>
+              </>
             ) : (
               <Button
                 variant="contained"

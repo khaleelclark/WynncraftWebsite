@@ -1,21 +1,29 @@
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import { adminApi } from "../api";
 import { useState } from "react";
-import { CustomFormContext } from "../CustomFormContext";
 import Button from "@mui/material/Button";
+import React from "react";
 
 export interface CustomFormProps {
   title: string;
-  children: ReactNode;
+  children: ReactNode[] | ReactNode;
   apiEndpoint: string;
   onSubmitSuccess?: () => void;
   onSubmitError?: (error: unknown) => void;
   changeRecordsCallback?: (newRecord: Object) => void;
   autofillData?: any;
   isPost?: boolean; //true = post, false = put
+}
+
+export interface FormRegisterProps {
+  id: string;
+  label: string;
+  register?: (id: string, value: string, validation: boolean) => void;
+  formValues?: Record<string, any>;
+  formValidations?: Record<string, any>;
 }
 
 export const CustomForm = ({
@@ -28,14 +36,16 @@ export const CustomForm = ({
   autofillData,
   isPost,
 }: CustomFormProps) => {
-  const [formValues, setFormValues] = useState<Record<string, string>>(
+  const [formValues, setFormValues] = useState<Record<string, any>>(
     autofillData ?? {}
   );
+  const [formValidations, setFormValidations] = useState<Record<string, any>>(
+    {}
+  );
 
-  useEffect(() => {}, []);
-
-  const register = (id: string, value: string) => {
+  const register = (id: string, value: any, validation: boolean) => {
     setFormValues(prevValues => ({ ...prevValues, [id]: value }));
+    setFormValidations(prevValues => ({ ...prevValues, [id]: validation }));
   };
 
   const flattenObject = (obj: any) => {
@@ -92,60 +102,69 @@ export const CustomForm = ({
   };
 
   const el = (
-    <CustomFormContext.Provider value={{ register, formValues }}>
-      <Paper
+    <Paper
+      sx={{
+        padding: 4,
+        margin: 2,
+        bgcolor: "background.paper",
+        color: "text.primary",
+        borderRadius: 3,
+        border: theme => `1px solid ${theme.palette.divider}`,
+      }}
+      elevation={3}
+    >
+      <Typography
+        variant="h4"
         sx={{
-          padding: 4,
-          margin: 2,
-          bgcolor: "background.paper",
+          mb: 3,
+          fontWeight: 800,
           color: "text.primary",
-          borderRadius: 3,
-          border: theme => `1px solid ${theme.palette.divider}`,
+          textAlign: "center",
         }}
-        elevation={3}
       >
-        <Typography
-          variant="h4"
+        {title}
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          alignItems: "stretch",
+          padding: 2,
+          margin: 2,
+        }}
+      >
+        {React.Children.map(children, child => {
+          if (!React.isValidElement(child)) return child;
+          return React.cloneElement(
+            child as React.ReactElement<FormRegisterProps>,
+            {
+              register,
+              formValues,
+              formValidations,
+            }
+          );
+        })}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSubmit}
+          disabled={!Object.values(formValidations).every(Boolean)}
           sx={{
-            mb: 3,
-            fontWeight: 800,
-            color: "text.primary",
-            textAlign: "center",
+            px: 3,
+
+            // optional: extra glow without hardcoding hex
+            boxShadow: theme => `0 0 16px ${theme.palette.primary.main}33`,
+            "&:hover": {
+              boxShadow: theme => `0 0 22px ${theme.palette.primary.main}66`,
+            },
           }}
         >
-          {title}
-        </Typography>
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
-            alignItems: "stretch",
-            padding: 2,
-            margin: 2,
-          }}
-        >
-          {children}
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            sx={{
-              px: 3,
-
-              // optional: extra glow without hardcoding hex
-              boxShadow: theme => `0 0 16px ${theme.palette.primary.main}33`,
-              "&:hover": {
-                boxShadow: theme => `0 0 22px ${theme.palette.primary.main}66`,
-              },
-            }}
-          >
-            Submit
-          </Button>
-        </Box>
-      </Paper>
-    </CustomFormContext.Provider>
+          Submit
+        </Button>
+      </Box>
+    </Paper>
   );
   return el;
 };
