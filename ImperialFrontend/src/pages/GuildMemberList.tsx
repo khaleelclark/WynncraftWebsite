@@ -134,7 +134,6 @@ const GuildMemberList: React.FC = () => {
         bgcolor: "background.default",
         color: "text.primary",
         width: "100%",
-        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -163,7 +162,7 @@ const GuildMemberList: React.FC = () => {
               fontWeight: 800,
             }}
           >
-            ~ Imperial Guild Members ~
+            Imperial Guild Members
           </Typography>
         </Paper>
         <DataGrid
