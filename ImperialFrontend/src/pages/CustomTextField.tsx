@@ -48,7 +48,8 @@ export const CustomTextField = ({
 
           const requiredOk = value.trim() !== "" && value.length >= minLength;
           const uuidOk = !isUUID || UUIDv1.test(value) || UUIDv2.test(value);
-          const numberOk = !isNumber || Number.isFinite(Number(value));
+          const parsed = Number(value);
+          const numberOk = !isNumber || (Number.isFinite(parsed) && parsed > 0);
           const validated = requiredOk && uuidOk && numberOk;
 
           const message = !requiredOk
@@ -56,7 +57,7 @@ export const CustomTextField = ({
             : !uuidOk
             ? "Invalid UUID"
             : !numberOk
-            ? "Must be a number"
+            ? "Must be a positive number"
             : "";
 
           setErrorMessage(message);

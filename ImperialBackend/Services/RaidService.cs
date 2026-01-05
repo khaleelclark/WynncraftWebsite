@@ -24,6 +24,10 @@ public class RaidService : IRaidService
 
     public async Task<RaidGetDTO> CreateAsync(RaidPostDTO dto)
     {
+        var exists = await _context.Raids.AnyAsync(r => r.RaidId == dto.Id);
+        if (exists)
+            throw new InvalidOperationException($"Raid with id {dto.Id} already exists.");
+
         var raid = new Raid
         {
             RaidId = dto.Id,
