@@ -40,7 +40,6 @@ export const CustomTextField = ({
         helperText={!formValidations?.[id] && touched ? errorMessage : ""}
         required
         fullWidth
-        onBlur={() => setTouched(true)}
         onChange={e => {
           const value = e.target.value;
 
@@ -62,6 +61,7 @@ export const CustomTextField = ({
 
           setErrorMessage(message);
           register?.(id, value, validated);
+          setTouched(true);
         }}
         value={formValues?.[id] ?? ""}
       />

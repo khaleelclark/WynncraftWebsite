@@ -106,8 +106,6 @@ public class GuildMembersController : ControllerBase
             : msg.Contains("GameId", StringComparison.OrdinalIgnoreCase) ? "games"
             : null;
 
-        // 409 = conflict (duplicate)
-        // 400 = validation-ish errors (invalid IDs)
         if (msg.Contains("already exists", StringComparison.OrdinalIgnoreCase))
             return Conflict(new { message = msg, field });
 
