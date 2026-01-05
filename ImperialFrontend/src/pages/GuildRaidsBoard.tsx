@@ -8,23 +8,17 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
-interface LeaderboardEntry {
+interface RaidCompletedPublicRow {
   id: number;
-  minecraftUsername: string;
-  uuid?: string;
-  warsCompleted: number;
-  hoursPlayed?: number | null;
-  raidsCompleted: number;
-  lastSynced?: string | null;
+  completedDate: string;
+  raidName: string;
+  guildMembers: string[];
 }
 
-const Leaderboard: React.FC = () => {
-  const navigate = useNavigate();
-
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+const GuildRaidsBoard: React.FC = () => {
+  const [entries, setEntries] = useState<RaidCompletedPublicRow[]>([]);
   const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
 
@@ -37,93 +31,51 @@ const Leaderboard: React.FC = () => {
 
   const columns: GridColDef[] = [
     {
-      field: "minecraftUsername",
-      headerName: "Player",
-      minWidth: 240,
-      flex: 1.4,
+      field: "raidName",
+      headerName: "Raid",
+      minWidth: 260,
+      flex: 1.2,
       align: "center",
       headerAlign: "center",
-      sortable: false,
-      renderCell: (params: any) => (
-        <span
-          style={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            cursor: "pointer",
-          }}
-          onClick={() => navigate(`/profile/${params.row.id}`)}
-        >
-          {params.row.uuid && (
-            <img
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-              alt="Skin"
-              style={{
-                width: 45,
-                height: 45,
-                marginRight: 10,
-                verticalAlign: "middle",
-                borderRadius: 6,
-              }}
-            />
-          )}
-          <span>{params.row.minecraftUsername}</span>
-        </span>
-      ),
     },
     {
-      field: "raidsCompleted",
-      headerName: "Raids",
-      minWidth: 150,
-      flex: 0.6,
-      align: "center",
-      headerAlign: "center",
-      type: "number",
-    },
-    {
-      field: "warsCompleted",
-      headerName: "Wars",
-      minWidth: 150,
-      flex: 0.6,
-      align: "center",
-      headerAlign: "center",
-      type: "number",
-    },
-    {
-      field: "hoursPlayed",
-      headerName: "Hours Played",
-      minWidth: 180,
-      flex: 0.7,
-      align: "center",
-      headerAlign: "center",
-      type: "number",
-      renderCell: (params: any) => {
-        const hp = params.row.hoursPlayed;
-        return hp != null && hp >= 0 ? hp : "Private";
-      },
-    },
-    {
-      field: "lastSynced",
-      headerName: "Last Updated",
-      minWidth: 200,
+      field: "completedDate",
+      headerName: "Completed",
+      minWidth: 220,
       flex: 0.9,
       align: "center",
       headerAlign: "center",
-      renderCell: (params: any) =>
-        params.value
-          ? new Date(params.value as string).toLocaleString(undefined, {
+      renderCell: (params: any) => {
+        const v = params.row.completedDate;
+        return v
+          ? new Date(v).toLocaleString(undefined, {
               dateStyle: "short",
               timeStyle: "short",
             })
-          : "—",
+          : "—";
+      },
+    },
+
+    {
+      field: "guildMembers",
+      headerName: "Members",
+      minWidth: 420,
+      flex: 2,
+      align: "left",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: (params: any) => {
+        const members: string[] = params.row.guildMembers ?? [];
+        return members.length ? members.join(", ") : "—";
+      },
     },
   ];
 
-  const getLeaderboard = () => {
+  const getPublicRaids = () => {
     if (!startDateTime || !endDateTime) return;
 
     axios
-      .get("/api/guildmembers/leaderboard", {
+      .get("/api/raidscompleted/public", {
         params: {
           startDate: startDateTime.toISOString(),
           endDate: endDateTime.toISOString(),
@@ -133,7 +85,7 @@ const Leaderboard: React.FC = () => {
         const arr = res.data?.value ?? res.data ?? [];
         setEntries(arr);
       })
-      .catch(err => console.error("Failed to fetch leaderboard:", err));
+      .catch(err => console.error("Failed to fetch public raids:", err));
   };
 
   useEffect(() => {
@@ -152,12 +104,12 @@ const Leaderboard: React.FC = () => {
   }, [selectedEvent]);
 
   useEffect(() => {
-    if (startDateTime && endDateTime) getLeaderboard();
+    if (startDateTime && endDateTime) getPublicRaids();
   }, [startDateTime, endDateTime]);
 
   const leaderboardTitle =
     selectedEvent?.id === -1
-      ? "All Time Leaderboard"
+      ? "All Completed Guild Raids"
       : selectedEvent?.id === -2
       ? "Custom Leaderboard"
       : `${selectedEvent?.name} Leaderboard`;
@@ -251,21 +203,23 @@ const Leaderboard: React.FC = () => {
               columns={columns}
               getRowId={row => row.id}
               rowHeight={70}
+              getRowHeight={() => "auto"}
               columnHeaderHeight={70}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 20, page: 0 } },
                 sorting: {
-                  sortModel: [{ field: "raidsCompleted", sort: "desc" }],
+                  sortModel: [{ field: "completedDate", sort: "desc" }],
                 },
               }}
               disableRowSelectionOnClick
               sx={{
                 fontSize: "1rem",
                 "& .MuiDataGrid-cell": {
-                  display: "flex",
-                  alignItems: "center",
-                  py: 2,
+                  whiteSpace: "normal",
+                  lineHeight: "1.35",
+                  py: 1.5,
+                  alignItems: "flex-start",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   textAlign: "center",
@@ -282,4 +236,4 @@ const Leaderboard: React.FC = () => {
   );
 };
 
-export default Leaderboard;
+export default GuildRaidsBoard;

@@ -119,6 +119,34 @@ namespace ImperialBackend.Services
             return await LoadGetDtoAsync(raidCompleted.RaidCompletedId);
         }
 
+        public async Task<List<RaidCompletedPublicGetDTO>> GetAllPublicAsync(
+            DateTimeOffset? startDate,
+            DateTimeOffset? endDate
+        )
+        {
+            var query = _context
+                .RaidsCompleted.AsNoTracking()
+                .Include(r => r.Raid)
+                .Include(r => r.RaidInstances)
+                    .ThenInclude(ri => ri.GuildMember)
+                .AsQueryable();
+
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                if (endDate < startDate)
+                    throw new InvalidOperationException("endDate must be >= startDate");
+
+                var startUtc = startDate.Value.UtcDateTime;
+                var endUtc = endDate.Value.UtcDateTime;
+
+                query = query.Where(r => r.CompletedDate >= startUtc && r.CompletedDate <= endUtc);
+            }
+
+            var raidsCompleted = await query.OrderByDescending(r => r.CompletedDate).ToListAsync();
+
+            return raidsCompleted.Select(ToPublicDto).ToList();
+        }
+
         public async Task DeleteAsync(int id)
         {
             var rc = await _context
@@ -227,6 +255,19 @@ namespace ImperialBackend.Services
                         Id = ri.GuildMemberId,
                         Name = ri.GuildMember!.MainUsername,
                     })
+                    .ToList(),
+            };
+
+        private static RaidCompletedPublicGetDTO ToPublicDto(RaidCompleted rc) =>
+            new()
+            {
+                Id = rc.RaidCompletedId,
+                CompletedDate = rc.CompletedDate,
+                RaidName = rc.Raid?.RaidName ?? "(Unknown Raid)",
+                GuildMembers = rc
+                    .RaidInstances.Where(ri => ri.GuildMember?.MainUsername != null)
+                    .Select(ri => ri.GuildMember!.MainUsername!)
+                    .Distinct()
                     .ToList(),
             };
 

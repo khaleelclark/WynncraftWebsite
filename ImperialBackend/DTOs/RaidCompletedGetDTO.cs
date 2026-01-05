@@ -2,10 +2,10 @@ namespace ImperialBackend.DTOs
 {
     public class RaidCompletedGetDTO
     {
-        public int Id { get; set; } // RaidCompletedId
-        public GenericGetDTO Raid { get; set; } = null!; // ✅ single object
+        public int Id { get; set; }
+        public GenericGetDTO Raid { get; set; } = null!;
         public DateTimeOffset CompletedDate { get; set; }
 
-        public List<GenericGetDTO> GuildMembers { get; set; } = new(); // ✅ array
+        public List<GenericGetDTO> GuildMembers { get; set; } = new();
     }
 }

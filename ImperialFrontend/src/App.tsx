@@ -9,9 +9,9 @@ import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import { useUser } from "./auth/UserContext";
-import { ProtectedRoute } from "./auth/ProtectedRoute";
 import React from "react";
 import Snackbar from "@mui/material/Snackbar";
+import GuildRaidsBoard from "./pages/GuildRaidsBoard";
 
 const App: React.FC = () => {
   const { user, isLoading, signinRedirect, signoutRedirect, signoutLocal } =
@@ -126,6 +126,18 @@ const App: React.FC = () => {
             >
               Leaderboard
             </Box>
+            <Box
+              component={Link}
+              to="/completed-raids-board"
+              sx={{
+                color: "inherit",
+                textDecoration: "none",
+                fontWeight: 700,
+                "&:hover": { opacity: 0.9 },
+              }}
+            >
+              Completed Raids
+            </Box>
 
             {user && (
               <Box
@@ -194,8 +206,8 @@ const App: React.FC = () => {
           </Box>
         </Box>
         <Routes>
+          <Route path="/completed-raids-board" element={<GuildRaidsBoard />} />
           <Route path="/" element={<GuildMemberList />} />
-
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/admin" element={<AdminPanel />} />
