@@ -1,4 +1,5 @@
 using ImperialBackend.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperialBackend.Controllers;
@@ -14,10 +15,12 @@ public class RaidsController : ControllerBase
         _service = service;
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpGet]
     [ResponseCache(Duration = 300)]
     public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Post(RaidPostDTO dto)
     {
@@ -31,6 +34,7 @@ public class RaidsController : ControllerBase
         }
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, RaidPostDTO dto)
     {
@@ -44,6 +48,7 @@ public class RaidsController : ControllerBase
         }
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {

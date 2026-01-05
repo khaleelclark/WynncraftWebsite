@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminApi } from "../api";
+
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { FormRegisterProps } from "./CustomForm";
@@ -25,7 +25,7 @@ export const CustomDropdown = ({
   const showError = required && touched && !formValidations?.[id];
 
   useEffect(() => {
-    adminApi.get(apiEndpoint).then(res => {
+    axios.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
     const value = formValues?.[id] ?? (multiple ? [] : null);

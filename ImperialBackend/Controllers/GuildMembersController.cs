@@ -1,4 +1,5 @@
 using ImperialBackend.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperialBackend.Controllers;
@@ -14,6 +15,7 @@ public class GuildMembersController : ControllerBase
         _service = service;
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPost]
     public async Task<IActionResult> Post(GuildMemberPostDTO dto)
     {
@@ -32,6 +34,7 @@ public class GuildMembersController : ControllerBase
         }
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, GuildMemberPostDTO dto)
     {
@@ -53,6 +56,7 @@ public class GuildMembersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetPublic() => Ok(await _service.GetAllPublicAsync());
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpGet("admin")]
     public async Task<IActionResult> GetAdmin() => Ok(await _service.GetAllAdminAsync());
 
@@ -75,12 +79,14 @@ public class GuildMembersController : ControllerBase
         [FromQuery] DateTimeOffset endDate
     ) => Ok(await _service.GetLeaderboardAsync(startDate, endDate));
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpGet("generic")]
     public async Task<IActionResult> GetAllGeneric()
     {
         return Ok(await _service.GetAllGenericAsync());
     }
 
+    [Authorize(Policy = "AdminOnly")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
