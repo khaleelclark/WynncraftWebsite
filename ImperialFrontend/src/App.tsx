@@ -136,7 +136,7 @@ const App: React.FC = () => {
               Completed Raids
             </Box>
 
-            {user && (
+            {user?.isAuthenticated && (
               <Box
                 component={Link}
                 to="/admin"
@@ -193,8 +193,28 @@ const App: React.FC = () => {
                   >
                     Logout
                   </MenuItem>
-                  <MenuItem onClick={handleFullLogout}>
+                  <MenuItem
+                    onClick={() =>
+                      (window.location.href = "/api/auth/logout-all")
+                    }
+                  >
                     Logout from Authentik
+                  </MenuItem>
+                  <MenuItem
+                    onClick={async () => {
+                      try {
+                        const res = await axios.get("/api/auth/me");
+                        console.log("User:", res.data);
+                        alert(
+                          `Logged in as: ${res.data.username ?? res.data.name}`
+                        );
+                      } catch (err: any) {
+                        console.error(err);
+                        alert("Not authenticated");
+                      }
+                    }}
+                  >
+                    Who am I
                   </MenuItem>
                 </Menu>
               </>
@@ -210,29 +230,6 @@ const App: React.FC = () => {
               </Button>
             )}
           </Box>
-          <MenuItem onClick={() => (window.location.href = "/api/auth/logout")}>
-            Logout
-          </MenuItem>
-          <MenuItem
-            onClick={() => (window.location.href = "/api/auth/logout-all")}
-          >
-            Logout All
-          </MenuItem>
-          <Button
-            variant="outlined"
-            onClick={async () => {
-              try {
-                const res = await axios.get("/api/auth/me");
-                console.log("User:", res.data);
-                alert(`Logged in as: ${res.data.username ?? res.data.name}`);
-              } catch (err: any) {
-                console.error(err);
-                alert("Not authenticated");
-              }
-            }}
-          >
-            Who am I
-          </Button>
         </Box>
         <Routes>
           <Route path="/completed-raids-board" element={<GuildRaidsBoard />} />
