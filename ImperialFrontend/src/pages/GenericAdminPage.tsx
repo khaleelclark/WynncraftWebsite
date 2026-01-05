@@ -18,6 +18,7 @@ import React from "react";
 import { CustomFormProps } from "./CustomForm";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
+import axios from "axios";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -218,7 +219,7 @@ export const GenericAdminPage = ({
               </Button>
               <Button
                 onClick={() => {
-                  adminApi
+                  axios
                     .delete(`${apiDeleteEndpoint}/${idToDelete}`)
                     .then(() => {
                       setMembers(prev => prev.filter(r => r.id !== idToDelete));

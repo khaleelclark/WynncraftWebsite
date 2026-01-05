@@ -39,6 +39,17 @@ builder.Services.AddDbContext<ImperialDbContext>(options =>
     )
 );
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(
+        "AdminOnly",
+        policy =>
+            policy.RequireAssertion(ctx =>
+                ctx.User.Claims.Any(c => c.Type == "groups" && c.Value == "admins")
+            )
+    );
+});
+
 builder.Services.AddScoped<IRaidsCompletedService, RaidsCompletedService>();
 builder.Services.AddScoped<IGuildMemberService, GuildMemberService>();
 builder.Services.AddScoped<IEventService, EventService>();

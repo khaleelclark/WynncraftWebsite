@@ -1,5 +1,6 @@
 using ImperialBackend.DTOs;
 using ImperialBackend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImperialBackend.Controllers
@@ -19,29 +20,12 @@ namespace ImperialBackend.Controllers
          * GET ALL
          * ============================ */
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var raids = await _service.GetAllAsync();
             return Ok(raids);
-        }
-
-        /* ============================
-         * GET BY ID
-         * ============================ */
-
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            try
-            {
-                var raid = await _service.GetByIdAsync(id);
-                return Ok(raid);
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound();
-            }
         }
 
         [HttpGet("public")]
@@ -72,6 +56,7 @@ namespace ImperialBackend.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] RaidCompletedPostDTO dto)
         {
@@ -90,6 +75,7 @@ namespace ImperialBackend.Controllers
             }
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] RaidCompletedPostDTO dto)
         {
@@ -108,6 +94,7 @@ namespace ImperialBackend.Controllers
          * DELETE
          * ============================ */
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
