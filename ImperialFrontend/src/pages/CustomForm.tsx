@@ -2,7 +2,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { ReactNode } from "react";
 import Box from "@mui/material/Box";
-import { adminApi } from "../api";
+
 import { useState } from "react";
 import Button from "@mui/material/Button";
 import React from "react";
@@ -80,7 +80,7 @@ export const CustomForm = ({
     const flattenFormValues = flattenObject(formValues);
     try {
       if (isPost) {
-        await adminApi.post(apiEndpoint, flattenFormValues).then(res => {
+        await axios.post(apiEndpoint, flattenFormValues).then(res => {
           if (changeRecordsCallback) changeRecordsCallback(res.data);
         });
       } else {

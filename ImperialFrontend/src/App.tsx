@@ -9,14 +9,13 @@ import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import { useUser } from "./auth/UserContext";
-import React from "react";
+import React, { useEffect } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import GuildRaidsBoard from "./pages/GuildRaidsBoard";
 import axios from "axios";
 
 const App: React.FC = () => {
-  const { user, isLoading, signinRedirect, signoutRedirect, signoutLocal } =
-    useUser();
+  const { user } = useUser();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -27,7 +26,6 @@ const App: React.FC = () => {
 
   React.useEffect(() => {
     const handleSessionExpired = () => {
-      signoutLocal();
       setSnackbar({
         open: true,
         message: "Your session has expired. Please log in again.",
@@ -39,7 +37,7 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener("sessionExpired", handleSessionExpired);
     };
-  }, [signoutLocal]);
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -60,12 +58,10 @@ const App: React.FC = () => {
   };
 
   const handleLocalLogout = () => {
-    signoutLocal();
     handleClose();
   };
 
   const handleFullLogout = () => {
-    signoutRedirect();
     handleClose();
   };
 
@@ -158,9 +154,7 @@ const App: React.FC = () => {
 
           {/* Right actions */}
           <Box sx={{ display: "flex", alignItems: "center", minWidth: 180 }}>
-            {isLoading ? (
-              <CircularProgress size={24} color="secondary" />
-            ) : user ? (
+            {user && user.claims ? (
               <>
                 <Button
                   id="logout-button"
@@ -171,7 +165,12 @@ const App: React.FC = () => {
                   variant="contained"
                   color="secondary"
                 >
-                  Welcome, {user.profile.nickname}
+                  Welcome,{" "}
+                  {user.claims
+                    ? user.claims.find(
+                        (claim: any) => claim.type === "nickname"
+                      ).value
+                    : ""}
                 </Button>
 
                 <Menu
