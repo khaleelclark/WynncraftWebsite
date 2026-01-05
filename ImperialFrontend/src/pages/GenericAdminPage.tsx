@@ -72,7 +72,7 @@ export const GenericAdminPage = ({
             valueGetter: (value: any) => {
               if (Array.isArray(value)) {
                 // If it's an array, join the 'name' properties
-                return value.map(item => item?.name ?? "").join(" | ");
+                return value.map(item => item?.name ?? "").join(", ");
               } else if (value && typeof value === "object") {
                 // If it's an object, return its 'name'
                 return value.name ?? "";

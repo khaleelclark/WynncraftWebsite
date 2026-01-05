@@ -71,6 +71,7 @@ const AdminPanel: React.FC = () => {
         label="Medals"
         apiEndpoint="/api/medals"
         multiple={true}
+        required={false}
       />
       <CustomDropdown
         id="games"
@@ -128,7 +129,6 @@ const AdminPanel: React.FC = () => {
     </CustomForm>
   );
 
-  // TODO add number control
   const createRaidForm = (
     <CustomForm
       title="Raid Management"
