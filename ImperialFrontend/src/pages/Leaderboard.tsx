@@ -250,7 +250,7 @@ const Leaderboard: React.FC = () => {
               rows={entries}
               columns={columns}
               getRowId={row => row.id}
-              rowHeight={70}
+              getRowHeight={() => "auto"}
               columnHeaderHeight={70}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
@@ -265,7 +265,12 @@ const Leaderboard: React.FC = () => {
                 "& .MuiDataGrid-cell": {
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
                   py: 2,
+                  whiteSpace: "normal",
+                  lineHeight: "1.35",
+                  wordBreak: "break-word",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   textAlign: "center",

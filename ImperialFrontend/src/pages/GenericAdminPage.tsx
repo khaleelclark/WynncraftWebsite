@@ -56,6 +56,22 @@ export const GenericAdminPage = ({
     });
   }, []);
 
+  const formatDateTime = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+
+  const formatDateOnly = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      dateStyle: "short",
+    });
+
+  const isDateOnlyField = (key: string) => key === "joinDate";
+  const isDateTimeField = (key: string) =>
+    /(date|time|at|created|updated|synced|completed|start|end)/i.test(key) &&
+    !isDateOnlyField(key);
+
   const columns: GridColDef[] =
     members.length !== 0
       ? [
@@ -68,8 +84,16 @@ export const GenericAdminPage = ({
             minWidth: 150,
             flex: 1,
 
-            // Custom render logic for the cell
             valueGetter: (value: any) => {
+              if (
+                typeof value === "string" &&
+                (isDateTimeField(key) || isDateOnlyField(key))
+              ) {
+                return isDateOnlyField(key)
+                  ? formatDateOnly(value)
+                  : formatDateTime(value);
+              }
+
               if (Array.isArray(value)) {
                 // If it's an array, join the 'name' properties
                 return value.map(item => item?.name ?? "").join(", ");
@@ -303,7 +327,7 @@ export const GenericAdminPage = ({
               rows={members}
               columns={columns}
               getRowId={row => row.id}
-              rowHeight={60}
+              getRowHeight={() => "auto"}
               columnHeaderHeight={60}
               pageSizeOptions={[20, 50, 100]}
               initialState={{
@@ -315,7 +339,12 @@ export const GenericAdminPage = ({
                 "& .MuiDataGrid-cell": {
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
                   py: 2,
+                  whiteSpace: "normal",
+                  lineHeight: "1.35",
+                  wordBreak: "break-word",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   textAlign: "center",

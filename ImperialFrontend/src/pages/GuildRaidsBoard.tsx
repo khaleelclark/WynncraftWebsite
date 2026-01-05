@@ -112,7 +112,7 @@ const GuildRaidsBoard: React.FC = () => {
       ? "All Completed Guild Raids"
       : selectedEvent?.id === -2
       ? "Custom Leaderboard"
-      : `${selectedEvent?.name} Leaderboard`;
+      : `${selectedEvent?.name} - Raid Completions`;
 
   const pickerSx = {
     "& .MuiOutlinedInput-input.Mui-disabled": {
@@ -202,7 +202,6 @@ const GuildRaidsBoard: React.FC = () => {
               rows={entries}
               columns={columns}
               getRowId={row => row.id}
-              rowHeight={70}
               getRowHeight={() => "auto"}
               columnHeaderHeight={70}
               pageSizeOptions={[20, 50, 100]}
@@ -216,10 +215,14 @@ const GuildRaidsBoard: React.FC = () => {
               sx={{
                 fontSize: "1rem",
                 "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
+                  py: 2,
                   whiteSpace: "normal",
                   lineHeight: "1.35",
-                  py: 1.5,
-                  alignItems: "flex-start",
+                  wordBreak: "break-word",
                 },
                 "& .MuiDataGrid-columnHeaderTitle": {
                   textAlign: "center",
