@@ -12,6 +12,7 @@ import { useUser } from "./auth/UserContext";
 import React from "react";
 import Snackbar from "@mui/material/Snackbar";
 import GuildRaidsBoard from "./pages/GuildRaidsBoard";
+import axios from "axios";
 
 const App: React.FC = () => {
   const { user, isLoading, signinRedirect, signoutRedirect, signoutLocal } =
@@ -188,7 +189,11 @@ const App: React.FC = () => {
                     },
                   }}
                 >
-                  <MenuItem onClick={handleLocalLogout}>Logout</MenuItem>
+                  <MenuItem
+                    onClick={() => (window.location.href = "/api/auth/logout")}
+                  >
+                    Logout
+                  </MenuItem>
                   <MenuItem onClick={handleFullLogout}>
                     Logout from Authentik
                   </MenuItem>
@@ -198,12 +203,37 @@ const App: React.FC = () => {
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => signinRedirect()}
+                onClick={() => {
+                  window.location.href = "/api/auth/login";
+                }}
               >
                 Admin Login
               </Button>
             )}
           </Box>
+          <MenuItem onClick={() => (window.location.href = "/api/auth/logout")}>
+            Logout
+          </MenuItem>
+          <MenuItem
+            onClick={() => (window.location.href = "/api/auth/logout-all")}
+          >
+            Logout All
+          </MenuItem>
+          <Button
+            variant="outlined"
+            onClick={async () => {
+              try {
+                const res = await axios.get("/api/auth/me");
+                console.log("User:", res.data);
+                alert(`Logged in as: ${res.data.username ?? res.data.name}`);
+              } catch (err: any) {
+                console.error(err);
+                alert("Not authenticated");
+              }
+            }}
+          >
+            Who am I
+          </Button>
         </Box>
         <Routes>
           <Route path="/completed-raids-board" element={<GuildRaidsBoard />} />
