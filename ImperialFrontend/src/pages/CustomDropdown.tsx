@@ -7,6 +7,7 @@ import { FormRegisterProps } from "./CustomForm";
 type DropdownProps = {
   apiEndpoint: string;
   multiple?: boolean;
+  required?: boolean;
 } & FormRegisterProps;
 
 export const CustomDropdown = ({
@@ -15,31 +16,38 @@ export const CustomDropdown = ({
   apiEndpoint,
   multiple,
   register,
+  required = true,
   formValues,
   formValidations,
 }: DropdownProps) => {
   const [dropdownOptions, setDropdownOptions] = useState([]);
   const [touched, setTouched] = useState(false);
+  const showError = required && touched && !formValidations?.[id];
 
   useEffect(() => {
     adminApi.get(apiEndpoint).then(res => {
       setDropdownOptions(res.data);
     });
-    register?.(
-      id,
-      formValues?.[id] ? formValues?.[id] : multiple ? [] : "",
-      formValues?.id !== undefined
-    );
+    const value = formValues?.[id] ?? (multiple ? [] : null);
+
+    const hasValue = multiple
+      ? Array.isArray(value) && value.length > 0
+      : !!value;
+
+    const isValid = required ? hasValue : true;
+
+    register?.(id, value, isValid);
   }, []);
-  console.log(formValues?.[id]);
 
   const el = multiple ? (
     <Autocomplete
       value={formValues?.[id] ?? []}
       onChange={(_, selectedItem: any) => {
-        const validated =
-          Array.isArray(selectedItem) && selectedItem.length > 0;
+        const hasValue = multiple
+          ? Array.isArray(selectedItem) && selectedItem.length > 0
+          : !!selectedItem;
 
+        const validated = required ? hasValue : true;
         register?.(id, selectedItem, validated);
         setTouched(true);
       }}
@@ -53,10 +61,8 @@ export const CustomDropdown = ({
         <TextField
           {...params}
           label={label}
-          error={!formValidations?.[id] && touched}
-          helperText={
-            !formValidations?.[id] && touched ? "This field is required" : ""
-          }
+          error={showError}
+          helperText={showError ? "This field is required" : ""}
         />
       )}
       multiple={multiple}
@@ -82,7 +88,8 @@ export const CustomDropdown = ({
     <Autocomplete
       value={formValues?.[id] ?? null}
       onChange={(_, selectedItem) => {
-        const validated = !!selectedItem;
+        const hasValue = !!selectedItem;
+        const validated = required ? hasValue : true;
         register?.(id, selectedItem, validated);
         setTouched(true);
       }}
@@ -94,10 +101,8 @@ export const CustomDropdown = ({
         <TextField
           {...params}
           label={label}
-          error={!formValidations?.[id] && touched}
-          helperText={
-            !formValidations?.[id] && touched ? "This field is required" : ""
-          }
+          error={showError}
+          helperText={showError ? "This field is required" : ""}
         />
       )}
     />

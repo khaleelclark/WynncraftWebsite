@@ -68,6 +68,13 @@ namespace ImperialBackend.Services
             if (member == null)
                 throw new KeyNotFoundException();
 
+            if (
+                await _context.GuildMembers.AnyAsync(m =>
+                    m.Uuid == dto.Uuid && m.GuildMemberId != id
+                )
+            )
+                throw new InvalidOperationException("Guild member with this UUID already exists");
+
             member.MainUsername = dto.Name;
             member.DiscordTag = dto.DiscordTag;
             member.JoinDate = dto.JoinDate;

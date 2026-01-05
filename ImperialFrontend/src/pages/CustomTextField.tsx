@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 type TextFieldProps = {
   minLength: number;
   format?: string;
+  type?: string;
 } & FormRegisterProps;
 
 export const CustomTextField = ({
   id,
+  type,
   label,
   format,
   register,
@@ -17,6 +19,7 @@ export const CustomTextField = ({
   formValidations,
 }: TextFieldProps) => {
   const [touched, setTouched] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
@@ -32,22 +35,33 @@ export const CustomTextField = ({
         id={id}
         label={label}
         variant="outlined"
+        type={type}
         error={!formValidations?.[id] && touched}
-        helperText={
-          !formValidations?.[id] && touched ? "This field is required" : ""
-        }
+        helperText={!formValidations?.[id] && touched ? errorMessage : ""}
         required
         fullWidth
         onChange={e => {
           const value = e.target.value;
-          const hasValue = value !== "" && value.length >= minLength;
 
-          const uuidValid = UUIDv1.test(value) || UUIDv2.test(value);
+          const isNumber = type === "number";
+          const isUUID = format === "UUID";
 
-          const validated =
-            format === "UUID" ? hasValue && uuidValid : hasValue;
+          const requiredOk = value.trim() !== "" && value.length >= minLength;
+          const uuidOk = !isUUID || UUIDv1.test(value) || UUIDv2.test(value);
+          const parsed = Number(value);
+          const numberOk = !isNumber || (Number.isFinite(parsed) && parsed > 0);
+          const validated = requiredOk && uuidOk && numberOk;
 
-          register?.(id, e.target.value, validated);
+          const message = !requiredOk
+            ? `Required. Must be at least ${minLength} character(s).`
+            : !uuidOk
+            ? "Invalid UUID"
+            : !numberOk
+            ? "Must be a positive number"
+            : "";
+
+          setErrorMessage(message);
+          register?.(id, value, validated);
           setTouched(true);
         }}
         value={formValues?.[id] ?? ""}

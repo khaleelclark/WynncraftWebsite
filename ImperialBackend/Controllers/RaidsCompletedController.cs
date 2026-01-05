@@ -44,6 +44,16 @@ namespace ImperialBackend.Controllers
             }
         }
 
+        [HttpGet("public")]
+        public async Task<IActionResult> GetAllPublic(
+            [FromQuery] DateTimeOffset? startDate,
+            [FromQuery] DateTimeOffset? endDate
+        )
+        {
+            var raids = await _service.GetAllPublicAsync(startDate, endDate);
+            return Ok(raids);
+        }
+
         /* ============================
          * RAID BOT REPORT
          * ============================ */

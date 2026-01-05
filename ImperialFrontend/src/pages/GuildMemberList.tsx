@@ -169,7 +169,7 @@ const GuildMemberList: React.FC = () => {
           rows={members}
           columns={columns}
           getRowId={row => row.id}
-          rowHeight={70}
+          getRowHeight={() => "auto"}
           columnHeaderHeight={70}
           pageSizeOptions={[20, 50, 100]}
           initialState={{
