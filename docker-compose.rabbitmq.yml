@@ -1,0 +1,30 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: raid-rabbit
+    hostname: raid-rabbit
+
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # Management UI
+
+    environment:
+      RABBITMQ_DEFAULT_USER: imperial
+      RABBITMQ_DEFAULT_PASS: ImperialGuild
+      RABBITMQ_DEFAULT_VHOST: imperial
+
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+    networks:
+      - imperial-net
+
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:
+
+networks:
+  imperial-net:
+    name: imperial-net
+    driver: bridge

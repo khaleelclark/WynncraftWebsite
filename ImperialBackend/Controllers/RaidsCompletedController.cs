@@ -38,24 +38,6 @@ namespace ImperialBackend.Controllers
             return Ok(raids);
         }
 
-        /* ============================
-         * RAID BOT REPORT
-         * ============================ */
-
-        [HttpPost("raid-bot-report")]
-        public async Task<IActionResult> SyncFromBot([FromBody] RaidBotReportDTO dto)
-        {
-            try
-            {
-                var result = await _service.SyncFromBotAsync(dto);
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] RaidCompletedPostDTO dto)
