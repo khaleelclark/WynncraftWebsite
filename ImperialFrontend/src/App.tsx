@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { ThemeProvider, CssBaseline, Button, Box } from "@mui/material";
 import Menu from "@mui/material/Menu";
-import CircularProgress from "@mui/material/CircularProgress";
 import MenuItem from "@mui/material/MenuItem";
 import theme from "./theme";
 import AdminPanel from "./pages/AdminPanel";
@@ -24,7 +23,7 @@ const App: React.FC = () => {
     message: string;
   }>({ open: false, message: "" });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleSessionExpired = () => {
       setSnackbar({
         open: true,
@@ -55,14 +54,6 @@ const App: React.FC = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleLocalLogout = () => {
-    handleClose();
-  };
-
-  const handleFullLogout = () => {
-    handleClose();
   };
 
   const el = (
@@ -136,7 +127,7 @@ const App: React.FC = () => {
               Completed Raids
             </Box>
 
-            {user && (
+            {user?.isAuthenticated && (
               <Box
                 component={Link}
                 to="/admin"
@@ -193,8 +184,28 @@ const App: React.FC = () => {
                   >
                     Logout
                   </MenuItem>
-                  <MenuItem onClick={handleFullLogout}>
+                  <MenuItem
+                    onClick={() =>
+                      (window.location.href = "/api/auth/logout-all")
+                    }
+                  >
                     Logout from Authentik
+                  </MenuItem>
+                  <MenuItem
+                    onClick={async () => {
+                      try {
+                        const res = await axios.get("/api/auth/me");
+                        console.log("User:", res.data);
+                        alert(
+                          `Logged in as: ${res.data.username ?? res.data.name}`
+                        );
+                      } catch (err: any) {
+                        console.error(err);
+                        alert("Not authenticated");
+                      }
+                    }}
+                  >
+                    Who am I
                   </MenuItem>
                 </Menu>
               </>
@@ -210,29 +221,6 @@ const App: React.FC = () => {
               </Button>
             )}
           </Box>
-          <MenuItem onClick={() => (window.location.href = "/api/auth/logout")}>
-            Logout
-          </MenuItem>
-          <MenuItem
-            onClick={() => (window.location.href = "/api/auth/logout-all")}
-          >
-            Logout All
-          </MenuItem>
-          <Button
-            variant="outlined"
-            onClick={async () => {
-              try {
-                const res = await axios.get("/api/auth/me");
-                console.log("User:", res.data);
-                alert(`Logged in as: ${res.data.username ?? res.data.name}`);
-              } catch (err: any) {
-                console.error(err);
-                alert("Not authenticated");
-              }
-            }}
-          >
-            Who am I
-          </Button>
         </Box>
         <Routes>
           <Route path="/completed-raids-board" element={<GuildRaidsBoard />} />

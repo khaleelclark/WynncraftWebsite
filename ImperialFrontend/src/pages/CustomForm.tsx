@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import { useState } from "react";
 import Button from "@mui/material/Button";
 import React from "react";
+import axios from "axios";
 
 export interface CustomFormProps {
   title: string;
@@ -84,7 +85,7 @@ export const CustomForm = ({
           if (changeRecordsCallback) changeRecordsCallback(res.data);
         });
       } else {
-        await adminApi
+        await axios
           .put(`${apiEndpoint}/${formValues.id}`, flattenFormValues)
           .then(res => {
             if (changeRecordsCallback) changeRecordsCallback(res.data);

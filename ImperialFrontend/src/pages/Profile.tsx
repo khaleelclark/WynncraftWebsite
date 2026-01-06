@@ -65,6 +65,9 @@ const Profile: React.FC = () => {
           justifyContent: "center",
           bgcolor: "background.default",
           color: "text.primary",
+
+          width: "100%",
+          minHeight: "100%",
         }}
       >
         <Paper
@@ -76,27 +79,29 @@ const Profile: React.FC = () => {
             bgcolor: "background.paper",
             color: "text.primary",
             borderRadius: 3,
+            transform: "scale(1.1)",
+            transformOrigin: "top center",
             border: theme => `1px solid ${theme.palette.divider}`,
             boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
           }}
         >
           {/* Header: avatar + name */}
-          <Grid container spacing={2} alignItems="center">
-            <Grid>
+          <Grid container spacing={3} alignItems="center">
+            <Grid size={{ xs: 12, sm: 8, lg: 2 }}>
               <Avatar
                 variant="rounded"
                 src={`https://mc-heads.net/avatar/${profile.uuid}/100/`}
                 alt="Skin Face"
                 sx={{
-                  width: 72,
-                  height: 72,
+                  width: 100,
+                  height: 100,
                   borderRadius: 1,
                   border: theme => `2px solid ${theme.palette.divider}`,
                   bgcolor: "background.default",
                 }}
               />
             </Grid>
-            <Grid>
+            <Grid size={5}>
               <Typography
                 variant="h4"
                 sx={{ fontWeight: 800, lineHeight: 1.1 }}
@@ -117,35 +122,35 @@ const Profile: React.FC = () => {
 
           {/* Basic stats in a grid */}
           <Grid container spacing={2}>
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Rank
               </Typography>
               <Typography variant="body1">{profile.rankName}</Typography>
             </Grid>
 
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Join Date
               </Typography>
               <Typography variant="body1">{profile.joinDate}</Typography>
             </Grid>
 
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Wynncraft Rank
               </Typography>
               <Typography variant="body1">{profile.wynncraftRank}</Typography>
             </Grid>
 
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Raids Completed
               </Typography>
               <Typography variant="body1">{profile.raidsCompleted}</Typography>
             </Grid>
 
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Hours Played
               </Typography>
@@ -156,7 +161,7 @@ const Profile: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid>
+            <Grid size={5}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Wars Completed
               </Typography>
@@ -164,7 +169,7 @@ const Profile: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Grid>
+          <Grid size={5}>
             <Typography variant="caption" sx={{ opacity: 0.7 }}>
               Last Updated
             </Typography>
