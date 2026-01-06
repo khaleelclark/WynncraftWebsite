@@ -10,6 +10,7 @@ export default defineConfig({
   },
   html: {
     template: "./src/index.html",
+    favicon: "./public/favicon.ico",
   },
   plugins: [pluginReact()],
   tools: {
