@@ -88,7 +88,7 @@ namespace ImperialBackend.Services
                         try
                         {
                             var skinResponse = await _httpClient.GetAsync(
-                                $"https://sessionserver.mojang.com/session/minecraft/profile/{member.Uuid.ToString("N")}"
+                                $"https://sessionserver.mojang.com/session/minecraft/profile/{member.Uuid}"
                             );
                             if (skinResponse.IsSuccessStatusCode)
                             {

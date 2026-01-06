@@ -14,7 +14,7 @@ namespace ImperialBackend.Models
         public string? MinecraftUsername { get; set; }
         public int RankId { get; set; }
         public DateOnly JoinDate { get; set; }
-        public Guid Uuid { get; set; }
+        public Guid? Uuid { get; set; }
         public string? WynncraftRank { get; set; }
         public int HoursPlayed { get; set; }
         public int WarsCompleted { get; set; }

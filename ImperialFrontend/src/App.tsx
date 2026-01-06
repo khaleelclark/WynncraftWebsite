@@ -8,17 +8,17 @@ import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import { useUser } from "./auth/UserContext";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Snackbar from "@mui/material/Snackbar";
 import GuildRaidsBoard from "./pages/GuildRaidsBoard";
 import axios from "axios";
 
 const App: React.FC = () => {
   const { user } = useUser();
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  const [snackbar, setSnackbar] = React.useState<{
+  const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
   }>({ open: false, message: "" });

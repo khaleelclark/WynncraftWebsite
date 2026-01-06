@@ -54,19 +54,17 @@ const Leaderboard: React.FC = () => {
           }}
           onClick={() => navigate(`/profile/${params.row.id}`)}
         >
-          {params.row.uuid && (
-            <img
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-              alt="Skin"
-              style={{
-                width: 45,
-                height: 45,
-                marginRight: 10,
-                verticalAlign: "middle",
-                borderRadius: 6,
-              }}
-            />
-          )}
+          <img
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+            alt="Skin"
+            style={{
+              width: 45,
+              height: 45,
+              marginRight: 10,
+              verticalAlign: "middle",
+              borderRadius: 6,
+            }}
+          />
           <span>{params.row.minecraftUsername}</span>
         </span>
       ),
@@ -74,15 +72,6 @@ const Leaderboard: React.FC = () => {
     {
       field: "raidsCompleted",
       headerName: "Raids",
-      minWidth: 150,
-      flex: 0.6,
-      align: "center",
-      headerAlign: "center",
-      type: "number",
-    },
-    {
-      field: "warsCompleted",
-      headerName: "Wars",
       minWidth: 150,
       flex: 0.6,
       align: "center",
@@ -101,6 +90,15 @@ const Leaderboard: React.FC = () => {
         const hp = params.row.hoursPlayed;
         return hp != null && hp >= 0 ? hp : "Private";
       },
+    },
+    {
+      field: "warsCompleted",
+      headerName: "Wars",
+      minWidth: 150,
+      flex: 0.6,
+      align: "center",
+      headerAlign: "center",
+      type: "number",
     },
     {
       field: "lastSynced",

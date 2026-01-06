@@ -53,18 +53,17 @@ const GuildMemberList: React.FC = () => {
             },
           }}
         >
-          {params.row.uuid && (
-            <Box
-              component="img"
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-              alt="Skin"
-              sx={{
-                width: 45,
-                height: 45,
-                borderRadius: 0.5,
-              }}
-            />
-          )}
+          <Box
+            component="img"
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+            alt="Skin"
+            sx={{
+              width: 45,
+              height: 45,
+              borderRadius: 0.5,
+            }}
+          />
+
           <Box component="span">{params.row.name}</Box>
         </Box>
       ),

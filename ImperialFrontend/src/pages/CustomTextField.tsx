@@ -22,12 +22,18 @@ export const CustomTextField = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
+    register?.(
+      id,
+      formValues?.[id] ?? (isUUID ? null : ""),
+      formValues?.[id] !== undefined || isUUID
+    );
   }, []);
 
   const UUIDv1 =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const UUIDv2 = /^[0-9a-f]{32}$/i;
+  const isNumber = type === "number";
+  const isUUID = format === "UUID";
 
   const el = (
     <>
@@ -38,16 +44,15 @@ export const CustomTextField = ({
         type={type}
         error={!formValidations?.[id] && touched}
         helperText={!formValidations?.[id] && touched ? errorMessage : ""}
-        required
+        required={!isUUID}
         fullWidth
         onChange={e => {
-          const value = e.target.value;
+          let value: string | null = e.target.value;
 
-          const isNumber = type === "number";
-          const isUUID = format === "UUID";
-
-          const requiredOk = value.trim() !== "" && value.length >= minLength;
-          const uuidOk = !isUUID || UUIDv1.test(value) || UUIDv2.test(value);
+          const requiredOk =
+            isUUID || (value.trim() !== "" && value.length >= minLength);
+          const uuidOk =
+            !isUUID || value === "" || UUIDv1.test(value) || UUIDv2.test(value);
           const parsed = Number(value);
           const numberOk = !isNumber || (Number.isFinite(parsed) && parsed > 0);
           const validated = requiredOk && uuidOk && numberOk;
@@ -59,6 +64,8 @@ export const CustomTextField = ({
             : !numberOk
             ? "Must be a positive number"
             : "";
+
+          value = isUUID && value === "" ? null : value;
 
           setErrorMessage(message);
           register?.(id, value, validated);
