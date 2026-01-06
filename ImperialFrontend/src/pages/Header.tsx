@@ -12,6 +12,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import Typography from "@mui/material/Typography";
 
 type HeaderButton = {
   text: string;
@@ -71,13 +72,54 @@ export const Header = () => {
           justifyContent: "space-between",
           alignItems: "center",
           px: 3,
-          py: 2,
-          bgcolor: "primary.main",
-          color: "primary.contrastText",
-          borderBottom: theme => `2px solid ${theme.palette.secondary.main}`,
-          flexShrink: 0,
+          py: 1.5,
+          bgcolor: "background.paper",
+          color: "text.primary",
+          borderBottom: t => `1px solid #B0540F`,
+          boxShadow: 2,
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backdropFilter: "blur(8px)",
         }}
       >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.25,
+            cursor: "pointer",
+            userSelect: "none",
+          }}
+          onClick={() => navigate("/")}
+        >
+          <Box
+            component="img"
+            src="/imperial-logo.png"
+            alt="Imperial logo"
+            sx={{
+              width: 34,
+              height: 34,
+              borderRadius: "8px",
+              boxShadow: 1,
+            }}
+          />
+
+          <Typography
+            sx={{
+              fontSize: 36,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              lineHeight: 1,
+
+              background: "#ffffffff",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Imperial
+          </Typography>
+        </Box>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <nav>
             {headerButtons.map(button => {
