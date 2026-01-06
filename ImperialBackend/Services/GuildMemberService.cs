@@ -165,6 +165,34 @@ namespace ImperialBackend.Services
 
             var oldest = member.PlayerHistoricalStats.OrderBy(s => s.SyncDate).FirstOrDefault();
 
+            var memberRaidIds = _context
+                .RaidInstances.Where(ri => ri.GuildMemberId == member.GuildMemberId)
+                .Select(ri => ri.RaidCompletedId);
+
+            var topRaidPartners = await _context
+                .RaidInstances.AsNoTracking()
+                .Where(ri => memberRaidIds.Contains(ri.RaidCompletedId))
+                .Where(ri => ri.GuildMemberId != member.GuildMemberId)
+                .GroupBy(ri => ri.GuildMemberId)
+                .Select(g => new { GuildMemberId = g.Key, Times = g.Count() })
+                .OrderByDescending(x => x.Times)
+                .ThenBy(x => x.GuildMemberId)
+                .Take(3)
+                .Join(
+                    _context.GuildMembers.AsNoTracking(),
+                    x => x.GuildMemberId,
+                    gm => gm.GuildMemberId,
+                    (x, gm) =>
+                        new RaidPartnerDTO
+                        {
+                            GuildMemberId = gm.GuildMemberId,
+                            Uuid = gm.Uuid,
+                            MainUsername = gm.MainUsername,
+                            TimesRaidedTogether = x.Times,
+                        }
+                )
+                .ToListAsync();
+
             return new GuildMemberProfileGetDTO
             {
                 Id = member.GuildMemberId,
@@ -183,6 +211,7 @@ namespace ImperialBackend.Services
                 LastSynced = member.LastSynced,
                 Games = member.Games.Select(g => g.Game!.GameName).ToList(),
                 Medals = member.Medals.Select(m => m.Medal!.MedalName).ToList(),
+                TopRaidPartners = topRaidPartners,
             };
         }
 
