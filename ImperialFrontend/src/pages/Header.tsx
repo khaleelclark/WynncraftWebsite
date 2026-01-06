@@ -23,7 +23,7 @@ type HeaderButton = {
 
 const headerButtons: HeaderButton[] = [
   {
-    text: "Guild Members",
+    text: "Members",
     link: "/",
     icon: <GroupIcon />,
   },
@@ -33,12 +33,12 @@ const headerButtons: HeaderButton[] = [
     icon: <LeaderboardIcon />,
   },
   {
-    text: "Completed Raids",
+    text: "Raids",
     link: "/completed-raids-board",
     icon: <VerifiedUserIcon />,
   },
   {
-    text: "Admin Panel",
+    text: "Admin",
     link: "/admin",
     icon: <AdminPanelSettingsIcon />,
     requiresAuth: true,

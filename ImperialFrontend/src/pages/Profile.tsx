@@ -1,8 +1,8 @@
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { use, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -12,6 +12,13 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import dayjs from "dayjs";
 import { Header } from "./Header";
+
+type RaidPartners = {
+  guildMemberId: string;
+  uuid: string;
+  mainUsername: string;
+  timesRaidedTogether: number;
+};
 
 interface ProfileData {
   name: string;
@@ -27,11 +34,13 @@ interface ProfileData {
   raidsCompleted?: number;
   uuid?: string;
   lastSynced?: string;
+  topRaidPartners?: RaidPartners[];
 }
 
 const Profile: React.FC = () => {
   const { id } = useParams();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`/api/guildmembers/${id}`).then(res => {
@@ -174,13 +183,83 @@ const Profile: React.FC = () => {
               </Grid>
             </Grid>
 
-            <Grid size={5}>
+            <Grid size={4}>
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
                 Last Updated
               </Typography>
               <Typography variant="body1">
                 {dayjs(profile.lastSynced).format("YYYY-MM-DD hh:mm A")}
               </Typography>
+            </Grid>
+
+            <Grid size={6} sx={{ mt: 2 }}>
+              <Typography
+                variant="caption"
+                sx={{ opacity: 0.7, display: "block" }}
+              >
+                Top Raid Partners
+              </Typography>
+
+              {profile.topRaidPartners && profile.topRaidPartners.length > 0 ? (
+                <Stack spacing={1.5} mt={1}>
+                  {profile.topRaidPartners.map(p => (
+                    <Stack
+                      key={p.guildMemberId}
+                      direction="row"
+                      spacing={1.5}
+                      alignItems="center"
+                      sx={{
+                        p: 1.25,
+                        borderRadius: 2,
+                        border: theme => `1px solid ${theme.palette.divider}`,
+                        bgcolor: "background.default",
+                      }}
+                    >
+                      <Avatar
+                        variant="rounded"
+                        src={`https://mc-heads.net/avatar/${p.uuid}/48/`}
+                        alt={`${p.mainUsername} head`}
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 1,
+                          border: theme => `1px solid ${theme.palette.divider}`,
+                        }}
+                        onClick={() => navigate(`/profile/${p.guildMemberId}`)}
+                      />
+
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          variant="body1"
+                          sx={{ fontWeight: 700 }}
+                          noWrap
+                        >
+                          {p.mainUsername}
+                        </Typography>
+                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                          {p.timesRaidedTogether} raid
+                          {p.timesRaidedTogether === 1 ? "" : "s"} together
+                        </Typography>
+                      </Box>
+
+                      <Chip
+                        label={`${p.timesRaidedTogether}x`}
+                        size="small"
+                        sx={{
+                          fontWeight: 800,
+                          bgcolor: theme => `${theme.palette.primary.main}22`,
+                          border: theme =>
+                            `1px solid ${theme.palette.primary.main}66`,
+                        }}
+                      />
+                    </Stack>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography variant="body2" sx={{ opacity: 0.8, mt: 1 }}>
+                  No raid partners yet
+                </Typography>
+              )}
             </Grid>
 
             {/* Games */}
