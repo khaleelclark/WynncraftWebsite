@@ -10,6 +10,7 @@ import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
+import { Header } from "./Header";
 
 interface LeaderboardEntry {
   id: number;
@@ -180,6 +181,7 @@ const Leaderboard: React.FC = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Header />
       <Box
         sx={{
           p: 3,

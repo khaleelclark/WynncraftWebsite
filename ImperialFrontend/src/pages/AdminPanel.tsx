@@ -20,6 +20,7 @@ import SecurityIcon from "@mui/icons-material/Security";
 import { CustomAdminTile } from "./CustomAdminTile";
 import { CustomAdminDialog } from "./CustomAdminDialog";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import { Header } from "./Header";
 
 const AdminPanel: React.FC = () => {
   const [guildMembersOpen, setGuildMembersOpen] = useState(false);
@@ -169,217 +170,221 @@ const AdminPanel: React.FC = () => {
   );
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        display: "flex",
-        justifyContent: "center",
-        bgcolor: "background.default",
-        color: "text.primary",
-      }}
-    >
-      <Box sx={{ width: "100%", maxWidth: 1200 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            maxWidth: "100%",
-            bgcolor: "#2e000cff",
-            color: "text.primary",
-            borderRadius: 3,
-            border: theme => `1px solid ${theme.palette.divider}`,
-            boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
-          }}
-        >
-          <Typography
-            variant="h3"
-            textAlign="center"
-            gutterBottom
+    <>
+      <Header />
+
+      <Box
+        sx={{
+          p: 3,
+          display: "flex",
+          justifyContent: "center",
+          bgcolor: "background.default",
+          color: "text.primary",
+        }}
+      >
+        <Box sx={{ width: "100%", maxWidth: 1200 }}>
+          <Paper
+            elevation={0}
             sx={{
-              fontWeight: 800,
+              p: 4,
+              maxWidth: "100%",
+              bgcolor: "#2e000cff",
               color: "text.primary",
+              borderRadius: 3,
+              border: theme => `1px solid ${theme.palette.divider}`,
+              boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
             }}
           >
-            Imperial Guild Admin Panel
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            textAlign="center"
-            sx={{
-              color: "text.secondary",
-              mb: 4,
-            }}
-          >
-            Manage all Imperial guild information in one place.
-          </Typography>
-
-          {/* --- TILE GRID --- */}
-          <Grid
-            container
-            spacing={3}
-            justifyContent="center"
-            alignItems="stretch"
-            sx={{ mt: 1 }}
-          >
-            <CustomAdminTile
-              title="Guild Members"
-              description="View, edit, and manage all guild members and their details."
-              icon={<GroupIcon />}
-              onOpen={() => setGuildMembersOpen(true)}
-            />
-
-            <CustomAdminTile
-              title="Events"
-              description="Configure upcoming raid events, wars, and guild activities."
-              icon={<EventIcon />}
-              onOpen={() => setEventsOpen(true)}
-            />
-
-            <CustomAdminTile
-              title="Games"
-              description="Create, edit and delete supported games."
-              icon={<SportsEsportsIcon />}
-              onOpen={() => setGamesOpen(true)}
-            />
-
-            <CustomAdminTile
-              title="Medals"
-              description="Create and assign medals to recognize achievements."
-              icon={<MilitaryTechIcon />}
-              onOpen={() => setMedalsOpen(true)}
-            />
-
-            <CustomAdminTile
-              title="Ranks"
-              description="Create, edit and delete guild ranks."
-              icon={<WorkspacePremiumIcon />}
-              onOpen={() => setRanksOpen(true)}
-            />
-
-            <CustomAdminTile
-              title="Raids"
-              description="Create, edit and delete guild raids."
-              icon={<SecurityIcon />}
-              onOpen={() => setRaidsOpen(true)}
-            />
-            <CustomAdminTile
-              title="Raids Completed"
-              description="Create, edit and delete completed guild raids.(Rare use cases only)"
-              icon={<VerifiedUserIcon />}
-              onOpen={() => setRaidsCompletedOpen(true)}
-            />
-          </Grid>
-
-          {/* ----- Validation ------ */}
-          <Snackbar
-            open={snackbarOpen}
-            autoHideDuration={4000}
-            onClose={handleSnackbarClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          >
-            <Alert
-              onClose={handleSnackbarClose}
-              severity={snackbarSeverity}
-              variant="filled"
-              sx={{ width: "100%" }}
+            <Typography
+              variant="h3"
+              textAlign="center"
+              gutterBottom
+              sx={{
+                fontWeight: 800,
+                color: "text.primary",
+              }}
             >
-              {snackbarMessage}
-            </Alert>
-          </Snackbar>
-        </Paper>
+              Imperial Guild Admin Panel
+            </Typography>
+            <Typography
+              variant="subtitle1"
+              textAlign="center"
+              sx={{
+                color: "text.secondary",
+                mb: 4,
+              }}
+            >
+              Manage all Imperial guild information in one place.
+            </Typography>
 
-        {/* ----- Dialogs ----- */}
-        <CustomAdminDialog
-          open={guildMembersOpen}
-          onClose={() => setGuildMembersOpen(false)}
-          title="Guild Members"
-        >
-          <GenericAdminPage
-            label="Guild Members"
-            apiGetEndpoint="/api/guildmembers/admin"
-            apiDeleteEndpoint="/api/guildmembers"
-            createForm={createGuildMemberForm}
-          />
-        </CustomAdminDialog>
-        <CustomAdminDialog
-          open={eventsOpen}
-          onClose={() => setEventsOpen(false)}
-          title="Events"
-        >
-          <GenericAdminPage
-            label="Events"
-            apiGetEndpoint="/api/events"
-            apiDeleteEndpoint="/api/events"
-            createForm={createEventForm}
-          />
-        </CustomAdminDialog>
+            {/* --- TILE GRID --- */}
+            <Grid
+              container
+              spacing={3}
+              justifyContent="center"
+              alignItems="stretch"
+              sx={{ mt: 1 }}
+            >
+              <CustomAdminTile
+                title="Guild Members"
+                description="View, edit, and manage all guild members and their details."
+                icon={<GroupIcon />}
+                onOpen={() => setGuildMembersOpen(true)}
+              />
 
-        <CustomAdminDialog
-          open={gamesOpen}
-          onClose={() => setGamesOpen(false)}
-          title="Games"
-        >
-          <GenericAdminPage
-            label="Games"
-            apiGetEndpoint="/api/games"
-            apiDeleteEndpoint="/api/games"
-            createForm={createGameForm}
-          />
-        </CustomAdminDialog>
+              <CustomAdminTile
+                title="Events"
+                description="Configure upcoming raid events, wars, and guild activities."
+                icon={<EventIcon />}
+                onOpen={() => setEventsOpen(true)}
+              />
 
-        <CustomAdminDialog
-          open={medalsOpen}
-          onClose={() => setMedalsOpen(false)}
-          title="Medals"
-        >
-          <GenericAdminPage
-            label="Medals"
-            apiGetEndpoint="/api/medals"
-            apiDeleteEndpoint="/api/medals"
-            createForm={createMedalForm}
-          />
-        </CustomAdminDialog>
+              <CustomAdminTile
+                title="Games"
+                description="Create, edit and delete supported games."
+                icon={<SportsEsportsIcon />}
+                onOpen={() => setGamesOpen(true)}
+              />
 
-        <CustomAdminDialog
-          open={ranksOpen}
-          onClose={() => setRanksOpen(false)}
-          title="Ranks"
-        >
-          <GenericAdminPage
-            label="Ranks"
-            apiGetEndpoint="/api/ranks"
-            apiDeleteEndpoint="/api/ranks"
-            createForm={createRankForm}
-          />
-        </CustomAdminDialog>
+              <CustomAdminTile
+                title="Medals"
+                description="Create and assign medals to recognize achievements."
+                icon={<MilitaryTechIcon />}
+                onOpen={() => setMedalsOpen(true)}
+              />
 
-        <CustomAdminDialog
-          open={raidsOpen}
-          onClose={() => setRaidsOpen(false)}
-          title="Raids"
-        >
-          <GenericAdminPage
-            label="Raids"
-            apiGetEndpoint="/api/raids"
-            apiDeleteEndpoint="/api/raids"
-            createForm={createRaidForm}
-          />
-        </CustomAdminDialog>
+              <CustomAdminTile
+                title="Ranks"
+                description="Create, edit and delete guild ranks."
+                icon={<WorkspacePremiumIcon />}
+                onOpen={() => setRanksOpen(true)}
+              />
 
-        <CustomAdminDialog
-          open={raidsCompletedOpen}
-          onClose={() => setRaidsCompletedOpen(false)}
-          title="Raids Completed"
-        >
-          <GenericAdminPage
-            label="Raids Completed"
-            apiGetEndpoint="/api/raidscompleted"
-            apiDeleteEndpoint="/api/raidscompleted"
-            createForm={createRaidCompletedForm}
-          />
-        </CustomAdminDialog>
+              <CustomAdminTile
+                title="Raids"
+                description="Create, edit and delete guild raids."
+                icon={<SecurityIcon />}
+                onOpen={() => setRaidsOpen(true)}
+              />
+              <CustomAdminTile
+                title="Raids Completed"
+                description="Create, edit and delete completed guild raids.(Rare use cases only)"
+                icon={<VerifiedUserIcon />}
+                onOpen={() => setRaidsCompletedOpen(true)}
+              />
+            </Grid>
+
+            {/* ----- Validation ------ */}
+            <Snackbar
+              open={snackbarOpen}
+              autoHideDuration={4000}
+              onClose={handleSnackbarClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            >
+              <Alert
+                onClose={handleSnackbarClose}
+                severity={snackbarSeverity}
+                variant="filled"
+                sx={{ width: "100%" }}
+              >
+                {snackbarMessage}
+              </Alert>
+            </Snackbar>
+          </Paper>
+
+          {/* ----- Dialogs ----- */}
+          <CustomAdminDialog
+            open={guildMembersOpen}
+            onClose={() => setGuildMembersOpen(false)}
+            title="Guild Members"
+          >
+            <GenericAdminPage
+              label="Guild Members"
+              apiGetEndpoint="/api/guildmembers/admin"
+              apiDeleteEndpoint="/api/guildmembers"
+              createForm={createGuildMemberForm}
+            />
+          </CustomAdminDialog>
+          <CustomAdminDialog
+            open={eventsOpen}
+            onClose={() => setEventsOpen(false)}
+            title="Events"
+          >
+            <GenericAdminPage
+              label="Events"
+              apiGetEndpoint="/api/events"
+              apiDeleteEndpoint="/api/events"
+              createForm={createEventForm}
+            />
+          </CustomAdminDialog>
+
+          <CustomAdminDialog
+            open={gamesOpen}
+            onClose={() => setGamesOpen(false)}
+            title="Games"
+          >
+            <GenericAdminPage
+              label="Games"
+              apiGetEndpoint="/api/games"
+              apiDeleteEndpoint="/api/games"
+              createForm={createGameForm}
+            />
+          </CustomAdminDialog>
+
+          <CustomAdminDialog
+            open={medalsOpen}
+            onClose={() => setMedalsOpen(false)}
+            title="Medals"
+          >
+            <GenericAdminPage
+              label="Medals"
+              apiGetEndpoint="/api/medals"
+              apiDeleteEndpoint="/api/medals"
+              createForm={createMedalForm}
+            />
+          </CustomAdminDialog>
+
+          <CustomAdminDialog
+            open={ranksOpen}
+            onClose={() => setRanksOpen(false)}
+            title="Ranks"
+          >
+            <GenericAdminPage
+              label="Ranks"
+              apiGetEndpoint="/api/ranks"
+              apiDeleteEndpoint="/api/ranks"
+              createForm={createRankForm}
+            />
+          </CustomAdminDialog>
+
+          <CustomAdminDialog
+            open={raidsOpen}
+            onClose={() => setRaidsOpen(false)}
+            title="Raids"
+          >
+            <GenericAdminPage
+              label="Raids"
+              apiGetEndpoint="/api/raids"
+              apiDeleteEndpoint="/api/raids"
+              createForm={createRaidForm}
+            />
+          </CustomAdminDialog>
+
+          <CustomAdminDialog
+            open={raidsCompletedOpen}
+            onClose={() => setRaidsCompletedOpen(false)}
+            title="Raids Completed"
+          >
+            <GenericAdminPage
+              label="Raids Completed"
+              apiGetEndpoint="/api/raidscompleted"
+              apiDeleteEndpoint="/api/raidscompleted"
+              createForm={createRaidCompletedForm}
+            />
+          </CustomAdminDialog>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
