@@ -1,6 +1,3 @@
-import SendIcon from "@mui/icons-material/Send";
-import CabinRoundedIcon from "@mui/icons-material/CabinRounded";
-import TerminalOutlinedIcon from "@mui/icons-material/TerminalOutlined";
 import { ReactNode, useState } from "react";
 import { useUser } from "../auth/UserContext";
 import Box from "@mui/material/Box";
@@ -9,34 +6,46 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { ThemeProvider } from "@mui/material/styles";
-import { BrowserRouter, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import theme from "../theme";
+import GroupIcon from "@mui/icons-material/Group";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import LeaderboardIcon from "@mui/icons-material/Leaderboard";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 type HeaderButton = {
   text: string;
   link: string;
   icon?: ReactNode;
+  requiresAuth?: boolean;
 };
 
 const headerButtons: HeaderButton[] = [
   {
-    text: "Completed Raids",
-    link: "/completed-raids-board",
-    icon: <CabinRoundedIcon />,
-  },
-  {
     text: "Guild Members",
     link: "/",
-    icon: <TerminalOutlinedIcon />,
+    icon: <GroupIcon />,
   },
   {
     text: "Leaderboard",
     link: "/leaderboard",
-    icon: <SendIcon />,
+    icon: <LeaderboardIcon />,
+  },
+  {
+    text: "Completed Raids",
+    link: "/completed-raids-board",
+    icon: <VerifiedUserIcon />,
+  },
+  {
+    text: "Admin Panel",
+    link: "/admin",
+    icon: <AdminPanelSettingsIcon />,
+    requiresAuth: true,
   },
 ];
 
 export const Header = () => {
+  const navigate = useNavigate();
   const { user } = useUser();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -48,6 +57,9 @@ export const Header = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const nickname =
+    user?.claims?.find((c: any) => c.type === "nickname")?.value ?? "User";
 
   let el = (
     <ThemeProvider theme={theme}>
@@ -66,69 +78,26 @@ export const Header = () => {
           flexShrink: 0,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <Box
-            component={Link}
-            to="/"
-            sx={{
-              color: "inherit",
-              textDecoration: "none",
-              fontWeight: 700,
-              "&:hover": { opacity: 0.9 },
-            }}
-          >
-            Guild Members
-          </Box>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <nav>
+            {headerButtons.map(button => {
+              if (button.requiresAuth && !user?.isAuthenticated) return null;
 
-          <Box
-            component={Link}
-            to="/leaderboard"
-            sx={{
-              color: "inherit",
-              textDecoration: "none",
-              fontWeight: 700,
-              "&:hover": { opacity: 0.9 },
-            }}
-          >
-            Leaderboard
-          </Box>
-          <Box
-            component={Link}
-            to="/completed-raids-board"
-            sx={{
-              color: "inherit",
-              textDecoration: "none",
-              fontWeight: 700,
-              "&:hover": { opacity: 0.9 },
-            }}
-          >
-            Completed Raids
-          </Box>
-
-          {user?.isAuthenticated && (
-            <Box
-              component={Link}
-              to="/admin"
-              sx={{
-                color: "inherit",
-                textDecoration: "none",
-                fontWeight: 700,
-                "&:hover": { opacity: 0.9 },
-              }}
-            >
-              Admin Panel
-            </Box>
-          )}
+              return (
+                <Button
+                  key={button.link}
+                  startIcon={button.icon}
+                  onClick={() => navigate(button.link)}
+                >
+                  {button.text}
+                </Button>
+              );
+            })}
+          </nav>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", minWidth: 180 }}>
-          {user && user.claims ? (
+          {user?.claims ? (
             <>
               <Button
                 id="logout-button"
@@ -139,11 +108,7 @@ export const Header = () => {
                 variant="contained"
                 color="secondary"
               >
-                Welcome,{" "}
-                {user.claims
-                  ? user.claims.find((claim: any) => claim.type === "nickname")
-                      .value
-                  : ""}
+                Welcome, {nickname}
               </Button>
 
               <Menu
@@ -156,7 +121,7 @@ export const Header = () => {
                     sx: {
                       bgcolor: "background.paper",
                       color: "text.primary",
-                      border: theme => `1px solid ${theme.palette.divider}`,
+                      border: t => `1px solid ${t.palette.divider}`,
                     },
                   },
                 }}
@@ -179,9 +144,7 @@ export const Header = () => {
             <Button
               variant="contained"
               color="secondary"
-              onClick={() => {
-                window.location.href = "/api/auth/login";
-              }}
+              onClick={() => (window.location.href = "/api/auth/login")}
             >
               Admin Login
             </Button>
