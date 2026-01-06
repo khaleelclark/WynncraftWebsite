@@ -17,7 +17,8 @@ namespace ImperialBackend.Migrations
                 type: "uniqueidentifier",
                 nullable: true,
                 oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
+                oldType: "uniqueidentifier"
+            );
         }
 
         /// <inheritdoc />
@@ -31,7 +32,8 @@ namespace ImperialBackend.Migrations
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier",
-                oldNullable: true);
+                oldNullable: true
+            );
         }
     }
 }
