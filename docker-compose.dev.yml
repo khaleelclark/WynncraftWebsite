@@ -126,3 +126,4 @@ volumes:
 networks:
   imperial-net:
     external: true
+    name: imperial-net
