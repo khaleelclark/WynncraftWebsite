@@ -1,7 +1,7 @@
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import axios from "axios";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -36,6 +36,18 @@ interface ProfileData {
   lastSynced?: string;
   topRaidPartners?: RaidPartners[];
 }
+
+const medals = [
+  {
+    emoji: "🥇",
+  },
+  {
+    emoji: "🥈",
+  },
+  {
+    emoji: "🥉",
+  },
+];
 
 const Profile: React.FC = () => {
   const { id } = useParams();
@@ -192,76 +204,6 @@ const Profile: React.FC = () => {
               </Typography>
             </Grid>
 
-            <Grid size={6} sx={{ mt: 2 }}>
-              <Typography
-                variant="caption"
-                sx={{ opacity: 0.7, display: "block" }}
-              >
-                Top Raid Partners
-              </Typography>
-
-              {profile.topRaidPartners && profile.topRaidPartners.length > 0 ? (
-                <Stack spacing={1.5} mt={1}>
-                  {profile.topRaidPartners.map(p => (
-                    <Stack
-                      key={p.guildMemberId}
-                      direction="row"
-                      spacing={1.5}
-                      alignItems="center"
-                      sx={{
-                        p: 1.25,
-                        borderRadius: 2,
-                        border: theme => `1px solid ${theme.palette.divider}`,
-                        bgcolor: "background.default",
-                      }}
-                    >
-                      <Avatar
-                        variant="rounded"
-                        src={`https://mc-heads.net/avatar/${p.uuid}/48/`}
-                        alt={`${p.mainUsername} head`}
-                        sx={{
-                          width: 48,
-                          height: 48,
-                          borderRadius: 1,
-                          border: theme => `1px solid ${theme.palette.divider}`,
-                        }}
-                        onClick={() => navigate(`/profile/${p.guildMemberId}`)}
-                      />
-
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="body1"
-                          sx={{ fontWeight: 700 }}
-                          noWrap
-                        >
-                          {p.mainUsername}
-                        </Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                          {p.timesRaidedTogether} raid
-                          {p.timesRaidedTogether === 1 ? "" : "s"} together
-                        </Typography>
-                      </Box>
-
-                      <Chip
-                        label={`${p.timesRaidedTogether}x`}
-                        size="small"
-                        sx={{
-                          fontWeight: 800,
-                          bgcolor: theme => `${theme.palette.primary.main}22`,
-                          border: theme =>
-                            `1px solid ${theme.palette.primary.main}66`,
-                        }}
-                      />
-                    </Stack>
-                  ))}
-                </Stack>
-              ) : (
-                <Typography variant="body2" sx={{ opacity: 0.8, mt: 1 }}>
-                  No raid partners yet
-                </Typography>
-              )}
-            </Grid>
-
             {/* Games */}
             <Box sx={{ mt: 3 }}>
               <Typography
@@ -323,6 +265,111 @@ const Profile: React.FC = () => {
                 </Typography>
               )}
             </Box>
+
+            <Grid size={12} sx={{ mt: 2 }}>
+              <Typography
+                sx={{
+                  display: "block",
+                  mb: 1,
+                  textAlign: "center",
+                  fontWeight: 600,
+                  fontSize: 20,
+                }}
+              >
+                Top Raid Partners
+              </Typography>
+
+              {profile.topRaidPartners && profile.topRaidPartners.length > 0 ? (
+                <Grid container spacing={2}>
+                  {profile.topRaidPartners.map((p, index) => {
+                    const medal = medals[index];
+                    return (
+                      <Grid
+                        key={p.guildMemberId}
+                        size={{ xs: 12, sm: 4 }}
+                        sx={{ display: "flex", justifyContent: "center" }}
+                      >
+                        <Paper
+                          elevation={0}
+                          onClick={() =>
+                            navigate(`/profile/${p.guildMemberId}`)
+                          }
+                          sx={{
+                            p: 2,
+                            width: "100%",
+                            cursor: "pointer",
+                            borderRadius: 3,
+                            border: `1px solid #B0540F`,
+                            bgcolor: "background.default",
+                            transition:
+                              "transform 120ms ease, box-shadow 120ms ease",
+                            "&:hover": {
+                              transform: "translateY(-3px)",
+                              boxShadow: "0 10px 24px rgba(0,0,0,0.35)",
+                            },
+                          }}
+                        >
+                          <Stack spacing={1.25} alignItems="center">
+                            <Avatar
+                              variant="rounded"
+                              src={`https://mc-heads.net/avatar/${p.uuid}/72/`}
+                              alt={`${p.mainUsername}'s head`}
+                              sx={{
+                                width: 72,
+                                height: 72,
+                                borderRadius: 1,
+                                border: theme =>
+                                  `1px solid ${theme.palette.divider}`,
+                              }}
+                            />
+
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 800, textAlign: "center" }}
+                              noWrap
+                            >
+                              {`${medal.emoji} ${p.mainUsername}`}
+                            </Typography>
+
+                            <Box
+                              sx={{
+                                width: "100%",
+                                textAlign: "center",
+                                border: theme =>
+                                  `1px solid ${theme.palette.primary.main}55`,
+                                borderRadius: 2,
+                                py: 1,
+                                px: 1,
+                              }}
+                            >
+                              <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 900, lineHeight: 1 }}
+                              >
+                                {p.timesRaidedTogether}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{ opacity: 0.8 }}
+                              >
+                                Raids together
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              ) : (
+                <Typography
+                  variant="body2"
+                  sx={{ opacity: 0.8, mt: 3, textAlign: "center" }}
+                >
+                  No raid partners yet
+                </Typography>
+              )}
+            </Grid>
           </Paper>
         </Box>
       </>
