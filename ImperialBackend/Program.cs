@@ -8,6 +8,7 @@
 //   5) Frontend calls: GET /api/auth/me (credentials included) to get user info
 
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using ImperialBackend.Models;
 using ImperialBackend.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,13 +33,6 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
-
-// builder.Services.AddDbContext<ImperialDbContext>(options =>
-//     options.UseSqlServer(
-//         connectionString,
-//         sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
-//     )
-// );
 
 builder.Services.AddDbContextFactory<ImperialDbContext>(options =>
     options.UseSqlServer(
@@ -69,6 +64,83 @@ builder.Services.AddHostedService<ImperialBackend.Messaging.RaidCompletedConsume
 builder.Services.AddSingleton<GuildMemberSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
 
+builder.Services.AddRateLimiter(options =>
+{
+    // Optional: keep a global limiter (applies to everything unless overridden)
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    {
+        var identifier =
+            httpContext.User?.Identity?.IsAuthenticated == true
+                ? (httpContext.User.Identity?.Name ?? "authenticated")
+                : httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+        return RateLimitPartition.GetTokenBucketLimiter(
+            partitionKey: identifier,
+            factory: _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 100,
+                TokensPerPeriod = 100,
+                ReplenishmentPeriod = TimeSpan.FromMinutes(1),
+                AutoReplenishment = true,
+                QueueLimit = 0,
+            }
+        );
+    });
+
+    // ✅ Policy for authenticated users (more lenient)
+    options.AddPolicy(
+        "authenticated",
+        httpContext =>
+        {
+            var identifier =
+                httpContext.User?.Identity?.Name
+                ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                ?? "anonymous";
+
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: identifier,
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 200,
+                    Window = TimeSpan.FromMinutes(1),
+                }
+            );
+        }
+    );
+
+    // ✅ Policy for auth endpoints (more restrictive)
+    options.AddPolicy(
+        "auth",
+        httpContext =>
+        {
+            var identifier = httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+
+            return RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: identifier,
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1),
+                }
+            );
+        }
+    );
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsync(
+            "Too many requests. Please try again later.",
+            token
+        );
+    };
+});
+
+/* ============================
+ * Logging
+ * ============================ */
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
@@ -259,10 +331,12 @@ builder
                 // ============================
                 OnTicketReceived = context =>
                 {
-                    if (!string.IsNullOrEmpty(context.Properties.RedirectUri))
-                        context.Properties.RedirectUri = ToPublicUrl(
-                            context.Properties.RedirectUri
-                        );
+                    var redirectUri = context.Properties?.RedirectUri;
+
+                    if (!string.IsNullOrEmpty(redirectUri))
+                    {
+                        context.Properties!.RedirectUri = ToPublicUrl(redirectUri);
+                    }
 
                     return Task.CompletedTask;
                 },
@@ -289,8 +363,6 @@ builder
             };
         }
     );
-
-builder.Services.AddAuthorization();
 
 /* ============================
  * App + Middleware
@@ -321,9 +393,8 @@ app.UseForwardedHeaders(
 );
 
 app.UseRouting();
-
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

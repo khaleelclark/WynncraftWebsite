@@ -1,11 +1,13 @@
 using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/ranks")]
+[EnableRateLimiting("authenticated")]
 public class RanksController : ControllerBase
 {
     private readonly IRankService _service;

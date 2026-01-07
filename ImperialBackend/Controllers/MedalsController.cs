@@ -1,11 +1,13 @@
 using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/medals")]
+[EnableRateLimiting("authenticated")]
 public class MedalsController : ControllerBase
 {
     private readonly IMedalService _service;

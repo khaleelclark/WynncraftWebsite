@@ -2,11 +2,13 @@ using ImperialBackend.DTOs;
 using ImperialBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers
 {
     [ApiController]
     [Route("api/raidscompleted")]
+    [EnableRateLimiting("authenticated")]
     public class RaidsCompletedController : ControllerBase
     {
         private readonly IRaidsCompletedService _service;

@@ -1,11 +1,13 @@
 using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/events")]
+[EnableRateLimiting("authenticated")]
 public class EventsController : ControllerBase
 {
     private readonly IEventService _service;

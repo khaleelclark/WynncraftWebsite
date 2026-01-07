@@ -23,7 +23,7 @@ const GuildMemberList: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("/api/guildmembers").then(res => setMembers(res.data));
+    axios.get("/api/guildmembers/public").then(res => setMembers(res.data));
   }, []);
 
   const columns: GridColDef[] = [
