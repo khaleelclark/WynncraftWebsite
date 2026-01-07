@@ -56,7 +56,7 @@ const Leaderboard: React.FC = () => {
           onClick={() => navigate(`/profile/${params.row.id}`)}
         >
           <img
-            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/45/`}
             alt="Skin"
             style={{
               width: 45,

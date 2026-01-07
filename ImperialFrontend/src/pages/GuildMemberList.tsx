@@ -56,7 +56,7 @@ const GuildMemberList: React.FC = () => {
         >
           <Box
             component="img"
-            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/45/`}
             alt="Skin"
             sx={{
               width: 45,
