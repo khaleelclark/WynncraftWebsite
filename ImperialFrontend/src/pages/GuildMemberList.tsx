@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import { Header } from "./Header";
 
 interface GuildMember {
   id: number;
@@ -53,18 +54,17 @@ const GuildMemberList: React.FC = () => {
             },
           }}
         >
-          {params.row.uuid && (
-            <Box
-              component="img"
-              src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
-              alt="Skin"
-              sx={{
-                width: 45,
-                height: 45,
-                borderRadius: 0.5,
-              }}
-            />
-          )}
+          <Box
+            component="img"
+            src={`https://mc-heads.net/avatar/${params.row.uuid}/100/`}
+            alt="Skin"
+            sx={{
+              width: 45,
+              height: 45,
+              borderRadius: 0.5,
+            }}
+          />
+
           <Box component="span">{params.row.name}</Box>
         </Box>
       ),
@@ -128,71 +128,74 @@ const GuildMemberList: React.FC = () => {
   ];
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        bgcolor: "background.default",
-        color: "text.primary",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
+    <>
+      <Header />
       <Box
         sx={{
+          p: 3,
+          bgcolor: "background.default",
+          color: "text.primary",
           width: "100%",
-          maxWidth: { xl: 1400, lg: 1200, md: "100%" },
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
-        <Paper
+        <Box
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            p: 3,
-            mb: 3,
+            width: "100%",
+            maxWidth: { xl: 1400, lg: 1200, md: "100%" },
           }}
         >
-          <Typography
-            variant="h3"
+          <Paper
             sx={{
-              textAlign: "center",
-              color: "text.primary",
-              fontWeight: 800,
-            }}
-          >
-            Imperial Guild Members
-          </Typography>
-        </Paper>
-        <DataGrid
-          rows={members}
-          columns={columns}
-          getRowId={row => row.id}
-          getRowHeight={() => "auto"}
-          columnHeaderHeight={70}
-          pageSizeOptions={[20, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 20, page: 0 } },
-          }}
-          disableRowSelectionOnClick
-          sx={{
-            fontSize: "1rem",
-            "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",
-              py: 2,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              textAlign: "center",
-              width: "100%",
-              py: 2,
-              px: 2,
-            },
-          }}
-        />
+              justifyContent: "center",
+              p: 3,
+              mb: 3,
+            }}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                textAlign: "center",
+                color: "text.primary",
+                fontWeight: 800,
+              }}
+            >
+              Imperial Guild Members
+            </Typography>
+          </Paper>
+          <DataGrid
+            rows={members}
+            columns={columns}
+            getRowId={row => row.id}
+            getRowHeight={() => "auto"}
+            columnHeaderHeight={70}
+            pageSizeOptions={[20, 50, 100]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 20, page: 0 } },
+            }}
+            disableRowSelectionOnClick
+            sx={{
+              fontSize: "1rem",
+              "& .MuiDataGrid-cell": {
+                display: "flex",
+                alignItems: "center",
+                py: 2,
+              },
+              "& .MuiDataGrid-columnHeaderTitle": {
+                textAlign: "center",
+                width: "100%",
+                py: 2,
+                px: 2,
+              },
+            }}
+          />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

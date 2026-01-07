@@ -13,6 +13,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - imperial-net
 
   redis:
     image: redis:7
@@ -22,6 +24,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - imperial-net
 
   authentik-server:
     image: ghcr.io/goauthentik/server:latest
@@ -45,6 +49,8 @@ services:
     volumes:
       - ./authentik-data:/media
       - ./custom-templates:/templates
+    networks:
+      - imperial-net
 
   authentik-worker:
     image: ghcr.io/goauthentik/server:latest
@@ -66,6 +72,8 @@ services:
       - ./authentik-data:/media
       - ./custom-templates:/templates
     user: root
+    networks:
+      - imperial-net
 
   backend:
     build:
@@ -81,6 +89,8 @@ services:
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb_New;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True"
     depends_on:
       - db
+    networks:
+      - imperial-net
 
   frontend:
     build:
@@ -95,6 +105,8 @@ services:
       NODE_ENV: development
     depends_on:
       - backend
+    networks:
+      - imperial-net
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -105,6 +117,13 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+    networks:
+      - imperial-net
 
 volumes:
   sql_data:
+
+networks:
+  imperial-net:
+    external: true
+    name: imperial-net

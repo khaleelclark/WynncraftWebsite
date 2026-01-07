@@ -9,6 +9,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
 import Grid from "@mui/material/Grid";
+import { Header } from "./Header";
 
 interface RaidCompletedPublicRow {
   id: number;
@@ -134,6 +135,7 @@ const GuildRaidsBoard: React.FC = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Header />
       <Box
         sx={{
           p: 3,

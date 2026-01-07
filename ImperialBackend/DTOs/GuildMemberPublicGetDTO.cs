@@ -6,6 +6,6 @@ namespace ImperialBackend.DTOs
         public string? MinecraftUsername { get; set; }
         public string? RankName { get; set; }
         public string? WynncraftRank { get; set; }
-        public Guid Uuid { get; set; }
+        public Guid? Uuid { get; set; }
     }
 }

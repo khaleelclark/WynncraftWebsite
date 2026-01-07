@@ -13,6 +13,7 @@ const imperial = {
   pearl: "#E1CED3",
   ink: "#1A0B0E",
   dryTears: "#160101ff",
+  ember: "#B0540F",
 };
 
 const imperialTable = {
@@ -45,7 +46,8 @@ const theme = createTheme({
     divider: "rgba(225, 206, 211, 0.25)",
     error: { main: "#FF0055" },
     success: { main: "#4ADE80" }, // you can swap later if you want "imperial" success
-    warning: { main: "#F59E0B" },
+    warning: { main: imperial.ember },
+
     info: { main: "#60A5FA" },
   },
 
@@ -261,8 +263,11 @@ const theme = createTheme({
           },
 
           // hover should tint, not replace
+          // "&:hover": {
+          //   backgroundColor: "rgba(231, 60, 131, 0.14)", // hot-pink wash
+          // },
           "&:hover": {
-            backgroundColor: "rgba(231, 60, 131, 0.14)", // hot-pink wash
+            backgroundColor: "rgba(176, 84, 15, 0.16)", // ember wash
           },
 
           // selected should still feel selected but keep the vibe

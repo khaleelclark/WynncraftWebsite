@@ -32,7 +32,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
-builder.Services.AddDbContext<ImperialDbContext>(options =>
+// builder.Services.AddDbContext<ImperialDbContext>(options =>
+//     options.UseSqlServer(
+//         connectionString,
+//         sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+//     )
+// );
+
+builder.Services.AddDbContextFactory<ImperialDbContext>(options =>
     options.UseSqlServer(
         connectionString,
         sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
@@ -57,6 +64,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IMedalService, MedalService>();
 builder.Services.AddScoped<IRankService, RankService>();
 builder.Services.AddScoped<IRaidService, RaidService>();
+builder.Services.AddHostedService<ImperialBackend.Messaging.RaidCompletedConsumer>();
 
 builder.Services.AddSingleton<GuildMemberSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
