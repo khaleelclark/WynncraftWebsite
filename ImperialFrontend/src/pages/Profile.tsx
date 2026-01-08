@@ -236,10 +236,7 @@ const Profile: React.FC = () => {
 
             {/* Medals */}
             <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="caption"
-                sx={{ color: "text.secondary", display: "block" }}
-              >
+              <Typography variant="caption" sx={{ display: "block" }}>
                 Medals
               </Typography>
               {profile.medals && profile.medals.length > 0 ? (

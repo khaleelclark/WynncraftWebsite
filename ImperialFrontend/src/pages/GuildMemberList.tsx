@@ -148,51 +148,62 @@ const GuildMemberList: React.FC = () => {
           }}
         >
           <Paper
+            elevation={2}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 3,
-              mb: 3,
+              overflow: "hidden",
+              borderRadius: 2,
             }}
           >
-            <Typography
-              variant="h3"
+            <Box
               sx={{
-                textAlign: "center",
-                color: "text.primary",
-                fontWeight: 800,
-              }}
-            >
-              Imperial Guild Members
-            </Typography>
-          </Paper>
-          <DataGrid
-            rows={members}
-            columns={columns}
-            getRowId={row => row.id}
-            getRowHeight={() => "auto"}
-            columnHeaderHeight={70}
-            pageSizeOptions={[20, 50, 100]}
-            initialState={{
-              pagination: { paginationModel: { pageSize: 20, page: 0 } },
-            }}
-            disableRowSelectionOnClick
-            sx={{
-              fontSize: "1rem",
-              "& .MuiDataGrid-cell": {
+                px: 3,
+                py: 2,
                 display: "flex",
                 alignItems: "center",
-                py: 2,
-              },
-              "& .MuiDataGrid-columnHeaderTitle": {
-                textAlign: "center",
-                width: "100%",
-                py: 2,
-                px: 2,
-              },
-            }}
-          />
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Members
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                {members.length} total
+              </Typography>
+            </Box>
+            <DataGrid
+              rows={members}
+              columns={columns}
+              getRowId={row => row.id}
+              getRowHeight={() => "auto"}
+              columnHeaderHeight={70}
+              pageSizeOptions={[20, 50, 100]}
+              initialState={{
+                pagination: { paginationModel: { pageSize: 20, page: 0 } },
+              }}
+              disableRowSelectionOnClick
+              sx={{
+                fontSize: "1rem",
+                "& .MuiDataGrid-cell": {
+                  display: "flex",
+                  alignItems: "center",
+                  py: 2,
+                },
+                "& .MuiDataGrid-columnHeaderTitle": {
+                  textAlign: "center",
+                  width: "100%",
+                  py: 2,
+                  px: 2,
+                },
+              }}
+            />
+          </Paper>
         </Box>
       </Box>
     </>

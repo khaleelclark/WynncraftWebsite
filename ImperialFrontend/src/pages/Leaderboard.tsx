@@ -11,6 +11,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import { Header } from "./Header";
+import Paper from "@mui/material/Paper";
 
 interface LeaderboardEntry {
   id: number;
@@ -200,18 +201,6 @@ const Leaderboard: React.FC = () => {
             maxWidth: { xl: 1400, lg: 1200, md: "100%" },
           }}
         >
-          <Typography
-            sx={{
-              color: "#efdddb",
-              marginBottom: 3,
-              fontWeight: 600,
-              fontSize: 30,
-              textAlign: "center",
-            }}
-          >
-            {leaderboardTitle}
-          </Typography>
-
           <EventSelector onSelect={setSelectedEvent} />
 
           {selectedEvent?.id === -1 ? (
@@ -245,42 +234,74 @@ const Leaderboard: React.FC = () => {
             </Box>
           )}
 
-          <Box sx={{ mt: 3 }}>
-            <DataGrid
-              rows={entries}
-              columns={columns}
-              getRowId={row => row.id}
-              getRowHeight={() => "auto"}
-              columnHeaderHeight={70}
-              pageSizeOptions={[20, 50, 100]}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 20, page: 0 } },
-                sorting: {
-                  sortModel: [{ field: "raidsCompleted", sort: "desc" }],
-                },
-              }}
-              disableRowSelectionOnClick
+          <Paper
+            elevation={2}
+            sx={{
+              overflow: "hidden",
+              borderRadius: 2,
+            }}
+          >
+            <Box
               sx={{
-                fontSize: "1rem",
-                "& .MuiDataGrid-cell": {
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  py: 2,
-                  whiteSpace: "normal",
-                  lineHeight: "1.35",
-                  wordBreak: "break-word",
-                },
-                "& .MuiDataGrid-columnHeaderTitle": {
-                  textAlign: "center",
-                  width: "100%",
-                  py: 2,
-                  px: 2,
-                },
+                px: 3,
+                py: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
-            />
-          </Box>
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  letterSpacing: 0.3,
+                }}
+              >
+                {leaderboardTitle}
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                {entries.length} total
+              </Typography>
+            </Box>
+
+            <Box sx={{ mt: 0.5 }}>
+              <DataGrid
+                rows={entries}
+                columns={columns}
+                getRowId={row => row.id}
+                getRowHeight={() => "auto"}
+                columnHeaderHeight={70}
+                pageSizeOptions={[20, 50, 100]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 20, page: 0 } },
+                  sorting: {
+                    sortModel: [{ field: "raidsCompleted", sort: "desc" }],
+                  },
+                }}
+                disableRowSelectionOnClick
+                sx={{
+                  fontSize: "1rem",
+                  "& .MuiDataGrid-cell": {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    py: 2,
+                    whiteSpace: "normal",
+                    lineHeight: "1.35",
+                    wordBreak: "break-word",
+                  },
+                  "& .MuiDataGrid-columnHeaderTitle": {
+                    textAlign: "center",
+                    width: "100%",
+                    py: 2,
+                    px: 2,
+                  },
+                }}
+              />
+            </Box>
+          </Paper>
         </Box>
       </Box>
     </LocalizationProvider>
