@@ -21,9 +21,10 @@ public sealed class RaidCompletedConsumer : BackgroundService
     private RMQConnection? _connection;
     private RMQChannel? _channel;
 
+    // Needs Secret
     private const string HostName = "raid-rabbit";
-    private const string UserName = "imperial";
-    private const string Password = "ImperialGuild";
+    private const string UserName = "imperial-website";
+    private const string Password = "WebsiteStrongPassword";
     private const string VirtualHost = "imperial";
 
     private const string ExchangeName = "raids.exchange";
@@ -53,24 +54,6 @@ public sealed class RaidCompletedConsumer : BackgroundService
 
         _connection = await factory.CreateConnectionAsync(cancellationToken);
         _channel = await _connection.CreateChannelAsync();
-
-        await _channel.ExchangeDeclareAsync(
-            ExchangeName,
-            ExchangeType.Topic,
-            durable: true,
-            autoDelete: false,
-            arguments: null
-        );
-
-        await _channel.QueueDeclareAsync(
-            QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null
-        );
-
-        await _channel.QueueBindAsync(QueueName, ExchangeName, RoutingKey, arguments: null);
 
         await _channel.BasicQosAsync(0, 1, false);
 
