@@ -19,6 +19,7 @@ import { CustomFormProps } from "./CustomForm";
 import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import axios from "axios";
+import Paper from "@mui/material/Paper";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -313,48 +314,70 @@ export const GenericAdminPage = ({
               </DialogContent>
             </Dialog>
 
-            <Typography
-              variant="h4"
+            <Paper
+              elevation={2}
               sx={{
-                mb: 3,
-                fontWeight: 800,
-                textAlign: "center",
-                color: "text.primary",
+                mt: 3,
+                overflow: "hidden",
+                borderRadius: 2,
               }}
             >
-              {label}
-            </Typography>
-            <DataGrid
-              rows={members}
-              columns={columns}
-              getRowId={row => row.id}
-              getRowHeight={() => "auto"}
-              columnHeaderHeight={60}
-              pageSizeOptions={[20, 50, 100]}
-              initialState={{
-                pagination: { paginationModel: { pageSize: 20, page: 0 } },
-              }}
-              disableRowSelectionOnClick
-              sx={{
-                fontSize: "1rem",
-                "& .MuiDataGrid-cell": {
+              <Box
+                sx={{
+                  px: 3,
+                  py: 2,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  py: 2,
-                  whiteSpace: "normal",
-                  lineHeight: "1.35",
-                  wordBreak: "break-word",
-                },
-                "& .MuiDataGrid-columnHeaderTitle": {
-                  textAlign: "center",
-                  width: "100%",
-                  py: 2,
-                  px: 2,
-                },
-              }}
-            />
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 800,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  {label}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {members.length} total
+                </Typography>
+              </Box>
+
+              <DataGrid
+                rows={members}
+                columns={columns}
+                getRowId={row => row.id}
+                getRowHeight={() => "auto"}
+                columnHeaderHeight={60}
+                pageSizeOptions={[20, 50, 100]}
+                initialState={{
+                  pagination: { paginationModel: { pageSize: 20, page: 0 } },
+                }}
+                disableRowSelectionOnClick
+                sx={{
+                  fontSize: "1rem",
+                  "& .MuiDataGrid-cell": {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    py: 2,
+                    whiteSpace: "normal",
+                    lineHeight: "1.35",
+                    wordBreak: "break-word",
+                  },
+                  "& .MuiDataGrid-columnHeaderTitle": {
+                    textAlign: "center",
+                    width: "100%",
+                    py: 2,
+                    px: 2,
+                  },
+                }}
+              />
+            </Paper>
           </Box>
         </Box>
       ) : (
