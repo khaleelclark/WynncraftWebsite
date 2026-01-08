@@ -44,12 +44,8 @@ const headerButtons: HeaderButton[] = [
 export const Header = () => {
   const navigate = useNavigate();
   const { user } = useUser();
-
-  // logout menu (used on lg+ header button AND in drawer if you want)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
-  // drawer open/close
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -109,7 +105,10 @@ export const Header = () => {
     <Button
       variant="contained"
       color="primary"
-      onClick={() => (window.location.href = "/api/auth/login")}
+      onClick={() =>
+        //(window.location.href = "/api/auth/login")
+        (window.location.href = "http://192.168.4.121:5032/api/auth/login")
+      }
       sx={{ whiteSpace: "nowrap" }}
       startIcon={<AdminPanelSettingsIcon />}
     >
@@ -177,12 +176,11 @@ export const Header = () => {
           </Typography>
         </Box>
 
-        {/* Middle: Nav buttons (md+) — centered on lg+ */}
         <Box
           sx={{
             flex: "1 1 auto",
             display: { xs: "none", md: "flex" },
-            justifyContent: { md: "flex-end", lg: "center" }, // ✅ center on lg+
+            justifyContent: { md: "flex-end", lg: "center" },
           }}
         >
           <Box sx={{ display: "flex", gap: 2 }}>
@@ -198,7 +196,6 @@ export const Header = () => {
           </Box>
         </Box>
 
-        {/* Right: Auth button ONLY on lg+ */}
         <Box
           sx={{
             flex: "0 0 auto",
@@ -210,7 +207,6 @@ export const Header = () => {
           {authControl}
         </Box>
 
-        {/* Right: Hamburger ONLY on md and down */}
         <Box
           sx={{
             flex: "0 0 auto",
@@ -228,7 +224,6 @@ export const Header = () => {
           </IconButton>
         </Box>
 
-        {/* Drawer (md and down) */}
         <Drawer
           anchor="right"
           open={drawerOpen}
@@ -266,7 +261,6 @@ export const Header = () => {
 
           <Divider />
 
-          {/* ✅ Auth control appears in drawer on md and under */}
           <Box sx={{ p: 2 }}>{authControl}</Box>
         </Drawer>
       </Box>

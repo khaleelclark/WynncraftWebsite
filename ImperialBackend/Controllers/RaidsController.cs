@@ -7,7 +7,6 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/raids")]
-[EnableRateLimiting("authenticated")]
 public class RaidsController : ControllerBase
 {
     private readonly IRaidService _service;

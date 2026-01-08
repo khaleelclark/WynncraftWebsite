@@ -7,7 +7,6 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/guildmembers")]
-[EnableRateLimiting("authenticated")]
 public class GuildMembersController : ControllerBase
 {
     private readonly IGuildMemberService _service;

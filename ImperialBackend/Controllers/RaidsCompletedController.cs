@@ -8,7 +8,6 @@ namespace ImperialBackend.Controllers
 {
     [ApiController]
     [Route("api/raidscompleted")]
-    [EnableRateLimiting("authenticated")]
     public class RaidsCompletedController : ControllerBase
     {
         private readonly IRaidsCompletedService _service;

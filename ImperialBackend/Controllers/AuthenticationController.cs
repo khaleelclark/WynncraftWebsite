@@ -10,15 +10,15 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-[EnableRateLimiting("auth")]
 public class AuthenticationController : ControllerBase
 {
-    private const string FrontendHome = "http://localhost:5173/";
+    // Needs Secret
+    private const string FrontendHome = "http://192.168.4.121:5173/";
 
     /* ============================
      * LOGIN
      * ============================ */
-
+    [EnableRateLimiting("auth")]
     [HttpGet("login")]
     public IActionResult Login()
     {

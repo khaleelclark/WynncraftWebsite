@@ -24,7 +24,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://backend:5032",
+      "/api": "http://192.168.4.121:5032", //needs secret
     },
   },
 });

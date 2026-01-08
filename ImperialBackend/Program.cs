@@ -1,9 +1,9 @@
 // Program.cs
 // ASP.NET Core Web API + Authentik (OIDC) + Cookie auth
 // Flow:
-//   1) Frontend sends user to: GET /api/auth/login?returnUrl=http://localhost:5173/somepage
+//   1) Frontend sends user to: GET /api/auth/login?returnUrl=http://192.168.4.121:5173/somepage
 //   2) Backend challenges with OIDC -> browser goes to Authentik
-//   3) Authentik posts back to: POST http://localhost:5032/api/auth/callback
+//   3) Authentik posts back to: POST http://192.168.4.121:5032/api/auth/callback
 //   4) OIDC middleware validates, creates cookie, then redirects user to returnUrl
 //   5) Frontend calls: GET /api/auth/me (credentials included) to get user info
 
@@ -64,22 +64,36 @@ builder.Services.AddHostedService<ImperialBackend.Messaging.RaidCompletedConsume
 builder.Services.AddSingleton<GuildMemberSyncService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
 
+static string GetRateLimitKey(HttpContext ctx)
+{
+    if (ctx.User?.Identity?.IsAuthenticated == true)
+    {
+        var sub =
+            ctx.User.FindFirst("sub")?.Value
+            ?? ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? ctx.User.Identity?.Name;
+
+        return "u:" + (sub ?? "unknown");
+    }
+
+    var ip = ctx.Connection.RemoteIpAddress?.ToString();
+    return "ip:" + (ip ?? "unknown"); // anonymous/unauthenticated users
+}
+
 builder.Services.AddRateLimiter(options =>
 {
-    // Optional: keep a global limiter (applies to everything unless overridden)
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
     {
-        var identifier =
-            httpContext.User?.Identity?.IsAuthenticated == true
-                ? (httpContext.User.Identity?.Name ?? "authenticated")
-                : httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+        var key = GetRateLimitKey(ctx);
+        var isAuthenticated = key.StartsWith("u:");
+        var perMinute = isAuthenticated ? 200 : 100; //~200 req for admin, ~100 for public use
 
         return RateLimitPartition.GetTokenBucketLimiter(
-            partitionKey: identifier,
-            factory: _ => new TokenBucketRateLimiterOptions
+            key,
+            _ => new TokenBucketRateLimiterOptions
             {
-                TokenLimit = 100,
-                TokensPerPeriod = 100,
+                TokenLimit = perMinute, // burst size
+                TokensPerPeriod = perMinute, // refill per period
                 ReplenishmentPeriod = TimeSpan.FromMinutes(1),
                 AutoReplenishment = true,
                 QueueLimit = 0,
@@ -87,42 +101,22 @@ builder.Services.AddRateLimiter(options =>
         );
     });
 
-    // ✅ Policy for authenticated users (more lenient)
-    options.AddPolicy(
-        "authenticated",
-        httpContext =>
-        {
-            var identifier =
-                httpContext.User?.Identity?.Name
-                ?? httpContext.Connection.RemoteIpAddress?.ToString()
-                ?? "anonymous";
-
-            return RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: identifier,
-                factory: _ => new FixedWindowRateLimiterOptions
-                {
-                    AutoReplenishment = true,
-                    PermitLimit = 200,
-                    Window = TimeSpan.FromMinutes(1),
-                }
-            );
-        }
-    );
-
-    // ✅ Policy for auth endpoints (more restrictive)
+    // Strict for login/callback endpoints (per IP)
     options.AddPolicy(
         "auth",
-        httpContext =>
+        ctx =>
         {
-            var identifier = httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous";
+            var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var key = "ip:" + ip;
 
             return RateLimitPartition.GetFixedWindowLimiter(
-                partitionKey: identifier,
-                factory: _ => new FixedWindowRateLimiterOptions
+                key,
+                _ => new FixedWindowRateLimiterOptions
                 {
                     AutoReplenishment = true,
                     PermitLimit = 10,
                     Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0,
                 }
             );
         }
@@ -131,6 +125,7 @@ builder.Services.AddRateLimiter(options =>
     options.OnRejected = async (context, token) =>
     {
         context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.Headers.RetryAfter = "60";
         await context.HttpContext.Response.WriteAsync(
             "Too many requests. Please try again later.",
             token
@@ -151,10 +146,11 @@ static string ToPublicUrl(string url)
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    return url.Replace("http://authentik-server:9000", "http://localhost:9000")
-        .Replace("https://authentik-server:9000", "http://localhost:9000")
-        .Replace("http://backend:5032", "http://localhost:5032")
-        .Replace("https://backend:5032", "http://localhost:5032");
+    // Needs Secret
+    return url.Replace("http://authentik-server:9000", "http://192.168.4.121:9000")
+        .Replace("https://authentik-server:9000", "http://192.168.4.121:9000")
+        .Replace("http://backend:5032", "http://192.168.4.121:5032")
+        .Replace("https://backend:5032", "http://192.168.4.121:5032");
 }
 
 /* ============================
@@ -181,7 +177,7 @@ authentikAuthority = authentikAuthority.TrimEnd('/');
 authentikInternalUrl = authentikInternalUrl.TrimEnd('/');
 
 // This is the callback URL Authentik must allow, and what the browser can resolve.
-const string publicBackendBaseUrl = "http://localhost:5032";
+const string publicBackendBaseUrl = "http://192.168.4.121:5032";
 var callbackUrl = $"{publicBackendBaseUrl}/api/auth/callback";
 var signoutCallbackUrl = $"{publicBackendBaseUrl}/api/auth/signout-callback";
 
@@ -279,7 +275,7 @@ builder
 
             options.Events.OnSignedOutCallbackRedirect = context =>
             {
-                context.Response.Redirect("http://localhost:5173/");
+                context.Response.Redirect("http://192.168.4.121:5173/");
                 context.HandleResponse();
                 return Task.CompletedTask;
             };
@@ -346,7 +342,7 @@ builder
                 // ============================
                 OnSignedOutCallbackRedirect = context =>
                 {
-                    context.Response.Redirect("http://localhost:5173/");
+                    context.Response.Redirect("http://192.168.4.121:5173/");
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
@@ -356,7 +352,7 @@ builder
                 // ============================
                 OnRemoteFailure = context =>
                 {
-                    context.Response.Redirect("http://localhost:5173/login?error=auth_failed");
+                    context.Response.Redirect("http://192.168.4.121:5173/login?error=auth_failed");
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
@@ -393,8 +389,8 @@ app.UseForwardedHeaders(
 );
 
 app.UseRouting();
-app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 app.Run();

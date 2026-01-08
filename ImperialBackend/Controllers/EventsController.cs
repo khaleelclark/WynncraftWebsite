@@ -7,7 +7,6 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/events")]
-[EnableRateLimiting("authenticated")]
 public class EventsController : ControllerBase
 {
     private readonly IEventService _service;

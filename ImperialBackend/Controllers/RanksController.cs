@@ -7,7 +7,6 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/ranks")]
-[EnableRateLimiting("authenticated")]
 public class RanksController : ControllerBase
 {
     private readonly IRankService _service;

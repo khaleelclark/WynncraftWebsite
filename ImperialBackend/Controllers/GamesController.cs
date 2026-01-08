@@ -7,7 +7,6 @@ namespace ImperialBackend.Controllers;
 
 [ApiController]
 [Route("api/games")]
-[EnableRateLimiting("authenticated")]
 public class GamesController : ControllerBase
 {
     private readonly IGameService _service;
