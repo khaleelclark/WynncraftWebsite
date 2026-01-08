@@ -62,7 +62,7 @@ public sealed class RaidCompletedConsumer : BackgroundService
         await base.StartAsync(cancellationToken);
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (_channel is null)
             throw new InvalidOperationException("RabbitMQ channel not initialized.");
@@ -151,10 +151,52 @@ public sealed class RaidCompletedConsumer : BackgroundService
             {
                 _logger.LogError(ex, "Failed to process raid.completed. Body: {Body}", bodyText);
 
-                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
+                // If processing fails, dead-lettering is ideal; for now we do not requeue.
+                await _channel!.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
             }
         };
 
-        return _channel.BasicConsumeAsync(QueueName, autoAck: false, consumer, stoppingToken);
+        // Retry consuming if the queue doesn't exist yet / broker not ready
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                // This will throw if the queue/vhost isn't ready or permissions are wrong.
+                await _channel.BasicConsumeAsync(
+                    QueueName,
+                    autoAck: false,
+                    consumer,
+                    stoppingToken
+                );
+
+                _logger.LogInformation("Consuming RabbitMQ queue: {Queue}", QueueName);
+
+                // Once consuming is started, keep the service alive.
+                await Task.Delay(Timeout.InfiniteTimeSpan, stoppingToken);
+            }
+            catch (RabbitMQ.Client.Exceptions.OperationInterruptedException ex)
+            {
+                // Most common causes here:
+                // - NOT_FOUND - no queue 'raids.completed.q' (definitions not loaded / wrong vhost)
+                // - ACCESS_REFUSED (permissions wrong)
+                _logger.LogWarning(
+                    ex,
+                    "RabbitMQ consume failed for queue '{Queue}'. "
+                        + "If you see NOT_FOUND, your definitions may not be loaded or vhost is wrong. "
+                        + "If you see ACCESS_REFUSED, permissions are too strict. Retrying in 5s...",
+                    QueueName
+                );
+            }
+            catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "RabbitMQ consumer encountered an error before consuming '{Queue}'. Retrying in 5s...",
+                    QueueName
+                );
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+        }
     }
 }
