@@ -42,9 +42,11 @@ public class GameService : IGameService
 
     public async Task DeleteAsync(int id)
     {
-        if (await _context.GuildMemberGames.AnyAsync(g => g.GameId == id))
+        var refs = await _context.GuildMemberGames.AsNoTracking().CountAsync(g => g.GameId == id);
+
+        if (refs > 0)
             throw new InvalidOperationException(
-                "Cannot delete game with guild members. Remove guild members first"
+                $"Game {id} can't be deleted because {refs} guild member record(s) reference it."
             );
 
         var game = await _context.Games.FindAsync(id) ?? throw new KeyNotFoundException();

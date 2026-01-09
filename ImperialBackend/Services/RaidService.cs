@@ -69,7 +69,7 @@ public class RaidService : IRaidService
 
         if (refs > 0)
             throw new InvalidOperationException(
-                $"Raid {id} can't be deleted because {refs} RaidInstances reference it."
+                $"Raid {id} can't be deleted because {refs} Raid Instances reference it."
             );
 
         var raid = await _context.Raids.FindAsync(id) ?? throw new KeyNotFoundException();
