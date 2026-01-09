@@ -34,6 +34,8 @@ export function useApiErrorSnackbar() {
     }
 
     switch (err.response.status) {
+      case 504:
+        return "Unable to reach server Please try again later.";
       case 503:
         return "Service unavailable. Please try again later.";
       case 500:

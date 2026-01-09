@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import axios from "axios";
 import Paper from "@mui/material/Paper";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -51,11 +52,15 @@ export const GenericAdminPage = ({
   const [openDeletionDialog, setOpenDeletionDialog] = useState(false);
   const [idToDelete, setIdToDelete] = useState(-1);
   const [autofillData, setAutofillData] = useState({});
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
-    axios.get(apiGetEndpoint).then(res => {
-      setMembers(res.data);
-    });
+    axios
+      .get(apiGetEndpoint)
+      .then(res => {
+        setMembers(res.data);
+      })
+      .catch(handleError);
   }, []);
 
   const formatDateTime = (iso: string) =>
@@ -184,6 +189,7 @@ export const GenericAdminPage = ({
 
   const el = (
     <>
+      {SnackbarElement}
       {members ? (
         <Box
           sx={{
