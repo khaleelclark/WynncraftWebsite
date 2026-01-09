@@ -12,8 +12,8 @@ export interface CustomFormProps {
   title: string;
   children: ReactNode[] | ReactNode;
   apiEndpoint: string;
-  onSubmitSuccess?: () => void;
-  onSubmitError?: (error: unknown) => void;
+  onSubmitSuccess?: (ctx: { action: FormAction; record?: any }) => void;
+  onSubmitError?: (ctx: { action: FormAction; error: unknown }) => void;
   changeRecordsCallback?: (newRecord: Object) => void;
   autofillData?: any;
   isPost?: boolean; //true = post, false = put
@@ -79,27 +79,19 @@ export const CustomForm = ({
 
   const handleSubmit = async () => {
     const flattenFormValues = flattenObject(formValues);
-    try {
-      if (isPost) {
-        await axios.post(apiEndpoint, flattenFormValues).then(res => {
-          if (changeRecordsCallback) changeRecordsCallback(res.data);
-        });
-      } else {
-        await axios
-          .put(`${apiEndpoint}/${formValues.id}`, flattenFormValues)
-          .then(res => {
-            if (changeRecordsCallback) changeRecordsCallback(res.data);
-          });
-      }
+    const action: FormAction = isPost ? "create" : "update";
 
-      if (onSubmitSuccess) {
-        onSubmitSuccess();
-      }
+    try {
+      const res = isPost
+        ? await axios.post(apiEndpoint, flattenFormValues)
+        : await axios.put(`${apiEndpoint}/${formValues.id}`, flattenFormValues);
+
+      if (changeRecordsCallback) changeRecordsCallback(res.data);
+
+      onSubmitSuccess?.({ action, record: res.data });
     } catch (error) {
       console.error("Form submission failed:", error);
-      if (onSubmitError) {
-        onSubmitError(error);
-      }
+      onSubmitError?.({ action, error });
     }
   };
 

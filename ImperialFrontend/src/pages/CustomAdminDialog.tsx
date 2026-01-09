@@ -14,7 +14,6 @@ type AdminDialogProps = {
 export const CustomAdminDialog = ({
   open,
   onClose,
-  title,
   children,
 }: AdminDialogProps) => (
   <Dialog

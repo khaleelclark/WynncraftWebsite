@@ -15,11 +15,11 @@ export function useApiErrorSnackbar() {
 
     const data = err.response?.data as any;
 
-    // ✅ Prefer explicit backend message
+    // Prefer explicit backend message
     if (typeof data?.message === "string" && data.message.trim())
       return data.message;
 
-    // ✅ Otherwise map backend error codes
+    // Otherwise map backend error codes
     if (typeof data?.error === "string") {
       switch (data.error) {
         case "AuthProviderUnavailable":
@@ -35,7 +35,7 @@ export function useApiErrorSnackbar() {
 
     switch (err.response.status) {
       case 504:
-        return "Unable to reach server Please try again later.";
+        return "Unable to reach server. Please try again later.";
       case 503:
         return "Service unavailable. Please try again later.";
       case 500:
@@ -51,22 +51,31 @@ export function useApiErrorSnackbar() {
     }
   }
 
-  const handleError = (err: unknown) => {
-    setMessage(getErrorMessage(err));
-    setSeverity("error");
-    setOpen(prev => (prev ? prev : true));
-  };
-
-  const handleSuccess = (msg: string, severity: Severity = "info") => {
+  const show = (msg: string, sev: Severity = "info") => {
     setMessage(msg);
-    setSeverity(severity);
+    setSeverity(sev);
     setOpen(true);
   };
+
+  const handleError = (
+    err: unknown,
+    opts?: { prefix?: string; fallback?: string }
+  ) => {
+    const base = getErrorMessage(err);
+    const msg = opts?.prefix
+      ? `${opts.prefix}: ${base}`
+      : opts?.fallback ?? base;
+
+    show(msg, "error");
+  };
+
+  const handleSuccess = (msg: string) => show(msg, "success");
+  const handleInfo = (msg: string) => show(msg, "info");
 
   const SnackbarElement = (
     <Snackbar
       open={open}
-      autoHideDuration={10000}
+      autoHideDuration={6000}
       onClose={() => setOpen(false)}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
@@ -80,5 +89,5 @@ export function useApiErrorSnackbar() {
     </Snackbar>
   );
 
-  return { handleError, handleSuccess, SnackbarElement };
+  return { show, handleError, handleSuccess, handleInfo, SnackbarElement };
 }

@@ -273,23 +273,6 @@ const AdminPanel: React.FC = () => {
                 onOpen={() => setRaidsCompletedOpen(true)}
               />
             </Grid>
-
-            {/* ----- Validation ------ */}
-            <Snackbar
-              open={snackbarOpen}
-              autoHideDuration={4000}
-              onClose={handleSnackbarClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            >
-              <Alert
-                onClose={handleSnackbarClose}
-                severity={snackbarSeverity}
-                variant="filled"
-                sx={{ width: "100%" }}
-              >
-                {snackbarMessage}
-              </Alert>
-            </Snackbar>
           </Paper>
 
           {/* ----- Dialogs ----- */}
