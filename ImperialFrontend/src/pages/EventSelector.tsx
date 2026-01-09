@@ -3,6 +3,7 @@ import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface Event {
   id: number;
@@ -32,6 +33,7 @@ const ALL_TIME_EVENT: Event = {
 const EventSelector: React.FC<Props> = ({ onSelect }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedId, setSelectedId] = useState<number>(-1);
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
     axios
@@ -41,7 +43,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
         setEvents([CUSTOM_EVENT, ALL_TIME_EVENT, ...data]);
       })
       .catch(err => {
-        console.error("Failed to fetch events:", err);
+        handleError(err);
         setEvents([CUSTOM_EVENT, ALL_TIME_EVENT]);
       });
   }, []);
@@ -59,6 +61,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
         justifyContent: "center",
       }}
     >
+      {SnackbarElement}
       <TextField
         select
         label="Date Range"
@@ -68,7 +71,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
           width: "min(520px, 100%)",
 
           "& .MuiOutlinedInput-root": {
-            backgroundColor: "#3C002F",
+            backgroundColor: "background.paper",
             borderRadius: 1.5,
           },
 

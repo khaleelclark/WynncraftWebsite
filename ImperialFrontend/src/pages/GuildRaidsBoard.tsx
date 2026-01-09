@@ -11,6 +11,7 @@ import axios from "axios";
 import Grid from "@mui/material/Grid";
 import { Header } from "./Header";
 import Paper from "@mui/material/Paper";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface RaidCompletedPublicRow {
   id: number;
@@ -23,6 +24,7 @@ const GuildRaidsBoard: React.FC = () => {
   const [entries, setEntries] = useState<RaidCompletedPublicRow[]>([]);
   const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
@@ -87,12 +89,11 @@ const GuildRaidsBoard: React.FC = () => {
         const arr = res.data?.value ?? res.data ?? [];
         setEntries(arr);
       })
-      .catch(err => console.error("Failed to fetch public raids:", err));
+      .catch(handleError);
   };
 
   useEffect(() => {
     if (selectedEvent?.id === -2) {
-      // Custom
       setStartDateTime(null);
       setEndDateTime(null);
       setEntries([]);
@@ -137,6 +138,7 @@ const GuildRaidsBoard: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Header />
+      {SnackbarElement}
       <Box
         sx={{
           p: 3,

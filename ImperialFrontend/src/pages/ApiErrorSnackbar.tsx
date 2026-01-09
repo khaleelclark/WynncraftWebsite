@@ -52,9 +52,9 @@ export function useApiErrorSnackbar() {
   const SnackbarElement = (
     <Snackbar
       open={open}
-      autoHideDuration={6000}
+      autoHideDuration={10000}
       onClose={() => setOpen(false)}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
       <Alert
         severity={severity}

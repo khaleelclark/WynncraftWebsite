@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import { Header } from "./Header";
 import Paper from "@mui/material/Paper";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface LeaderboardEntry {
   id: number;
@@ -29,6 +30,7 @@ const Leaderboard: React.FC = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
+  const { handleError, handleSuccess, SnackbarElement } = useApiErrorSnackbar();
 
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
@@ -133,7 +135,7 @@ const Leaderboard: React.FC = () => {
         const arr = res.data?.value ?? res.data ?? [];
         setEntries(arr);
       })
-      .catch(err => console.error("Failed to fetch leaderboard:", err));
+      .catch(handleError);
   };
 
   useEffect(() => {
@@ -183,6 +185,7 @@ const Leaderboard: React.FC = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Header />
+      {SnackbarElement}
       <Box
         sx={{
           p: 3,
