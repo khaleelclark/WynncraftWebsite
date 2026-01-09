@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -374,11 +375,11 @@ if (app.Environment.IsDevelopment())
 {
     // Do NOT run migrations at startup in an outage simulation.
     // If you want migrations, gate behind a config flag and wrap in try/catch.
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler("/error");
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
@@ -390,34 +391,70 @@ app.UseForwardedHeaders(
 );
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRateLimiter();
 
 // Convert SQL failures from request pipeline into a clean 503 instead of crashing or 500 spam.
 // This does NOT affect background services; those should handle retries internally.
-app.Use(
-    async (ctx, next) =>
+app.Map(
+    "/error",
+    async (HttpContext ctx) =>
     {
-        try
-        {
-            await next();
-        }
-        catch (SqlException)
+        var feature = ctx.Features.Get<IExceptionHandlerFeature>();
+        var ex = feature?.Error;
+
+        if (ctx.Response.HasStarted)
+            return;
+
+        ctx.Response.ContentType = "application/json";
+
+        if (ex is SqlException)
         {
             ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await ctx.Response.WriteAsJsonAsync(
                 new
                 {
                     error = "DatabaseUnavailable",
-                    message = "Database is currently unavailable. Please retry.",
+                    message = "Service is currently unavailable. Please try again later.",
                 }
             );
+            return;
         }
+
+        if (IsAuthentikOidcDown(ex))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            await ctx.Response.WriteAsJsonAsync(
+                new
+                {
+                    error = "AuthProviderUnavailable",
+                    message = "Login is currently unavailable. Please try again later.",
+                }
+            );
+            return;
+        }
+
+        ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await ctx.Response.WriteAsJsonAsync(
+            new { error = "UnhandledException", message = "An unexpected error occurred." }
+        );
     }
 );
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseRateLimiter();
+static bool IsAuthentikOidcDown(Exception? ex)
+{
+    for (var cur = ex; cur != null; cur = cur.InnerException)
+    {
+        var msg = cur.Message ?? "";
+        if (
+            msg.Contains("IDX20803", StringComparison.OrdinalIgnoreCase)
+            || msg.Contains("IDX20804", StringComparison.OrdinalIgnoreCase)
+        )
+            return true;
+    }
+    return false;
+}
 
 app.MapControllers();
-
 app.Run();

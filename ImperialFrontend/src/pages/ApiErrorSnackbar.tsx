@@ -11,8 +11,20 @@ export function useApiErrorSnackbar() {
   const [severity, setSeverity] = React.useState<Severity>("error");
 
   function getErrorMessage(err: unknown): string {
-    if (!axios.isAxiosError(err)) {
-      return "Something unexpected happened.";
+    if (!axios.isAxiosError(err)) return "Something unexpected happened.";
+
+    const data = err.response?.data as any;
+
+    // ✅ Prefer explicit backend message
+    if (typeof data?.message === "string" && data.message.trim())
+      return data.message;
+
+    // ✅ Otherwise map backend error codes
+    if (typeof data?.error === "string") {
+      switch (data.error) {
+        case "AuthProviderUnavailable":
+          return "Login is currently unavailable. Please try again later.";
+      }
     }
 
     if (!err.response) {
@@ -22,16 +34,16 @@ export function useApiErrorSnackbar() {
     }
 
     switch (err.response.status) {
+      case 503:
+        return "Service unavailable. Please try again later.";
+      case 500:
+        return "Server error. Please try again later.";
       case 401:
         return "Your session expired. Please sign in again.";
       case 403:
         return "You don’t have permission to do this.";
       case 404:
         return "That resource wasn’t found.";
-      case 500:
-        return "Server error. Please try again later.";
-      case 503:
-        return "Service unavailable. Please try again later.";
       default:
         return "Request failed.";
     }
@@ -43,9 +55,9 @@ export function useApiErrorSnackbar() {
     setOpen(prev => (prev ? prev : true));
   };
 
-  const handleSuccess = (msg: string, success: Severity = "info") => {
+  const handleSuccess = (msg: string, severity: Severity = "info") => {
     setMessage(msg);
-    setSeverity(success);
+    setSeverity(severity);
     setOpen(true);
   };
 
