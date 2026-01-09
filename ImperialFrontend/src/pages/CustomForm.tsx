@@ -8,6 +8,8 @@ import Button from "@mui/material/Button";
 import React from "react";
 import axios from "axios";
 
+type FormAction = "create" | "update";
+
 export interface CustomFormProps {
   title: string;
   children: ReactNode[] | ReactNode;
