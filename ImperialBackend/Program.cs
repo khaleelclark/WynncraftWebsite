@@ -1,11 +1,11 @@
 // Program.cs
 // ASP.NET Core Web API + Authentik (OIDC) + Cookie auth
-// Flow:
-//   1) Frontend sends user to: GET /api/auth/login?returnUrl=http://192.168.4.121:5173/somepage
-//   2) Backend challenges with OIDC -> browser goes to Authentik
-//   3) Authentik posts back to: POST http://192.168.4.121:5032/api/auth/callback
-//   4) OIDC middleware validates, creates cookie, then redirects user to returnUrl
-//   5) Frontend calls: GET /api/auth/me (credentials included) to get user info
+// Outage-friendly:
+//  - DB can be down without crashing the host
+//  - BackgroundService exceptions won't take down the API
+//  - SQL exceptions from controllers map to 503
+//  - GuildMemberSyncService registered as a proper HostedService (no singleton hack)
+//  - HttpClientFactory enabled
 
 using System.Security.Claims;
 using System.Threading.RateLimiting;
@@ -16,11 +16,24 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+/* ============================
+ * Host Options (Outage-friendly)
+ * ============================ */
+
+// Do NOT crash the entire web host if a BackgroundService throws.
+// (Workers should still handle outages internally, but this prevents API shutdown.)
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
 
 /* ============================
  * Services
@@ -37,7 +50,17 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddDbContextFactory<ImperialDbContext>(options =>
     options.UseSqlServer(
         connectionString,
-        sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)
+        sqlOptions =>
+        {
+            sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+
+            // Helps for transient failures (doesn't fix outages, but improves resilience).
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorNumbersToAdd: null
+            );
+        }
     )
 );
 
@@ -52,6 +75,7 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
+// App services
 builder.Services.AddScoped<IRaidsCompletedService, RaidsCompletedService>();
 builder.Services.AddScoped<IGuildMemberService, GuildMemberService>();
 builder.Services.AddScoped<IEventService, EventService>();
@@ -59,10 +83,13 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IMedalService, MedalService>();
 builder.Services.AddScoped<IRankService, RankService>();
 builder.Services.AddScoped<IRaidService, RaidService>();
+
+// Background services
 builder.Services.AddHostedService<ImperialBackend.Messaging.RaidCompletedConsumer>();
 
-builder.Services.AddSingleton<GuildMemberSyncService>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<GuildMemberSyncService>());
+// GuildMemberSyncService uses external APIs -> use IHttpClientFactory
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<GuildMemberSyncService>();
 
 static string GetRateLimitKey(HttpContext ctx)
 {
@@ -86,14 +113,14 @@ builder.Services.AddRateLimiter(options =>
     {
         var key = GetRateLimitKey(ctx);
         var isAuthenticated = key.StartsWith("u:");
-        var perMinute = isAuthenticated ? 200 : 100; //~200 req for admin, ~100 for public use
+        var perMinute = isAuthenticated ? 200 : 100; // ~200 req/min auth, ~100 req/min anon
 
         return RateLimitPartition.GetTokenBucketLimiter(
             key,
             _ => new TokenBucketRateLimiterOptions
             {
-                TokenLimit = perMinute, // burst size
-                TokensPerPeriod = perMinute, // refill per period
+                TokenLimit = perMinute,
+                TokensPerPeriod = perMinute,
                 ReplenishmentPeriod = TimeSpan.FromMinutes(1),
                 AutoReplenishment = true,
                 QueueLimit = 0,
@@ -136,6 +163,7 @@ builder.Services.AddRateLimiter(options =>
 /* ============================
  * Logging
  * ============================ */
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
@@ -252,7 +280,6 @@ builder
             {
                 NameClaimType = "preferred_username",
                 RoleClaimType = "role",
-                // Use the public issuer; if your issuer differs, adjust accordingly
                 ValidIssuer = authentikAuthority,
             };
 
@@ -273,27 +300,16 @@ builder
                 : CookieSecurePolicy.Always;
             options.NonceCookie.Expiration = TimeSpan.FromMinutes(15);
 
-            options.Events.OnSignedOutCallbackRedirect = context =>
-            {
-                context.Response.Redirect("http://192.168.4.121:5173/");
-                context.HandleResponse();
-                return Task.CompletedTask;
-            };
-
             options.Events = new OpenIdConnectEvents
             {
-                // ============================
                 // LOGIN
-                // ============================
                 OnRedirectToIdentityProvider = context =>
                 {
-                    // Authentik authorize endpoint
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
                         );
 
-                    // redirect_uri (login callback)
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.RedirectUri))
                         context.ProtocolMessage.RedirectUri = ToPublicUrl(
                             context.ProtocolMessage.RedirectUri
@@ -302,18 +318,14 @@ builder
                     return Task.CompletedTask;
                 },
 
-                // ============================
                 // LOGOUT
-                // ============================
                 OnRedirectToIdentityProviderForSignOut = context =>
                 {
-                    // Authentik end-session endpoint
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
                         );
 
-                    // post_logout_redirect_uri
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.PostLogoutRedirectUri))
                         context.ProtocolMessage.PostLogoutRedirectUri = ToPublicUrl(
                             context.ProtocolMessage.PostLogoutRedirectUri
@@ -322,24 +334,18 @@ builder
                     return Task.CompletedTask;
                 },
 
-                // ============================
                 // AFTER LOGIN CALLBACK
-                // ============================
                 OnTicketReceived = context =>
                 {
                     var redirectUri = context.Properties?.RedirectUri;
 
                     if (!string.IsNullOrEmpty(redirectUri))
-                    {
                         context.Properties!.RedirectUri = ToPublicUrl(redirectUri);
-                    }
 
                     return Task.CompletedTask;
                 },
 
-                // ============================
                 // AFTER LOGOUT CALLBACK
-                // ============================
                 OnSignedOutCallbackRedirect = context =>
                 {
                     context.Response.Redirect("http://192.168.4.121:5173/");
@@ -347,9 +353,7 @@ builder
                     return Task.CompletedTask;
                 },
 
-                // ============================
                 // FAILURE
-                // ============================
                 OnRemoteFailure = context =>
                 {
                     context.Response.Redirect("http://192.168.4.121:5173/login?error=auth_failed");
@@ -368,16 +372,13 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
-    db.Database.Migrate();
+    // Do NOT run migrations at startup in an outage simulation.
+    // If you want migrations, gate behind a config flag and wrap in try/catch.
 
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// If you ever put a reverse proxy in front later, keep this.
-// It won’t hurt now, and helps if Host/Proto are forwarded.
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
@@ -389,8 +390,34 @@ app.UseForwardedHeaders(
 );
 
 app.UseRouting();
+
+// Convert SQL failures from request pipeline into a clean 503 instead of crashing or 500 spam.
+// This does NOT affect background services; those should handle retries internally.
+app.Use(
+    async (ctx, next) =>
+    {
+        try
+        {
+            await next();
+        }
+        catch (SqlException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            await ctx.Response.WriteAsJsonAsync(
+                new
+                {
+                    error = "DatabaseUnavailable",
+                    message = "Database is currently unavailable. Please retry.",
+                }
+            );
+        }
+    }
+);
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
+
 app.MapControllers();
+
 app.Run();

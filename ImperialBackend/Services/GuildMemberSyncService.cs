@@ -4,171 +4,182 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using ImperialBackend.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ImperialBackend.Services
 {
-    public class GuildMemberSyncService : BackgroundService
+    public sealed class GuildMemberSyncService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<GuildMemberSyncService> _logger;
 
-        public GuildMemberSyncService(IServiceProvider serviceProvider)
+        public GuildMemberSyncService(
+            IServiceProvider serviceProvider,
+            IHttpClientFactory httpClientFactory,
+            ILogger<GuildMemberSyncService> logger
+        )
         {
             _serviceProvider = serviceProvider;
-            _httpClient = new HttpClient();
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             DateTimeOffset lastNightlySync = DateTimeOffset.MinValue;
+
+            // Backoff when DB is down (prevents hammering)
+            var backoff = TimeSpan.FromSeconds(5);
+            var maxBackoff = TimeSpan.FromMinutes(2);
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                await SyncGuildMembersFromApis();
-                var now = DateTimeOffset.UtcNow;
-                // Nightly sync at midnight
-                if (now.Hour == 0 && (now - lastNightlySync).TotalHours > 23)
+                try
                 {
-                    await SyncNightlyStats();
-                    lastNightlySync = now;
+                    await SyncGuildMembersFromApis(stoppingToken);
+
+                    var now = DateTimeOffset.UtcNow;
+                    if (now.Hour == 0 && (now - lastNightlySync).TotalHours > 23)
+                    {
+                        await SyncNightlyStats(stoppingToken);
+                        lastNightlySync = now;
+                    }
+
+                    // Success: reset backoff and sleep normal interval
+                    backoff = TimeSpan.FromSeconds(5);
+                    await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
                 }
-                await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Sync every 5 minutes
+                catch (SqlException ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "DB unavailable; guild member sync backing off for {Delay}.",
+                        backoff
+                    );
+                    await Task.Delay(backoff, stoppingToken);
+                    backoff = TimeSpan.FromSeconds(
+                        Math.Min(backoff.TotalSeconds * 2, maxBackoff.TotalSeconds)
+                    );
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "DB update failed (SQL down); backing off for {Delay}.",
+                        backoff
+                    );
+                    await Task.Delay(backoff, stoppingToken);
+                    backoff = TimeSpan.FromSeconds(
+                        Math.Min(backoff.TotalSeconds * 2, maxBackoff.TotalSeconds)
+                    );
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // graceful shutdown
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    // Don’t crash the host for unexpected errors; log and retry
+                    _logger.LogError(
+                        ex,
+                        "Unexpected error in GuildMemberSyncService; continuing after short delay."
+                    );
+                    await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
+                }
             }
         }
 
-        private async Task SyncGuildMembersFromApis()
+        private async Task SyncGuildMembersFromApis(CancellationToken stoppingToken)
         {
             using var scope = _serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
-            var membersToSync = db
+            var dbFactory = scope.ServiceProvider.GetRequiredService<
+                IDbContextFactory<ImperialDbContext>
+            >();
+            await using var db = await dbFactory.CreateDbContextAsync(stoppingToken);
+
+            // IMPORTANT: This query will throw SqlException when DB is down — now caught in ExecuteAsync
+            var membersToSync = await db
                 .GuildMembers.Where(m => m.Uuid != Guid.Empty)
                 .OrderBy(m => m.LastSynced ?? DateTimeOffset.MinValue)
                 .Take(100)
-                .ToList();
+                .ToListAsync(stoppingToken);
+
+            if (membersToSync.Count == 0)
+                return;
+
+            var http = _httpClientFactory.CreateClient();
+
             foreach (var member in membersToSync)
             {
-                // If UUID is set, try to sync username and skin from Mojang
-                if (member.Uuid != Guid.Empty)
-                {
-                    // 1. Get UUID from Mojang API
-                    try
-                    {
-                        var uuidResponse = await _httpClient.GetAsync(
-                            $"https://api.minecraftservices.com/minecraft/profile/lookup/{member.Uuid}"
-                        );
-                        if (uuidResponse.IsSuccessStatusCode)
-                        {
-                            var uuidJson = await uuidResponse.Content.ReadAsStringAsync();
-                            var uuidObj = System.Text.Json.JsonDocument.Parse(uuidJson).RootElement;
-                            var uuidStr = uuidObj.TryGetProperty("id", out var idProp)
-                                ? idProp.GetString()
-                                : null;
-                            var mcName = uuidObj.TryGetProperty("name", out var nameProp)
-                                ? nameProp.GetString()
-                                : null;
-                            if (!string.IsNullOrEmpty(uuidStr))
-                            {
-                                member.Uuid = Guid.ParseExact(uuidStr, "N");
-                            }
-                            if (!string.IsNullOrEmpty(mcName) && member.MinecraftUsername != mcName)
-                            {
-                                member.MinecraftUsername = mcName;
-                            }
-                        }
-                    }
-                    catch
-                    { /* ignore errors, keep existing UUID */
-                    }
+                stoppingToken.ThrowIfCancellationRequested();
 
-                    // 2. Get skin from Mojang session server
-                    if (member.Uuid != Guid.Empty)
+                // ---- External APIs should not crash the worker ----
+                // Mojang profile lookup
+                try
+                {
+                    var uuidResponse = await http.GetAsync(
+                        $"https://api.minecraftservices.com/minecraft/profile/lookup/{member.Uuid}",
+                        stoppingToken
+                    );
+
+                    if (uuidResponse.IsSuccessStatusCode)
                     {
-                        try
-                        {
-                            var skinResponse = await _httpClient.GetAsync(
-                                $"https://sessionserver.mojang.com/session/minecraft/profile/{member.Uuid}"
-                            );
-                            if (skinResponse.IsSuccessStatusCode)
-                            {
-                                var skinJson = await skinResponse.Content.ReadAsStringAsync();
-                                var skinObj = System
-                                    .Text.Json.JsonDocument.Parse(skinJson)
-                                    .RootElement;
-                                var properties = skinObj.TryGetProperty(
-                                    "properties",
-                                    out var propArr
-                                )
-                                    ? propArr.EnumerateArray()
-                                    : default;
-                                foreach (var prop in properties)
-                                {
-                                    if (
-                                        prop.TryGetProperty("name", out var nameProp)
-                                        && nameProp.GetString() == "textures"
-                                    )
-                                    {
-                                        var value = prop.TryGetProperty("value", out var valueProp)
-                                            ? valueProp.GetString()
-                                            : null;
-                                        if (!string.IsNullOrEmpty(value))
-                                        {
-                                            // Decode base64 value
-                                            var decoded = System
-                                                .Text.Json.JsonDocument.Parse(
-                                                    System.Text.Encoding.UTF8.GetString(
-                                                        Convert.FromBase64String(value)
-                                                    )
-                                                )
-                                                .RootElement;
-                                            if (
-                                                decoded.TryGetProperty(
-                                                    "textures",
-                                                    out var texturesObj
-                                                )
-                                                && texturesObj.TryGetProperty(
-                                                    "SKIN",
-                                                    out var skinObj2
-                                                )
-                                            )
-                                            {
-                                                var skinUrl = skinObj2.TryGetProperty(
-                                                    "url",
-                                                    out var urlProp
-                                                )
-                                                    ? urlProp.GetString()
-                                                    : null;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        catch
-                        { /* ignore errors, keep existing skin */
-                        }
+                        var uuidJson = await uuidResponse.Content.ReadAsStringAsync(stoppingToken);
+                        var root = System.Text.Json.JsonDocument.Parse(uuidJson).RootElement;
+
+                        var uuidStr = root.TryGetProperty("id", out var idProp)
+                            ? idProp.GetString()
+                            : null;
+                        var mcName = root.TryGetProperty("name", out var nameProp)
+                            ? nameProp.GetString()
+                            : null;
+
+                        if (!string.IsNullOrEmpty(uuidStr))
+                            member.Uuid = Guid.ParseExact(uuidStr, "N");
+
+                        if (!string.IsNullOrEmpty(mcName) && member.MinecraftUsername != mcName)
+                            member.MinecraftUsername = mcName;
                     }
                 }
-                // Wynncraft API sync (by UUID)
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(
+                        ex,
+                        "Mojang profile lookup failed for member {Id}.",
+                        member.GuildMemberId
+                    );
+                }
+
+                // Wynncraft API
                 try
                 {
                     if (member.Uuid != Guid.Empty)
                     {
-                        var wynnResponse = await _httpClient.GetAsync(
-                            $"https://api.wynncraft.com/v3/player/{member.Uuid}"
+                        var wynnResponse = await http.GetAsync(
+                            $"https://api.wynncraft.com/v3/player/{member.Uuid}",
+                            stoppingToken
                         );
+
                         if (wynnResponse.IsSuccessStatusCode)
                         {
-                            var wynnJson = await wynnResponse.Content.ReadAsStringAsync();
+                            var wynnJson = await wynnResponse.Content.ReadAsStringAsync(
+                                stoppingToken
+                            );
                             var wynnObj = System.Text.Json.JsonDocument.Parse(wynnJson).RootElement;
-                            // Get cumulative stats
+
                             member.HoursPlayed = wynnObj.TryGetProperty(
                                 "playtime",
                                 out var playtimeProp
                             )
                                 ? (int)playtimeProp.GetDouble()
                                 : 0;
+
                             if (wynnObj.TryGetProperty("globalData", out var globalData))
                             {
                                 member.WarsCompleted = globalData.TryGetProperty(
@@ -178,7 +189,7 @@ namespace ImperialBackend.Services
                                     ? warsProp.GetInt32()
                                     : 0;
                             }
-                            // Get player's rank in their current guild
+
                             if (wynnObj.TryGetProperty("guild", out var guildObj))
                             {
                                 member.WynncraftRank = guildObj.TryGetProperty(
@@ -191,33 +202,38 @@ namespace ImperialBackend.Services
                         }
                     }
                 }
-                catch
-                { /* ignore errors, keep existing Wynncraft stats */
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(
+                        ex,
+                        "Wynncraft sync failed for member {Id}.",
+                        member.GuildMemberId
+                    );
                 }
+
                 member.LastSynced = DateTimeOffset.UtcNow;
             }
 
             try
             {
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(stoppingToken);
             }
             catch (DbUpdateConcurrencyException)
             {
-                // A member was deleted/changed while syncing this batch; ignore this cycle.
+                // ignore this cycle
             }
         }
 
-        public async Task RunNightlySyncManually()
-        {
-            await SyncNightlyStats();
-        }
-
-        private async Task SyncNightlyStats()
+        private async Task SyncNightlyStats(CancellationToken stoppingToken)
         {
             using var scope = _serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ImperialDbContext>();
-            var members = db.GuildMembers.ToList();
-            // Copy GuildMember data to PlayerHistoricalStats
+            var dbFactory = scope.ServiceProvider.GetRequiredService<
+                IDbContextFactory<ImperialDbContext>
+            >();
+            await using var db = await dbFactory.CreateDbContextAsync(stoppingToken);
+
+            var members = await db.GuildMembers.ToListAsync(stoppingToken);
+
             foreach (var member in members)
             {
                 if (member.Uuid != Guid.Empty)
@@ -234,13 +250,14 @@ namespace ImperialBackend.Services
                     );
                 }
             }
+
             try
             {
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(stoppingToken);
             }
             catch (DbUpdateConcurrencyException)
             {
-                // ignore errors, keep existing stats
+                // ignore
             }
         }
     }
