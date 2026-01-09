@@ -409,6 +409,22 @@ app.Map(
 
         ctx.Response.ContentType = "application/json";
 
+        if (ex is KeyNotFoundException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            await ctx.Response.WriteAsJsonAsync(
+                new { error = "NotFound", message = "Resource not found." }
+            );
+            return;
+        }
+
+        if (ex is InvalidOperationException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
+            return;
+        }
+
         if (ex is SqlException)
         {
             ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
