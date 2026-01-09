@@ -163,7 +163,7 @@ const AdminPanel: React.FC = () => {
       <CustomDropdown
         id="guildMembers"
         label="Players"
-        apiEndpoint="/api/guildmembers/generic"
+        apiEndpoint="/api/guildmembers"
         multiple={true}
       />
     </CustomForm>

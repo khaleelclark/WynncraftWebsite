@@ -1,6 +1,7 @@
 using ImperialBackend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers;
 
@@ -53,7 +54,7 @@ public class GuildMembersController : ControllerBase
         }
     }
 
-    [HttpGet]
+    [HttpGet("public")]
     public async Task<IActionResult> GetPublic() => Ok(await _service.GetAllPublicAsync());
 
     [Authorize(Policy = "AdminOnly")]
@@ -80,7 +81,7 @@ public class GuildMembersController : ControllerBase
     ) => Ok(await _service.GetLeaderboardAsync(startDate, endDate));
 
     [Authorize(Policy = "AdminOnly")]
-    [HttpGet("generic")]
+    [HttpGet()]
     public async Task<IActionResult> GetAllGeneric()
     {
         return Ok(await _service.GetAllGenericAsync());

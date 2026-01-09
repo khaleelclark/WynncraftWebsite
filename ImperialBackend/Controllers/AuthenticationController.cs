@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImperialBackend.Controllers;
 
@@ -11,12 +12,13 @@ namespace ImperialBackend.Controllers;
 [Route("api/auth")]
 public class AuthenticationController : ControllerBase
 {
-    private const string FrontendHome = "http://localhost:5173/";
+    // Needs Secret
+    private const string FrontendHome = "http://192.168.4.121:5173/";
 
     /* ============================
      * LOGIN
      * ============================ */
-
+    [EnableRateLimiting("auth")]
     [HttpGet("login")]
     public IActionResult Login()
     {

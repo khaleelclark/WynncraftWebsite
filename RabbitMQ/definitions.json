@@ -1,0 +1,80 @@
+{
+  "vhosts": [{ "name": "imperial" }],
+
+  "users": [
+    {
+      "name": "imperial",
+      "password": "ImperialGuild",
+      "tags": "administrator"
+    },
+    {
+      "name": "raid-bot",
+      "password": "RaidBotStrongPassword",
+      "tags": ""
+    },
+    {
+      "name": "imperial-website",
+      "password": "WebsiteStrongPassword",
+      "tags": ""
+    }
+  ],
+
+  "permissions": [
+    {
+      "user": "imperial",
+      "vhost": "imperial",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+
+    {
+      "user": "raid-bot",
+      "vhost": "imperial",
+      "configure": "^$",
+      "write": "^raids\\.exchange$",
+      "read": "^$"
+    },
+
+    {
+      "user": "imperial-website",
+      "vhost": "imperial",
+      "configure": "^$",
+      "write": "^$",
+      "read": "^raids\\.completed\\.q$"
+    }
+  ],
+
+  "exchanges": [
+    {
+      "name": "raids.exchange",
+      "vhost": "imperial",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+
+  "queues": [
+    {
+      "name": "raids.completed.q",
+      "vhost": "imperial",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+
+  "bindings": [
+    {
+      "source": "raids.exchange",
+      "vhost": "imperial",
+      "destination": "raids.completed.q",
+      "destination_type": "queue",
+      "routing_key": "raid.completed",
+      "arguments": {}
+    }
+  ]
+}
