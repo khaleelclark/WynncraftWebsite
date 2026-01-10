@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using ImperialBackend.Config;
 using ImperialBackend.Contracts;
 using ImperialBackend.Models;
 using Microsoft.Data.SqlClient;
@@ -21,14 +22,11 @@ public sealed class RaidCompletedConsumer : BackgroundService
 
     private RMQConnection? _connection;
     private RMQChannel? _channel;
-
-    // Secrets (move to env vars later)
-    private const string HostName = "raid-rabbit";
-    private const string UserName = "imperial-website";
-    private const string Password = "WebsiteStrongPassword";
-    private const string VirtualHost = "imperial";
-
-    private const string QueueName = "raids.completed.q";
+    private readonly string _hostName;
+    private readonly string _userName;
+    private readonly string _password;
+    private readonly string _virtualHost;
+    private readonly string _queueName;
 
     public RaidCompletedConsumer(
         IDbContextFactory<ImperialDbContext> dbFactory,
@@ -37,6 +35,26 @@ public sealed class RaidCompletedConsumer : BackgroundService
     {
         _dbFactory = dbFactory;
         _logger = logger;
+
+        _hostName = SecretReader.Get("RABBITMQ_HOST", required: false, defaultValue: "raid-rabbit");
+        _userName = SecretReader.Get(
+            "RABBITMQ_USERNAME",
+            required: false,
+            defaultValue: "imperial-website"
+        );
+        _virtualHost = SecretReader.Get(
+            "RABBITMQ_VHOST",
+            required: false,
+            defaultValue: "imperial"
+        );
+
+        _password = SecretReader.Get("RABBITMQ_PASSWORD", required: true);
+
+        _queueName = SecretReader.Get(
+            "RABBITMQ_QUEUE_RAIDS_COMPLETED",
+            required: false,
+            defaultValue: "raids.completed.q"
+        );
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,12 +82,12 @@ public sealed class RaidCompletedConsumer : BackgroundService
                 consumer.ReceivedAsync += (_, ea) => OnMessageAsync(ea, stoppingToken);
 
                 await _channel.BasicConsumeAsync(
-                    queue: QueueName,
+                    queue: _queueName,
                     autoAck: false,
                     consumer: consumer
                 );
 
-                _logger.LogInformation("Consuming RabbitMQ queue: {Queue}", QueueName);
+                _logger.LogInformation("Consuming RabbitMQ queue: {Queue}", _queueName);
 
                 // Success: reset backoff + attempt counter
                 delay = TimeSpan.FromSeconds(2);
@@ -139,57 +157,68 @@ public sealed class RaidCompletedConsumer : BackgroundService
                 throw new InvalidOperationException("minecraftUsernames cannot be empty.");
 
             await using var db = await _dbFactory.CreateDbContextAsync(stoppingToken);
-            await using var tx = await db.Database.BeginTransactionAsync(stoppingToken);
 
-            var raid =
-                await db.Raids.FindAsync(new object[] { msg.RaidId }, stoppingToken)
-                ?? throw new InvalidOperationException($"Unknown RaidId {msg.RaidId}");
+            var strategy = db.Database.CreateExecutionStrategy();
 
-            var raidCompleted = new RaidCompleted
+            await strategy.ExecuteAsync(async () =>
             {
-                RaidId = msg.RaidId,
-                CompletedDate = msg.CompletedDate.UtcDateTime,
-                RaidInstances = new List<RaidInstance>(),
-            };
+                await using var tx = await db.Database.BeginTransactionAsync(stoppingToken);
 
-            var distinctNames = msg
-                .MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+                var raid =
+                    await db.Raids.FindAsync(new object[] { msg.RaidId }, stoppingToken)
+                    ?? throw new InvalidOperationException($"Unknown RaidId {msg.RaidId}");
 
-            var members = await db
-                .GuildMembers.Where(m => m.MinecraftUsername != null)
-                .Select(m => new { m.GuildMemberId, m.MinecraftUsername })
-                .ToListAsync(stoppingToken);
-
-            var notFound = new List<string>();
-
-            foreach (var username in distinctNames)
-            {
-                var member = members.FirstOrDefault(m =>
-                    string.Equals(m.MinecraftUsername, username, StringComparison.OrdinalIgnoreCase)
-                );
-
-                if (member == null)
+                var raidCompleted = new RaidCompleted
                 {
-                    notFound.Add(username);
-                    continue;
+                    RaidId = msg.RaidId,
+                    CompletedDate = msg.CompletedDate.UtcDateTime,
+                    RaidInstances = new List<RaidInstance>(),
+                };
+
+                var distinctNames = msg
+                    .MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var members = await db
+                    .GuildMembers.Where(m => m.MinecraftUsername != null)
+                    .Select(m => new { m.GuildMemberId, m.MinecraftUsername })
+                    .ToListAsync(stoppingToken);
+
+                var notFound = new List<string>();
+
+                foreach (var username in distinctNames)
+                {
+                    var member = members.FirstOrDefault(m =>
+                        string.Equals(
+                            m.MinecraftUsername,
+                            username,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    );
+
+                    if (member == null)
+                    {
+                        notFound.Add(username);
+                        continue;
+                    }
+
+                    raidCompleted.RaidInstances.Add(
+                        new RaidInstance { GuildMemberId = member.GuildMemberId }
+                    );
                 }
 
-                raidCompleted.RaidInstances.Add(
-                    new RaidInstance { GuildMemberId = member.GuildMemberId }
+                db.RaidsCompleted.Add(raidCompleted);
+                await db.SaveChangesAsync(stoppingToken);
+
+                await tx.CommitAsync(stoppingToken);
+
+                _logger.LogInformation(
+                    "RaidCompleted processed: RaidId={RaidId} Instances={Count} Missing=[{Missing}]",
+                    raid.RaidId,
+                    raidCompleted.RaidInstances.Count,
+                    string.Join(", ", notFound)
                 );
-            }
-
-            db.RaidsCompleted.Add(raidCompleted);
-            await db.SaveChangesAsync(stoppingToken);
-            await tx.CommitAsync(stoppingToken);
-
-            _logger.LogInformation(
-                "RaidCompleted processed: RaidId={RaidId} Instances={Count} Missing=[{Missing}]",
-                raid.RaidId,
-                raidCompleted.RaidInstances.Count,
-                string.Join(", ", notFound)
-            );
+            });
 
             // RabbitMQ calls here do NOT take CancellationToken in many client versions
             await _channel.BasicAckAsync(ea.DeliveryTag, multiple: false);
@@ -226,10 +255,10 @@ public sealed class RaidCompletedConsumer : BackgroundService
 
         var factory = new RMQConnectionFactory
         {
-            HostName = HostName,
-            UserName = UserName,
-            Password = Password,
-            VirtualHost = VirtualHost,
+            HostName = _hostName,
+            UserName = _userName,
+            Password = _password,
+            VirtualHost = _virtualHost,
             AutomaticRecoveryEnabled = true,
             NetworkRecoveryInterval = TimeSpan.FromSeconds(5),
         };
@@ -240,7 +269,7 @@ public sealed class RaidCompletedConsumer : BackgroundService
 
         _channel = await _connection.CreateChannelAsync();
 
-        _logger.LogInformation("RabbitMQ connected for queue {Queue}", QueueName);
+        _logger.LogInformation("RabbitMQ connected for queue {Queue}", _queueName);
     }
 
     private async Task WaitForDisconnectAsync(CancellationToken ct)
