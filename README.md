@@ -43,6 +43,9 @@ cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt \
 cp secrets/rabbitmq_website_password.example.txt \
    secrets/rabbitmq_website_password.txt
 
+cp secrets/sqlserver_connection_string.example.txt \
+   secrets/sqlserver_connection_string.txt
+
 
 ```
 
