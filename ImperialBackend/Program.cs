@@ -9,6 +9,7 @@
 
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using ImperialBackend.Config;
 using ImperialBackend.Models;
 using ImperialBackend.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -44,7 +45,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ---- Promote secrets/env into the config keys your app reads ----
+
 builder.Configuration.AddEnvironmentVariables();
+
+// Connection string (supports ConnectionStrings__DefaultConnection_FILE)
+var cs = SecretReader.Get("ConnectionStrings__DefaultConnection", required: false);
+if (!string.IsNullOrWhiteSpace(cs))
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = cs;
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
@@ -176,7 +185,6 @@ static string ToPublicUrl(string url)
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    // Needs Secret
     return url.Replace("http://authentik-server:9000", "http://192.168.4.121:9000")
         .Replace("https://authentik-server:9000", "http://192.168.4.121:9000")
         .Replace("http://backend:5032", "http://192.168.4.121:5032")
@@ -197,6 +205,7 @@ var authentikInternalUrl = builder.Configuration["Authentik:InternalUrl"] ?? aut
 var clientId =
     builder.Configuration["Authentik:ClientId"]
     ?? throw new InvalidOperationException("Authentik:ClientId not configured");
+
 var clientSecret =
     builder.Configuration["Authentik:ClientSecret"]
     ?? throw new InvalidOperationException("Authentik:ClientSecret not configured");

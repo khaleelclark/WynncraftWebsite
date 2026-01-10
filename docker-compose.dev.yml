@@ -94,7 +94,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-      ConnectionStrings__DefaultConnection: ${CONNECTIONSTRINGS__DEFAULTCONNECTION}
+      ConnectionStrings__DefaultConnection_FILE: /run/secrets/sqlserver_connection_string
       Authentik__ClientId: ${CLIENT_ID}
       Authentik__ClientSecret: ${CLIENT_SECRET}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-raid-rabbit}
@@ -103,6 +103,7 @@ services:
       RABBITMQ_QUEUE_RAIDS_COMPLETED: ${RABBITMQ_QUEUE_RAIDS_COMPLETED:-raids.completed.q}
       RABBITMQ_PASSWORD_FILE: /run/secrets/rabbitmq_website_password
     secrets:
+      - sqlserver_connection_string
       - rabbitmq_website_password
     depends_on:
       - db
@@ -141,7 +142,10 @@ services:
 
 secrets:
   rabbitmq_website_password:
-    file: ./RabbitMQ/secrets/rabbitmq_website_password.txt
+    file: ./secrets/rabbitmq_website_password.txt
+
+  sqlserver_connection_string:
+    file: ./secrets/sqlserver_connection_string.txt
 
 volumes:
   sql_data:
