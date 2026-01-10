@@ -1,3 +1,10 @@
+# RabbitMQ Secrets
+
+Copy the `.example.txt` files to `.txt` and replace values.
+
+These files are mounted as Docker secrets.
+Do NOT commit real passwords.
+
 After you copy the files, run:
 
 ```
