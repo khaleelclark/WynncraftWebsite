@@ -38,16 +38,14 @@ public class RankService : IRankService
 
     public async Task DeleteAsync(int id)
     {
-        var rank =
-            await _context
-                .Ranks.Include(r => r.GuildMembers)
-                .FirstOrDefaultAsync(r => r.RankId == id)
-            ?? throw new KeyNotFoundException();
+        var refs = await _context.GuildMembers.AsNoTracking().CountAsync(m => m.RankId == id);
 
-        if (rank.GuildMembers.Any())
+        if (refs > 0)
             throw new InvalidOperationException(
-                "Can't delete this rank because it still has guild members. Reassign them first."
+                $"Rank can't be deleted because {refs} guild member(s) reference it."
             );
+
+        var rank = await _context.Ranks.FindAsync(id) ?? throw new KeyNotFoundException();
 
         _context.Ranks.Remove(rank);
         await _context.SaveChangesAsync();

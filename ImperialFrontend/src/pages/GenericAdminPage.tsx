@@ -20,6 +20,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Tooltip from "@mui/material/Tooltip";
 import axios from "axios";
 import Paper from "@mui/material/Paper";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface GenericAdminPageProps {
   apiGetEndpoint: string;
@@ -51,11 +52,21 @@ export const GenericAdminPage = ({
   const [openDeletionDialog, setOpenDeletionDialog] = useState(false);
   const [idToDelete, setIdToDelete] = useState(-1);
   const [autofillData, setAutofillData] = useState({});
+  const { handleError, handleSuccess, SnackbarElement } = useApiErrorSnackbar();
+
+  const singular = (s: string) => s.replace(/s$/i, ""); // good enough for your labels
+  const entity = singular(label); // "Guild Member", "Event", ...
+
+  const actionVerbPast = (a: "create" | "update" | "delete") =>
+    a === "create" ? "added" : a === "update" ? "updated" : "deleted";
 
   useEffect(() => {
-    axios.get(apiGetEndpoint).then(res => {
-      setMembers(res.data);
-    });
+    axios
+      .get(apiGetEndpoint)
+      .then(res => {
+        setMembers(res.data);
+      })
+      .catch(handleError);
   }, []);
 
   const formatDateTime = (iso: string) =>
@@ -164,15 +175,30 @@ export const GenericAdminPage = ({
     setOpenUpdateDialog(false);
   };
 
+  const entityName = singular(label);
   const updatedCreateForm = React.cloneElement(createForm, {
     changeRecordsCallback: addNewRecord,
     isPost: true,
+    onSubmitSuccess: () => {
+      setOpenCreationDialog(false);
+      handleSuccess(`${entityName} added successfully.`);
+    },
+    onSubmitError: ({ error }: any) => {
+      handleError(error, { prefix: `Failed to add ${entityName}` });
+    },
   });
 
   const updatedUpdateForm = React.cloneElement(createForm, {
     changeRecordsCallback: updateRecord,
     autofillData,
     isPost: false,
+    onSubmitSuccess: () => {
+      setOpenUpdateDialog(false);
+      handleSuccess(`${entityName} updated successfully.`);
+    },
+    onSubmitError: ({ error }: any) => {
+      handleError(error, { prefix: `Failed to update ${entityName}` });
+    },
   });
 
   const blockBackdropAndEscClose =
@@ -184,6 +210,7 @@ export const GenericAdminPage = ({
 
   const el = (
     <>
+      {SnackbarElement}
       {members ? (
         <Box
           sx={{
@@ -226,10 +253,12 @@ export const GenericAdminPage = ({
                       setMembers(prev => prev.filter(r => r.id !== idToDelete));
                       setIdToDelete(-1);
                       setOpenDeletionDialog(false);
+                      handleSuccess(`${entityName} deleted successfully.`);
                     })
                     .catch(error => {
-                      console.log(error);
-                      //error dialog message
+                      handleError(error, {
+                        prefix: `Failed to delete ${entityName}`,
+                      });
                     });
                 }}
                 autoFocus

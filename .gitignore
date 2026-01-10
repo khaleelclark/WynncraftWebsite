@@ -4,12 +4,14 @@ dist/
 build/
 pgdata/
 .env
-.env.*
 *.log
 *.tsbuildinfo
 .cache/
 .vscode/
 .DS_Store
+*.txt
+!*.example.txt
+
 
 # .NET/Backend
 bin/

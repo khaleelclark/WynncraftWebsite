@@ -21,6 +21,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
+import axios from "axios";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 type HeaderButton = {
   text: string;
@@ -47,6 +49,7 @@ export const Header = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -75,7 +78,6 @@ export const Header = () => {
       >
         Welcome, {nickname}
       </Button>
-
       <Menu
         id="logout-menu"
         anchorEl={anchorEl}
@@ -102,24 +104,29 @@ export const Header = () => {
       </Menu>
     </>
   ) : (
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() =>
-        //(window.location.href = "/api/auth/login")
-        (window.location.href = "http://192.168.4.121:5032/api/auth/login")
-      }
-      sx={{ whiteSpace: "nowrap" }}
-      startIcon={<AdminPanelSettingsIcon />}
-    >
-      Admin Login
-    </Button>
+    <>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={async () => {
+          try {
+            await axios.get("/api/auth/status");
+            //window.location.href = "/api/auth/login";
+            window.location.href = "http://192.168.4.121:5032/api/auth/login";
+          } catch (err) {
+            handleError(err); // snackbar
+          }
+        }}
+      >
+        Admin Login
+      </Button>
+    </>
   );
 
   const el = (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
+      {SnackbarElement}
       <Box
         component="nav"
         sx={{

@@ -73,4 +73,34 @@ public class AuthenticationController : ControllerBase
             }
         );
     }
+
+    [HttpGet("status")]
+    public async Task<IActionResult> Status(
+        [FromServices] IHttpClientFactory http,
+        IConfiguration config,
+        CancellationToken ct
+    )
+    {
+        // Check if Authentik is up/reachable
+        var internalUrl = (
+            config["Authentik:InternalUrl"] ?? config["Authentik:Authority"]!
+        )!.TrimEnd('/');
+        var metadata = $"{internalUrl}/.well-known/openid-configuration";
+
+        try
+        {
+            var client = http.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(2);
+
+            using var res = await client.GetAsync(metadata, ct);
+            if (!res.IsSuccessStatusCode)
+                return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
+
+            return Ok(new { ok = true });
+        }
+        catch
+        {
+            return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
+        }
+    }
 }

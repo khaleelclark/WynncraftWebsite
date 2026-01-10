@@ -7,6 +7,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { Header } from "./Header";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 interface GuildMember {
   id: number;
@@ -20,10 +21,14 @@ interface GuildMember {
 
 const GuildMemberList: React.FC = () => {
   const [members, setMembers] = useState<GuildMember[]>([]);
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("/api/guildmembers/public").then(res => setMembers(res.data));
+    axios
+      .get("/api/guildmembers/public")
+      .then(res => setMembers(res.data))
+      .catch(handleError);
   }, []);
 
   const columns: GridColDef[] = [
@@ -130,6 +135,7 @@ const GuildMemberList: React.FC = () => {
   return (
     <>
       <Header />
+      {SnackbarElement}
       <Box
         sx={{
           p: 3,

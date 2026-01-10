@@ -12,6 +12,7 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import dayjs from "dayjs";
 import { Header } from "./Header";
+import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
 type RaidPartners = {
   guildMemberId: string;
@@ -53,15 +54,19 @@ const Profile: React.FC = () => {
   const { id } = useParams();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const navigate = useNavigate();
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
-    axios.get(`/api/guildmembers/${id}`).then(res => {
-      if (!res.data) {
-        return setProfile(null);
-      } else {
-        return setProfile(res.data);
-      }
-    });
+    axios
+      .get(`/api/guildmembers/${id}`)
+      .then(res => {
+        if (!res.data) {
+          return setProfile(null);
+        } else {
+          return setProfile(res.data);
+        }
+      })
+      .catch(handleError);
   }, [id]);
 
   if (!profile) {
@@ -75,6 +80,7 @@ const Profile: React.FC = () => {
           width: "100%",
         }}
       >
+        {SnackbarElement}
         <CircularProgress />
       </Box>
     );
@@ -82,6 +88,7 @@ const Profile: React.FC = () => {
     return (
       <>
         <Header />
+        {SnackbarElement}
         <Box
           sx={{
             p: 3,
@@ -164,7 +171,9 @@ const Profile: React.FC = () => {
                 <Typography variant="caption" sx={{ opacity: 0.7 }}>
                   Wynncraft Rank
                 </Typography>
-                <Typography variant="body1">{profile.wynncraftRank}</Typography>
+                <Typography variant="body1">
+                  {profile.wynncraftRank ? profile.wynncraftRank : "N/A"}
+                </Typography>
               </Grid>
 
               <Grid size={5}>
@@ -200,7 +209,9 @@ const Profile: React.FC = () => {
                 Last Updated
               </Typography>
               <Typography variant="body1">
-                {dayjs(profile.lastSynced).format("YYYY-MM-DD hh:mm A")}
+                {profile.lastSynced
+                  ? dayjs(profile.lastSynced).format("YYYY-MM-DD hh:mm A")
+                  : "Has not synced yet"}
               </Typography>
             </Grid>
 

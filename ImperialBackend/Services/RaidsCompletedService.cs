@@ -54,11 +54,8 @@ namespace ImperialBackend.Services
             var validMemberIds = await _context
                 .GuildMembers.Select(m => m.GuildMemberId)
                 .ToListAsync();
-
             if (dto.GuildMembers.Except(validMemberIds).Any())
                 throw new InvalidOperationException("Invalid GuildMemberId");
-
-            await using var tx = await _context.Database.BeginTransactionAsync();
 
             var rc = await _context
                 .RaidsCompleted.Include(r => r.RaidInstances)
@@ -78,7 +75,6 @@ namespace ImperialBackend.Services
             );
 
             await _context.SaveChangesAsync();
-            await tx.CommitAsync();
 
             return await LoadGetDtoAsync(id);
         }
@@ -96,11 +92,8 @@ namespace ImperialBackend.Services
             var validMemberIds = await _context
                 .GuildMembers.Select(m => m.GuildMemberId)
                 .ToListAsync();
-
             if (dto.GuildMembers.Except(validMemberIds).Any())
                 throw new InvalidOperationException("Invalid GuildMemberId");
-
-            await using var tx = await _context.Database.BeginTransactionAsync();
 
             var raidCompleted = new RaidCompleted
             {
@@ -114,7 +107,6 @@ namespace ImperialBackend.Services
 
             _context.RaidsCompleted.Add(raidCompleted);
             await _context.SaveChangesAsync();
-            await tx.CommitAsync();
 
             return await LoadGetDtoAsync(raidCompleted.RaidCompletedId);
         }
@@ -175,8 +167,6 @@ namespace ImperialBackend.Services
 
             var completedDateUtc = (dto.CompletedDate ?? DateTimeOffset.UtcNow).UtcDateTime;
 
-            await using var tx = await _context.Database.BeginTransactionAsync();
-
             var raidCompleted = new RaidCompleted
             {
                 RaidId = dto.RaidId,
@@ -213,7 +203,6 @@ namespace ImperialBackend.Services
 
             _context.RaidsCompleted.Add(raidCompleted);
             await _context.SaveChangesAsync();
-            await tx.CommitAsync();
 
             return new
             {

@@ -21,8 +21,32 @@ This project is a full-stack application for managing and displaying Imperial gu
 ## Project Structure
 
 From the project root run the docker container using the following
+
 ```
 docker compose -f docker-compose.dev.yml up --build
+```
+
+To copy secret files and .env file, do the following and edit them with the correct values
+
+```
+cp .env.example .env
+
+cp RabbitMQ/secrets/rabbitmq_admin_password.example.txt \
+   RabbitMQ/secrets/rabbitmq_admin_password.txt
+
+cp RabbitMQ/secrets/rabbitmq_website_password.example.txt \
+   RabbitMQ/secrets/rabbitmq_website_password.txt
+
+cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt \
+   RabbitMQ/secrets/rabbitmq_raidbot_password.txt
+
+cp secrets/rabbitmq_website_password.example.txt \
+   secrets/rabbitmq_website_password.txt
+
+cp secrets/sqlserver_connection_string.example.txt \
+   secrets/sqlserver_connection_string.txt
+
+
 ```
 
 ```
@@ -46,8 +70,6 @@ Imperial Backend/
 ```
 
 ## Getting Started
-
-
 
 ## API Endpoints
 

@@ -1,16 +1,17 @@
-# Needs Secrets
 services:
   postgresql:
     image: postgres:15
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: authentik
-      POSTGRES_USER: authentik
-      POSTGRES_PASSWORD: authentik
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U authentik"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -37,13 +38,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      AUTHENTIK_SECRET_KEY: 6qh+s3chrsrX5JoLfEAFUbTZGXLI8XnVUwouFuzXAVl8VhK6TVGpBBu4Kdp9mEz1H18=
       AUTHENTIK_POSTGRESQL__HOST: postgresql
-      AUTHENTIK_POSTGRESQL__NAME: authentik
-      AUTHENTIK_POSTGRESQL__USER: authentik
-      AUTHENTIK_POSTGRESQL__PASSWORD: authentik
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
       AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     ports:
       - "9000:9000"
       - "9443:9443"
@@ -62,13 +65,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    env_file:
+      - .env
     environment:
-      AUTHENTIK_SECRET_KEY: 6qh+s3chrsrX5JoLfEAFUbTZGXLI8XnVUwouFuzXAVl8VhK6TVGpBBu4Kdp9mEz1H18=
       AUTHENTIK_POSTGRESQL__HOST: postgresql
-      AUTHENTIK_POSTGRESQL__NAME: authentik
-      AUTHENTIK_POSTGRESQL__USER: authentik
-      AUTHENTIK_POSTGRESQL__PASSWORD: authentik
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
       AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     volumes:
       - ./authentik-data:/media
       - ./custom-templates:/templates
@@ -84,10 +89,22 @@ services:
       - ./ImperialBackend:/app
     ports:
       - "5032:5032"
+    env_file:
+      - .env
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb_New;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True"
+      ConnectionStrings__DefaultConnection_FILE: /run/secrets/sqlserver_connection_string
+      Authentik__ClientId: ${CLIENT_ID}
+      Authentik__ClientSecret: ${CLIENT_SECRET}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-raid-rabbit}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-imperial}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-imperial-website}
+      RABBITMQ_QUEUE_RAIDS_COMPLETED: ${RABBITMQ_QUEUE_RAIDS_COMPLETED:-raids.completed.q}
+      RABBITMQ_PASSWORD_FILE: /run/secrets/rabbitmq_website_password
+    secrets:
+      - sqlserver_connection_string
+      - rabbitmq_website_password
     depends_on:
       - db
     networks:
@@ -111,15 +128,24 @@ services:
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    env_file:
+      - .env
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "SomeStrongPassword123!"
+      SA_PASSWORD: ${MSSQL_SA_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     networks:
       - imperial-net
+
+secrets:
+  rabbitmq_website_password:
+    file: ./secrets/rabbitmq_website_password.txt
+
+  sqlserver_connection_string:
+    file: ./secrets/sqlserver_connection_string.txt
 
 volumes:
   sql_data:

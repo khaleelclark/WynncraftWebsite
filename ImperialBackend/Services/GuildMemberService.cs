@@ -55,8 +55,6 @@ namespace ImperialBackend.Services
         {
             await ValidateIdsAsync(dto);
 
-            await using var tx = await _context.Database.BeginTransactionAsync();
-
             var member = await _context
                 .GuildMembers.Include(m => m.Medals)
                 .Include(m => m.Games)
@@ -86,7 +84,6 @@ namespace ImperialBackend.Services
             );
 
             await _context.SaveChangesAsync();
-            await tx.CommitAsync();
 
             return await LoadAdminDtoAsync(id);
         }

@@ -38,9 +38,11 @@ public class MedalService : IMedalService
 
     public async Task DeleteAsync(int id)
     {
-        if (await _context.GuildMemberMedals.AnyAsync(m => m.MedalId == id))
+        var refs = await _context.GuildMemberMedals.AsNoTracking().CountAsync(m => m.MedalId == id);
+
+        if (refs > 0)
             throw new InvalidOperationException(
-                "Cannot delete medal with guild members. Remove guild members first"
+                $"Medal {id} can't be deleted because {refs} guild member record(s) reference it."
             );
 
         var medal = await _context.Medals.FindAsync(id) ?? throw new KeyNotFoundException();

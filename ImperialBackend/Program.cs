@@ -9,12 +9,14 @@
 
 using System.Security.Claims;
 using System.Threading.RateLimiting;
+using ImperialBackend.Config;
 using ImperialBackend.Models;
 using ImperialBackend.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +44,15 @@ builder.Services.Configure<HostOptions>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// ---- Promote secrets/env into the config keys your app reads ----
+
+builder.Configuration.AddEnvironmentVariables();
+
+// Connection string (supports ConnectionStrings__DefaultConnection_FILE)
+var cs = SecretReader.Get("ConnectionStrings__DefaultConnection", required: false);
+if (!string.IsNullOrWhiteSpace(cs))
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = cs;
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrWhiteSpace(connectionString))
@@ -174,7 +185,6 @@ static string ToPublicUrl(string url)
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    // Needs Secret
     return url.Replace("http://authentik-server:9000", "http://192.168.4.121:9000")
         .Replace("https://authentik-server:9000", "http://192.168.4.121:9000")
         .Replace("http://backend:5032", "http://192.168.4.121:5032")
@@ -195,6 +205,7 @@ var authentikInternalUrl = builder.Configuration["Authentik:InternalUrl"] ?? aut
 var clientId =
     builder.Configuration["Authentik:ClientId"]
     ?? throw new InvalidOperationException("Authentik:ClientId not configured");
+
 var clientSecret =
     builder.Configuration["Authentik:ClientSecret"]
     ?? throw new InvalidOperationException("Authentik:ClientSecret not configured");
@@ -374,11 +385,11 @@ if (app.Environment.IsDevelopment())
 {
     // Do NOT run migrations at startup in an outage simulation.
     // If you want migrations, gate behind a config flag and wrap in try/catch.
-
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseExceptionHandler("/error");
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
@@ -390,34 +401,86 @@ app.UseForwardedHeaders(
 );
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRateLimiter();
 
 // Convert SQL failures from request pipeline into a clean 503 instead of crashing or 500 spam.
 // This does NOT affect background services; those should handle retries internally.
-app.Use(
-    async (ctx, next) =>
+app.Map(
+    "/error",
+    async (HttpContext ctx) =>
     {
-        try
+        var feature = ctx.Features.Get<IExceptionHandlerFeature>();
+        var ex = feature?.Error;
+
+        if (ctx.Response.HasStarted)
+            return;
+
+        ctx.Response.ContentType = "application/json";
+
+        if (ex is KeyNotFoundException)
         {
-            await next();
+            ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+            await ctx.Response.WriteAsJsonAsync(
+                new { error = "NotFound", message = "Resource not found." }
+            );
+            return;
         }
-        catch (SqlException)
+
+        if (ex is InvalidOperationException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
+            return;
+        }
+
+        if (ex is SqlException)
         {
             ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await ctx.Response.WriteAsJsonAsync(
                 new
                 {
                     error = "DatabaseUnavailable",
-                    message = "Database is currently unavailable. Please retry.",
+                    message = "Service is currently unavailable. Please try again later.",
                 }
             );
+            return;
         }
+
+        if (IsAuthentikOidcDown(ex))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            await ctx.Response.WriteAsJsonAsync(
+                new
+                {
+                    error = "AuthProviderUnavailable",
+                    message = "Login is currently unavailable. Please try again later.",
+                }
+            );
+            return;
+        }
+
+        ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        await ctx.Response.WriteAsJsonAsync(
+            new { error = "UnhandledException", message = "An unexpected error occurred." }
+        );
     }
 );
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseRateLimiter();
+static bool IsAuthentikOidcDown(Exception? ex)
+{
+    for (var cur = ex; cur != null; cur = cur.InnerException)
+    {
+        var msg = cur.Message ?? "";
+        if (
+            msg.Contains("IDX20803", StringComparison.OrdinalIgnoreCase)
+            || msg.Contains("IDX20804", StringComparison.OrdinalIgnoreCase)
+        )
+            return true;
+    }
+    return false;
+}
 
 app.MapControllers();
-
 app.Run();
