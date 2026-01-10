@@ -10,6 +10,7 @@ pgdata/
 .cache/
 .vscode/
 .DS_Store
+secrets/
 
 # .NET/Backend
 bin/

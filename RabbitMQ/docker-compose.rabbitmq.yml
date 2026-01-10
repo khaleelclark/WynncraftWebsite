@@ -1,0 +1,82 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: raid-rabbit
+    hostname: raid-rabbit
+
+    ports:
+      - "5672:5672"
+      - "127.0.0.1:15672:15672"
+
+    environment:
+      RABBITMQ_DEFAULT_USER: imperial
+      RABBITMQ_DEFAULT_VHOST: imperial
+
+    secrets:
+      - rabbitmq_admin_password
+      - rabbitmq_website_password
+      - rabbitmq_raidbot_password
+
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        export RABBITMQ_DEFAULT_PASS="$(cat /run/secrets/rabbitmq_admin_password)"
+        exec docker-entrypoint.sh rabbitmq-server
+
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+    networks:
+      - imperial-net
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq-init:
+    image: rabbitmq:3-management
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+    volumes:
+      - ./init.sh:/init.sh:ro
+
+    secrets:
+      - rabbitmq_admin_password
+      - rabbitmq_website_password
+      - rabbitmq_raidbot_password
+
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        set -e
+        apt-get update
+        apt-get install -y --no-install-recommends curl ca-certificates
+        exec /bin/bash /init.sh
+
+    networks:
+      - imperial-net
+
+    restart: "no"
+
+secrets:
+  rabbitmq_admin_password:
+    file: ./secrets/rabbitmq_admin_password.txt
+  rabbitmq_website_password:
+    file: ./secrets/rabbitmq_website_password.txt
+  rabbitmq_raidbot_password:
+    file: ./secrets/rabbitmq_raidbot_password.txt
+
+volumes:
+  rabbitmq-data:
+
+networks:
+  imperial-net:
+    name: imperial-net
+    driver: bridge

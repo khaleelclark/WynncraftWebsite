@@ -1,50 +1,6 @@
 {
   "vhosts": [{ "name": "imperial" }],
 
-  "users": [
-    {
-      "name": "imperial",
-      "password": "ImperialGuild",
-      "tags": "administrator"
-    },
-    {
-      "name": "raid-bot",
-      "password": "RaidBotStrongPassword",
-      "tags": ""
-    },
-    {
-      "name": "imperial-website",
-      "password": "WebsiteStrongPassword",
-      "tags": ""
-    }
-  ],
-
-  "permissions": [
-    {
-      "user": "imperial",
-      "vhost": "imperial",
-      "configure": ".*",
-      "write": ".*",
-      "read": ".*"
-    },
-
-    {
-      "user": "raid-bot",
-      "vhost": "imperial",
-      "configure": "^$",
-      "write": "^raids\\.exchange$",
-      "read": "^$"
-    },
-
-    {
-      "user": "imperial-website",
-      "vhost": "imperial",
-      "configure": "^$",
-      "write": "^$",
-      "read": "^raids\\.completed\\.q$"
-    }
-  ],
-
   "exchanges": [
     {
       "name": "raids.exchange",
