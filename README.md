@@ -28,6 +28,12 @@ docker compose -f docker-compose.dev.yml up --build
 
 To copy secret files and .env file, do the following and edit them with the correct values
 
+Initial Setup (Secrets & Environment Files)
+
+Before running the project, you need to copy the example secret files and .env file, then edit them with the correct values.
+
+🐧 Linux / macOS (Terminal)
+
 ```
 cp .env.example .env
 
@@ -45,9 +51,24 @@ cp secrets/rabbitmq_website_password.example.txt \
 
 cp secrets/sqlserver_connection_string.example.txt \
    secrets/sqlserver_connection_string.txt
+```
 
+🪟 Windows (PowerShell — recommended)
+
+Run these commands from the project root:
 
 ```
+Copy-Item ".env.example" ".env"
+
+Copy-Item "RabbitMQ/secrets/rabbitmq_admin_password.example.txt"   "RabbitMQ/secrets/rabbitmq_admin_password.txt"
+Copy-Item "RabbitMQ/secrets/rabbitmq_website_password.example.txt" "RabbitMQ/secrets/rabbitmq_website_password.txt"
+Copy-Item "RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt" "RabbitMQ/secrets/rabbitmq_raidbot_password.txt"
+
+Copy-Item "secrets/rabbitmq_website_password.example.txt"          "secrets/rabbitmq_website_password.txt"
+Copy-Item "secrets/sqlserver_connection_string.example.txt"        "secrets/sqlserver_connection_string.txt"
+```
+
+💡 If files already exist and you want to overwrite them, add -Force to Copy-Item.
 
 ```
 Imperial Backend/
