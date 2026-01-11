@@ -118,6 +118,7 @@ const GuildRaidsBoard: React.FC = () => {
       : `${selectedEvent?.name} - Raid Completions`;
 
   const pickerSx = {
+    mb: 3,
     "& .MuiOutlinedInput-input.Mui-disabled": {
       color: "#c3c3c3ff !important",
       WebkitTextFillColor: "#c3c3c3ff !important",
@@ -130,7 +131,7 @@ const GuildRaidsBoard: React.FC = () => {
       color: "#efdddb",
     },
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#3C002F",
+      backgroundColor: "background.paper",
       borderRadius: 1.5,
     },
   };

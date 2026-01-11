@@ -75,7 +75,6 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
             borderRadius: 1.5,
           },
 
-          // ensure icon contrast
           "& .MuiSvgIcon-root": {
             color: "text.secondary",
           },

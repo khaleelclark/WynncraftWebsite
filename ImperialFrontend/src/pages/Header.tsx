@@ -143,6 +143,7 @@ export const Header = () => {
           zIndex: 10,
           backdropFilter: "blur(8px)",
           gap: 2,
+          mb: 3,
         }}
       >
         {/* Left: Logo */}

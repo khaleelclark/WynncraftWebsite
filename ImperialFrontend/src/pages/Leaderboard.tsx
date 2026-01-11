@@ -30,7 +30,7 @@ const Leaderboard: React.FC = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [startDateTime, setStartDateTime] = useState<Dayjs | null>(null);
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
-  const { handleError, handleSuccess, SnackbarElement } = useApiErrorSnackbar();
+  const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
@@ -165,6 +165,7 @@ const Leaderboard: React.FC = () => {
       : `${selectedEvent?.name} Leaderboard`;
 
   const pickerSx = {
+    mb: 3,
     "& .MuiOutlinedInput-input.Mui-disabled": {
       color: "#c3c3c3ff !important",
       WebkitTextFillColor: "#c3c3c3ff !important",
@@ -177,7 +178,7 @@ const Leaderboard: React.FC = () => {
       color: "#efdddb",
     },
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#3C002F",
+      backgroundColor: "background.paper",
       borderRadius: 1.5,
     },
   };
