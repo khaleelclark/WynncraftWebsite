@@ -59,6 +59,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
         my: 2,
         display: "flex",
         justifyContent: "center",
+        mb: 3,
       }}
     >
       {SnackbarElement}

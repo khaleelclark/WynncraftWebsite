@@ -43,6 +43,19 @@ const GuildRaidsBoard: React.FC = () => {
       headerAlign: "center",
     },
     {
+      field: "guildMembers",
+      headerName: "Members",
+      minWidth: 420,
+      flex: 2,
+      align: "left",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: (params: any) => {
+        const members: string[] = params.row.guildMembers ?? [];
+        return members.length ? members.join(", ") : "—";
+      },
+    },
+    {
       field: "completedDate",
       headerName: "Completed",
       minWidth: 220,
@@ -57,20 +70,6 @@ const GuildRaidsBoard: React.FC = () => {
               timeStyle: "short",
             })
           : "—";
-      },
-    },
-
-    {
-      field: "guildMembers",
-      headerName: "Members",
-      minWidth: 420,
-      flex: 2,
-      align: "left",
-      headerAlign: "center",
-      sortable: false,
-      renderCell: (params: any) => {
-        const members: string[] = params.row.guildMembers ?? [];
-        return members.length ? members.join(", ") : "—";
       },
     },
   ];
@@ -118,7 +117,7 @@ const GuildRaidsBoard: React.FC = () => {
       : `${selectedEvent?.name} - Raid Completions`;
 
   const pickerSx = {
-    mb: 3,
+    mb: 1,
     "& .MuiOutlinedInput-input.Mui-disabled": {
       color: "#c3c3c3ff !important",
       WebkitTextFillColor: "#c3c3c3ff !important",
@@ -160,12 +159,10 @@ const GuildRaidsBoard: React.FC = () => {
         >
           <EventSelector onSelect={setSelectedEvent} />
 
-          {selectedEvent?.id === -1 ? (
-            <Typography
-              sx={{ my: 2, color: "#efdddb", textAlign: "center" }}
-            ></Typography>
+          {!selectedEvent || selectedEvent?.id === -1 ? (
+            <Box sx={{ my: 2 }} />
           ) : (
-            <Box sx={{ my: 2 }}>
+            <Box sx={{ my: 2, mb: 3 }}>
               <Grid container spacing={2} justifyContent="center">
                 <Grid>
                   <DateTimePicker

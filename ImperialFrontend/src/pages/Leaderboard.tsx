@@ -207,7 +207,7 @@ const Leaderboard: React.FC = () => {
         >
           <EventSelector onSelect={setSelectedEvent} />
 
-          {selectedEvent?.id === -1 ? (
+          {!selectedEvent || selectedEvent?.id === -1 ? (
             <Typography
               sx={{ my: 2, color: "#efdddb", textAlign: "center" }}
             ></Typography>
