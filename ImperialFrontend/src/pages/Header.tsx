@@ -186,7 +186,7 @@ export const Header = () => {
         <Box
           sx={{
             flex: "1 1 auto",
-            display: { xs: "none", md: "flex" },
+            display: { xs: "none", lg: "flex" },
             justifyContent: { md: "flex-end", lg: "center" },
           }}
         >
@@ -217,7 +217,7 @@ export const Header = () => {
         <Box
           sx={{
             flex: "0 0 auto",
-            display: { xs: "flex", md: "flex", lg: "none" },
+            display: { xs: "flex", lg: "none" },
             ml: "auto",
           }}
         >

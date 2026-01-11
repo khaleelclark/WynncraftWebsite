@@ -240,13 +240,6 @@ const AdminPanel: React.FC = () => {
               />
 
               <CustomAdminTile
-                title="Games"
-                description="Create, edit and delete supported games."
-                icon={<SportsEsportsIcon />}
-                onOpen={() => setGamesOpen(true)}
-              />
-
-              <CustomAdminTile
                 title="Medals"
                 description="Create and assign medals to recognize achievements."
                 icon={<MilitaryTechIcon />}
@@ -258,6 +251,13 @@ const AdminPanel: React.FC = () => {
                 description="Create, edit and delete guild ranks."
                 icon={<WorkspacePremiumIcon />}
                 onOpen={() => setRanksOpen(true)}
+              />
+
+              <CustomAdminTile
+                title="Games"
+                description="Create, edit and delete supported games."
+                icon={<SportsEsportsIcon />}
+                onOpen={() => setGamesOpen(true)}
               />
 
               <CustomAdminTile
