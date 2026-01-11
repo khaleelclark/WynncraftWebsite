@@ -45,7 +45,7 @@ const theme = createTheme({
     },
     divider: "rgba(225, 206, 211, 0.25)",
     error: { main: "#FF0055" },
-    success: { main: "#4ADE80" }, // you can swap later if you want "imperial" success
+    success: { main: "#4ADE80" },
     warning: { main: imperial.ember },
 
     info: { main: "#60A5FA" },
@@ -241,6 +241,13 @@ const theme = createTheme({
           border: "1px solid rgba(178, 0, 75, 0.65)",
           boxShadow:
             "0 10px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(249,165,201,0.08)",
+          "& .MuiDataGrid-menuIcon, & .MuiDataGrid-menuIconButton": {
+            color: imperial.paper,
+            opacity: 1,
+          },
+          "& .MuiDataGrid-menuIconButton:hover": {
+            backgroundColor: "rgba(231, 60, 131, 0.18)",
+          },
         },
 
         columnHeaders: {
@@ -261,28 +268,15 @@ const theme = createTheme({
           "&:nth-of-type(odd)": {
             backgroundColor: imperialTable.rowOdd,
           },
-
-          // hover should tint, not replace
-          // "&:hover": {
-          //   backgroundColor: "rgba(231, 60, 131, 0.14)", // hot-pink wash
-          // },
           "&:hover": {
-            backgroundColor: "rgba(176, 84, 15, 0.16)", // ember wash
+            backgroundColor: "rgba(176, 84, 15, 0.16)",
           },
-
-          // selected should still feel selected but keep the vibe
           "&.Mui-selected": {
             backgroundColor: "rgba(178, 0, 75, 0.30)",
           },
           "&.Mui-selected:hover": {
             backgroundColor: "rgba(231, 60, 131, 0.22)",
           },
-        },
-
-        footerContainer: {
-          backgroundColor: imperial.blood,
-          color: imperial.paper,
-          borderTop: "1px solid rgba(231, 60, 131, 0.45)",
         },
       },
     },
