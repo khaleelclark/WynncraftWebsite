@@ -59,6 +59,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
         my: 2,
         display: "flex",
         justifyContent: "center",
+        mb: 3,
       }}
     >
       {SnackbarElement}
@@ -75,7 +76,6 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
             borderRadius: 1.5,
           },
 
-          // ensure icon contrast
           "& .MuiSvgIcon-root": {
             color: "text.secondary",
           },
