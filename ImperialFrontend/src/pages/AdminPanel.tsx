@@ -3,7 +3,6 @@ import { CustomForm } from "./CustomForm";
 import { CustomTextField } from "./CustomTextField";
 import { CustomDropdown } from "./CustomDropdown";
 import { CustomDateOnlySelector } from "./CustomDateOnlySelector";
-import { AlertColor } from "@mui/material/Alert";
 import { GenericAdminPage } from "./GenericAdminPage";
 import { CustomTimeAndDateSelector } from "./CustomTimeAndDateSelector";
 import Box from "@mui/material/Box";
@@ -30,33 +29,8 @@ const AdminPanel: React.FC = () => {
   const [raidsOpen, setRaidsOpen] = useState(false);
   const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] =
-    useState<AlertColor>("success");
-
-  const handleSnackbarClose = () => setSnackbarOpen(false);
-
-  const handleSubmitSuccess = () => {
-    // add dymanic message confirmations
-    setSnackbarMessage("Entity added successfully!");
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
-  };
-
-  const handleSubmitError = (error: unknown) => {
-    setSnackbarMessage("Failed to create new entity. Please try again.");
-    setSnackbarSeverity("error");
-    setSnackbarOpen(true);
-  };
-
   const createGuildMemberForm = (
-    <CustomForm
-      title="Guild Member Management"
-      apiEndpoint="/api/guildmembers"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Guild Member Management" apiEndpoint="/api/guildmembers">
       <CustomTextField id="discordTag" label="Discord Tag" minLength={1} />
       <CustomTextField id="name" label="Main Username" minLength={1} />
       <CustomTextField
@@ -84,12 +58,7 @@ const AdminPanel: React.FC = () => {
   );
 
   const createEventForm = (
-    <CustomForm
-      title="Event Management"
-      apiEndpoint="/api/events"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Event Management" apiEndpoint="/api/events">
       <CustomTextField id="name" label="Event Name" minLength={4} />
       <CustomTimeAndDateSelector id="eventStart" label="Start Date & Time" />
       <CustomTimeAndDateSelector id="eventEnd" label="End Date & Time" />
@@ -97,45 +66,25 @@ const AdminPanel: React.FC = () => {
   );
 
   const createGameForm = (
-    <CustomForm
-      title="Game Management"
-      apiEndpoint="/api/games"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Game Management" apiEndpoint="/api/games">
       <CustomTextField id="name" label="Game Name" minLength={2} />
     </CustomForm>
   );
 
   const createMedalForm = (
-    <CustomForm
-      title="Medal Management"
-      apiEndpoint="/api/medals"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Medal Management" apiEndpoint="/api/medals">
       <CustomTextField id="name" label="Medal Name" minLength={2} />
     </CustomForm>
   );
 
   const createRankForm = (
-    <CustomForm
-      title="Rank Management"
-      apiEndpoint="/api/ranks"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Rank Management" apiEndpoint="/api/ranks">
       <CustomTextField id="name" label="Rank Name" minLength={2} />
     </CustomForm>
   );
 
   const createRaidForm = (
-    <CustomForm
-      title="Raid Management"
-      apiEndpoint="/api/raids"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
-    >
+    <CustomForm title="Raid Management" apiEndpoint="/api/raids">
       <CustomTextField id="id" label="Raid Id" minLength={1} type="number" />
       <CustomTextField id="name" label="Raid Name" minLength={3} />
       <CustomTextField
@@ -151,8 +100,6 @@ const AdminPanel: React.FC = () => {
     <CustomForm
       title="Raids Completed Management"
       apiEndpoint="/api/raidscompleted"
-      onSubmitSuccess={handleSubmitSuccess}
-      onSubmitError={handleSubmitError}
     >
       <CustomDropdown id="raid" label="Raid Id" apiEndpoint="/api/raids" />
       <CustomTimeAndDateSelector
