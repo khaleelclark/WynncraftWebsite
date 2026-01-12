@@ -4,6 +4,7 @@ dist/
 build/
 pgdata/
 .env
+.env.dev
 *.log
 *.tsbuildinfo
 .cache/

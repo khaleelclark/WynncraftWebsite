@@ -1,11 +1,5 @@
 // Program.cs
 // ASP.NET Core Web API + Authentik (OIDC) + Cookie auth
-// Outage-friendly:
-//  - DB can be down without crashing the host
-//  - BackgroundService exceptions won't take down the API
-//  - SQL exceptions from controllers map to 503
-//  - GuildMemberSyncService registered as a proper HostedService (no singleton hack)
-//  - HttpClientFactory enabled
 
 using System.Security.Claims;
 using System.Threading.RateLimiting;
@@ -26,30 +20,42 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/* ============================
- * Host Options (Outage-friendly)
- * ============================ */
-
-// Do NOT crash the entire web host if a BackgroundService throws.
-// (Workers should still handle outages internally, but this prevents API shutdown.)
 builder.Services.Configure<HostOptions>(options =>
 {
     options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
 });
 
-/* ============================
- * Services
- * ============================ */
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ---- Promote secrets/env into the config keys your app reads ----
-
 builder.Configuration.AddEnvironmentVariables();
 
-// Connection string (supports ConnectionStrings__DefaultConnection_FILE)
+static string Env(string name)
+{
+    var value = Environment.GetEnvironmentVariable(name);
+    if (string.IsNullOrWhiteSpace(value))
+        throw new InvalidOperationException(
+            $"{name} is not set (check .env / docker compose env)."
+        );
+    return value.TrimEnd('/');
+}
+
+var frontendUrl = Env("FRONTEND_URL");
+var backendUrl = Env("BACKEND_URL");
+var authentikUrl = Env("AUTHENTIK_URL");
+var clientId = Env("CLIENT_ID");
+var clientSecret = Env("CLIENT_SECRET");
+var issuerPath = Env("AUTHENTIK_ISSUER_PATH");
+var authentikInternalUrl = Env("AUTHENTIK_INTERNAL_URL");
+var backendInternalUrl = Env("BACKEND_INTERNAL_URL");
+
+Console.WriteLine($"[Auth Config] Frontend URL: {frontendUrl}");
+Console.WriteLine($"[Auth Config] Backend URL: {backendUrl}");
+Console.WriteLine($"[Auth Config] Authentik URL: {authentikUrl}");
+Console.WriteLine($"[Auth Config] Issuer Path: {issuerPath}");
+Console.WriteLine($"[Auth Config] Authentik Internal URL: {authentikInternalUrl}");
+
 var cs = SecretReader.Get("ConnectionStrings__DefaultConnection", required: false);
 if (!string.IsNullOrWhiteSpace(cs))
     builder.Configuration["ConnectionStrings:DefaultConnection"] = cs;
@@ -64,8 +70,6 @@ builder.Services.AddDbContextFactory<ImperialDbContext>(options =>
         sqlOptions =>
         {
             sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-
-            // Helps for transient failures (doesn't fix outages, but improves resilience).
             sqlOptions.EnableRetryOnFailure(
                 maxRetryCount: 5,
                 maxRetryDelay: TimeSpan.FromSeconds(5),
@@ -86,7 +90,6 @@ builder.Services.AddAuthorization(options =>
     );
 });
 
-// App services
 builder.Services.AddScoped<IRaidsCompletedService, RaidsCompletedService>();
 builder.Services.AddScoped<IGuildMemberService, GuildMemberService>();
 builder.Services.AddScoped<IEventService, EventService>();
@@ -95,10 +98,7 @@ builder.Services.AddScoped<IMedalService, MedalService>();
 builder.Services.AddScoped<IRankService, RankService>();
 builder.Services.AddScoped<IRaidService, RaidService>();
 
-// Background services
 builder.Services.AddHostedService<ImperialBackend.Messaging.RaidCompletedConsumer>();
-
-// GuildMemberSyncService uses external APIs -> use IHttpClientFactory
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<GuildMemberSyncService>();
 
@@ -115,7 +115,7 @@ static string GetRateLimitKey(HttpContext ctx)
     }
 
     var ip = ctx.Connection.RemoteIpAddress?.ToString();
-    return "ip:" + (ip ?? "unknown"); // anonymous/unauthenticated users
+    return "ip:" + (ip ?? "unknown");
 }
 
 builder.Services.AddRateLimiter(options =>
@@ -124,7 +124,7 @@ builder.Services.AddRateLimiter(options =>
     {
         var key = GetRateLimitKey(ctx);
         var isAuthenticated = key.StartsWith("u:");
-        var perMinute = isAuthenticated ? 200 : 100; // ~200 req/min auth, ~100 req/min anon
+        var perMinute = isAuthenticated ? 200 : 100;
 
         return RateLimitPartition.GetTokenBucketLimiter(
             key,
@@ -139,7 +139,6 @@ builder.Services.AddRateLimiter(options =>
         );
     });
 
-    // Strict for login/callback endpoints (per IP)
     options.AddPolicy(
         "auth",
         ctx =>
@@ -171,54 +170,34 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
-/* ============================
- * Logging
- * ============================ */
-
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Authentication", LogLevel.Debug);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Authorization", LogLevel.Debug);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
-static string ToPublicUrl(string url)
+string ToPublicUrl(string url)
 {
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    return url.Replace("http://authentik-server:9000", "http://192.168.4.121:9000")
-        .Replace("https://authentik-server:9000", "http://192.168.4.121:9000")
-        .Replace("http://backend:5032", "http://192.168.4.121:5032")
-        .Replace("https://backend:5032", "http://192.168.4.121:5032");
+    return url.Replace(authentikInternalUrl, authentikUrl).Replace(backendInternalUrl, backendUrl);
 }
 
-/* ============================
- * Authentik / OIDC config
- * ============================ */
+// CRITICAL: Use internal URL for metadata fetching, public URL for authority/issuer validation
+var authentikAuthority = issuerPath.TrimEnd('/');
+var authentikInternalIssuer = $"{authentikInternalUrl}/application/o/imperial-web";
 
-var authentikAuthority =
-    builder.Configuration["Authentik:Authority"]
-    ?? throw new InvalidOperationException("Authentik:Authority not configured");
-
-// Internal URL is for backchannel metadata fetch from inside Docker.
-var authentikInternalUrl = builder.Configuration["Authentik:InternalUrl"] ?? authentikAuthority;
-
-var clientId =
-    builder.Configuration["Authentik:ClientId"]
-    ?? throw new InvalidOperationException("Authentik:ClientId not configured");
-
-var clientSecret =
-    builder.Configuration["Authentik:ClientSecret"]
-    ?? throw new InvalidOperationException("Authentik:ClientSecret not configured");
-
-// IMPORTANT: Authority should be the server root, e.g. http://localhost:9000
-// NOT /application/o/imperial-web/
-authentikAuthority = authentikAuthority.TrimEnd('/');
-authentikInternalUrl = authentikInternalUrl.TrimEnd('/');
-
-// This is the callback URL Authentik must allow, and what the browser can resolve.
-const string publicBackendBaseUrl = "http://192.168.4.121:5032";
-var callbackUrl = $"{publicBackendBaseUrl}/api/auth/callback";
-var signoutCallbackUrl = $"{publicBackendBaseUrl}/api/auth/signout-callback";
+var callbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/callback";
+var signoutCallbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/signout-callback";
+Console.WriteLine($"[Auth] Callback URL: {callbackUrl}");
+Console.WriteLine($"[Auth] Signout Callback URL: {signoutCallbackUrl}");
+Console.WriteLine($"[Auth] Authority (public): {authentikAuthority}");
+Console.WriteLine(
+    $"[Auth] Internal Metadata URL: {authentikInternalIssuer}/.well-known/openid-configuration"
+);
 
 builder
     .Services.AddAuthentication(options =>
@@ -233,23 +212,22 @@ builder
             options.Cookie.Name = "imperial.auth";
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax;
-
-            options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-                ? CookieSecurePolicy.SameAsRequest
-                : CookieSecurePolicy.Always;
-
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.SlidingExpiration = true;
             options.ExpireTimeSpan = TimeSpan.FromHours(8);
 
-            // APIs should return 401 instead of redirecting to login
             options.Events.OnRedirectToLogin = context =>
             {
                 if (context.Request.Path.StartsWithSegments("/api"))
                 {
+                    Console.WriteLine(
+                        $"[Auth] API request to {context.Request.Path} - returning 401"
+                    );
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return Task.CompletedTask;
                 }
 
+                Console.WriteLine($"[Auth] Redirecting to login: {context.RedirectUri}");
                 context.Response.Redirect(context.RedirectUri);
                 return Task.CompletedTask;
             };
@@ -259,7 +237,6 @@ builder
         OpenIdConnectDefaults.AuthenticationScheme,
         options =>
         {
-            // ✅ Explicitly tell OIDC to sign in using the cookie scheme
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
             options.Authority = authentikAuthority;
@@ -277,15 +254,14 @@ builder
             options.Scope.Add("profile");
             options.Scope.Add("email");
 
-            // OIDC callback endpoints on THIS backend
             options.CallbackPath = "/api/auth/callback";
             options.SignedOutCallbackPath = "/api/auth/signout-callback";
 
             options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
             options.MapInboundClaims = false;
 
-            // ✅ Backchannel metadata fetch uses internal Docker URL (safe + reliable)
-            options.MetadataAddress = $"{authentikInternalUrl}/.well-known/openid-configuration";
+            // CRITICAL: Use internal URL for metadata fetching
+            options.MetadataAddress = $"{authentikInternalIssuer}/.well-known/openid-configuration";
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -294,7 +270,6 @@ builder
                 ValidIssuer = authentikAuthority,
             };
 
-            // Temp cookies for OIDC correlation/nonce
             options.CorrelationCookie.Name = "imperial.oidc.correlation";
             options.CorrelationCookie.HttpOnly = true;
             options.CorrelationCookie.SameSite = SameSiteMode.Lax;
@@ -313,9 +288,16 @@ builder
 
             options.Events = new OpenIdConnectEvents
             {
-                // LOGIN
                 OnRedirectToIdentityProvider = context =>
                 {
+                    Console.WriteLine($"[Auth] OnRedirectToIdentityProvider");
+                    Console.WriteLine(
+                        $"[Auth] Original IssuerAddress: {context.ProtocolMessage.IssuerAddress}"
+                    );
+                    Console.WriteLine(
+                        $"[Auth] Original RedirectUri: {context.ProtocolMessage.RedirectUri}"
+                    );
+
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
@@ -326,12 +308,20 @@ builder
                             context.ProtocolMessage.RedirectUri
                         );
 
+                    Console.WriteLine(
+                        $"[Auth] Updated IssuerAddress: {context.ProtocolMessage.IssuerAddress}"
+                    );
+                    Console.WriteLine(
+                        $"[Auth] Updated RedirectUri: {context.ProtocolMessage.RedirectUri}"
+                    );
+
                     return Task.CompletedTask;
                 },
 
-                // LOGOUT
                 OnRedirectToIdentityProviderForSignOut = context =>
                 {
+                    Console.WriteLine($"[Auth] OnRedirectToIdentityProviderForSignOut");
+
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
@@ -345,9 +335,9 @@ builder
                     return Task.CompletedTask;
                 },
 
-                // AFTER LOGIN CALLBACK
                 OnTicketReceived = context =>
                 {
+                    Console.WriteLine($"[Auth] OnTicketReceived - Login successful");
                     var redirectUri = context.Properties?.RedirectUri;
 
                     if (!string.IsNullOrEmpty(redirectUri))
@@ -356,18 +346,21 @@ builder
                     return Task.CompletedTask;
                 },
 
-                // AFTER LOGOUT CALLBACK
                 OnSignedOutCallbackRedirect = context =>
                 {
-                    context.Response.Redirect("http://192.168.4.121:5173/");
+                    Console.WriteLine(
+                        $"[Auth] OnSignedOutCallbackRedirect - Redirecting to frontend"
+                    );
+                    context.Response.Redirect(frontendUrl);
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
 
-                // FAILURE
                 OnRemoteFailure = context =>
                 {
-                    context.Response.Redirect("http://192.168.4.121:5173/login?error=auth_failed");
+                    Console.WriteLine($"[Auth ERROR] OnRemoteFailure: {context.Failure?.Message}");
+                    Console.WriteLine($"[Auth ERROR] Exception: {context.Failure}");
+                    context.Response.Redirect($"{frontendUrl}/login?error=auth_failed");
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
@@ -375,16 +368,10 @@ builder
         }
     );
 
-/* ============================
- * App + Middleware
- * ============================ */
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    // Do NOT run migrations at startup in an outage simulation.
-    // If you want migrations, gate behind a config flag and wrap in try/catch.
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -405,14 +392,16 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 
-// Convert SQL failures from request pipeline into a clean 503 instead of crashing or 500 spam.
-// This does NOT affect background services; those should handle retries internally.
 app.Map(
     "/error",
     async (HttpContext ctx) =>
     {
         var feature = ctx.Features.Get<IExceptionHandlerFeature>();
         var ex = feature?.Error;
+
+        Console.WriteLine($"[ERROR] Exception caught: {ex?.GetType().Name}");
+        Console.WriteLine($"[ERROR] Message: {ex?.Message}");
+        Console.WriteLine($"[ERROR] Stack: {ex?.StackTrace}");
 
         if (ctx.Response.HasStarted)
             return;
@@ -425,13 +414,6 @@ app.Map(
             await ctx.Response.WriteAsJsonAsync(
                 new { error = "NotFound", message = "Resource not found." }
             );
-            return;
-        }
-
-        if (ex is InvalidOperationException)
-        {
-            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
-            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
             return;
         }
 
@@ -450,6 +432,7 @@ app.Map(
 
         if (IsAuthentikOidcDown(ex))
         {
+            Console.WriteLine($"[ERROR] Authentik OIDC is down - returning 503");
             ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await ctx.Response.WriteAsJsonAsync(
                 new
@@ -458,6 +441,13 @@ app.Map(
                     message = "Login is currently unavailable. Please try again later.",
                 }
             );
+            return;
+        }
+
+        if (ex is InvalidOperationException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
             return;
         }
 
