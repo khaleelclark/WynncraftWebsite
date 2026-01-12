@@ -6,6 +6,7 @@ import GuildMemberList from "./pages/GuildMemberList";
 import Profile from "./pages/Profile";
 import Leaderboard from "./pages/Leaderboard";
 import GuildRaidsBoard from "./pages/GuildRaidsBoard";
+import { RequireAuth } from "./auth/RequireAuth";
 
 export const App = () => {
   const el = (
@@ -17,7 +18,14 @@ export const App = () => {
           <Route path="/" element={<GuildMemberList />} />
           <Route path="/profile/:id" element={<Profile />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/admin" element={<AdminPanel />} />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <AdminPanel />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

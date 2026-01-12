@@ -54,7 +54,7 @@ export const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
   const BACKEND_URL = RSBUILD_PUBLIC_API_URL;
-  
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };

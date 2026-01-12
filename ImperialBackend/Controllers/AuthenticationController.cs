@@ -116,7 +116,8 @@ public class AuthenticationController : ControllerBase
     {
         // Use INTERNAL Authentik URL for backend-to-Authentik communication
         var authentikInternalUrl = Env(config, "AUTHENTIK_INTERNAL_URL");
-        var metadata = $"{authentikInternalUrl}/application/o/imperial-web/.well-known/openid-configuration";
+        var metadata =
+            $"{authentikInternalUrl}/application/o/imperial-web/.well-known/openid-configuration";
 
         _logger.LogInformation("[Auth Status] Checking Authentik at: {MetadataUrl}", metadata);
 
@@ -127,12 +128,15 @@ public class AuthenticationController : ControllerBase
 
             _logger.LogDebug("[Auth Status] Sending request...");
             using var res = await client.GetAsync(metadata, ct);
-            
+
             _logger.LogInformation("[Auth Status] Response status: {StatusCode}", res.StatusCode);
 
             if (!res.IsSuccessStatusCode)
             {
-                _logger.LogWarning("[Auth Status] Authentik returned non-success status: {StatusCode}", res.StatusCode);
+                _logger.LogWarning(
+                    "[Auth Status] Authentik returned non-success status: {StatusCode}",
+                    res.StatusCode
+                );
                 return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
             }
 
@@ -141,7 +145,11 @@ public class AuthenticationController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Auth Status] Failed to connect to Authentik at {MetadataUrl}", metadata);
+            _logger.LogError(
+                ex,
+                "[Auth Status] Failed to connect to Authentik at {MetadataUrl}",
+                metadata
+            );
             return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
         }
     }

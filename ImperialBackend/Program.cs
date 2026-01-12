@@ -195,7 +195,9 @@ var signoutCallbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/signout-callback";
 Console.WriteLine($"[Auth] Callback URL: {callbackUrl}");
 Console.WriteLine($"[Auth] Signout Callback URL: {signoutCallbackUrl}");
 Console.WriteLine($"[Auth] Authority (public): {authentikAuthority}");
-Console.WriteLine($"[Auth] Internal Metadata URL: {authentikInternalIssuer}/.well-known/openid-configuration");
+Console.WriteLine(
+    $"[Auth] Internal Metadata URL: {authentikInternalIssuer}/.well-known/openid-configuration"
+);
 
 builder
     .Services.AddAuthentication(options =>
@@ -218,7 +220,9 @@ builder
             {
                 if (context.Request.Path.StartsWithSegments("/api"))
                 {
-                    Console.WriteLine($"[Auth] API request to {context.Request.Path} - returning 401");
+                    Console.WriteLine(
+                        $"[Auth] API request to {context.Request.Path} - returning 401"
+                    );
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return Task.CompletedTask;
                 }
@@ -283,9 +287,13 @@ builder
                 OnRedirectToIdentityProvider = context =>
                 {
                     Console.WriteLine($"[Auth] OnRedirectToIdentityProvider");
-                    Console.WriteLine($"[Auth] Original IssuerAddress: {context.ProtocolMessage.IssuerAddress}");
-                    Console.WriteLine($"[Auth] Original RedirectUri: {context.ProtocolMessage.RedirectUri}");
-                    
+                    Console.WriteLine(
+                        $"[Auth] Original IssuerAddress: {context.ProtocolMessage.IssuerAddress}"
+                    );
+                    Console.WriteLine(
+                        $"[Auth] Original RedirectUri: {context.ProtocolMessage.RedirectUri}"
+                    );
+
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
@@ -296,8 +304,12 @@ builder
                             context.ProtocolMessage.RedirectUri
                         );
 
-                    Console.WriteLine($"[Auth] Updated IssuerAddress: {context.ProtocolMessage.IssuerAddress}");
-                    Console.WriteLine($"[Auth] Updated RedirectUri: {context.ProtocolMessage.RedirectUri}");
+                    Console.WriteLine(
+                        $"[Auth] Updated IssuerAddress: {context.ProtocolMessage.IssuerAddress}"
+                    );
+                    Console.WriteLine(
+                        $"[Auth] Updated RedirectUri: {context.ProtocolMessage.RedirectUri}"
+                    );
 
                     return Task.CompletedTask;
                 },
@@ -305,7 +317,7 @@ builder
                 OnRedirectToIdentityProviderForSignOut = context =>
                 {
                     Console.WriteLine($"[Auth] OnRedirectToIdentityProviderForSignOut");
-                    
+
                     if (!string.IsNullOrEmpty(context.ProtocolMessage.IssuerAddress))
                         context.ProtocolMessage.IssuerAddress = ToPublicUrl(
                             context.ProtocolMessage.IssuerAddress
@@ -332,7 +344,9 @@ builder
 
                 OnSignedOutCallbackRedirect = context =>
                 {
-                    Console.WriteLine($"[Auth] OnSignedOutCallbackRedirect - Redirecting to frontend");
+                    Console.WriteLine(
+                        $"[Auth] OnSignedOutCallbackRedirect - Redirecting to frontend"
+                    );
                     context.Response.Redirect(frontendUrl);
                     context.HandleResponse();
                     return Task.CompletedTask;
