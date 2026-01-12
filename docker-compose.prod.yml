@@ -116,15 +116,16 @@ services:
     build:
       context: ./ImperialFrontend
       dockerfile: Dockerfile.prod
+      args:
+        BACKEND_URL: ${BACKEND_URL}
+        FRONTEND_URL: ${FRONTEND_URL}
     container_name: imperial_frontend
-    env_file:
-      - ./ImperialFrontend/.env
     environment:
       NODE_ENV: production
     networks:
       - imperial-net
     ports:
-      - "5173:80"
+      - "80:80"
     depends_on:
       - backend
 

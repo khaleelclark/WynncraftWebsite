@@ -24,6 +24,9 @@ import Divider from "@mui/material/Divider";
 import axios from "axios";
 import { useApiErrorSnackbar } from "./ApiErrorSnackbar";
 
+// Declare global variables defined by Rsbuild
+declare const RSBUILD_PUBLIC_API_URL: string;
+
 type HeaderButton = {
   text: string;
   link: string;
@@ -44,14 +47,14 @@ const headerButtons: HeaderButton[] = [
 ];
 
 export const Header = () => {
-  console.log("a", import.meta);
   const navigate = useNavigate();
   const { user } = useUser();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
-  const BACKEND_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:5032";
+  const BACKEND_URL = RSBUILD_PUBLIC_API_URL;
+  
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -114,7 +117,7 @@ export const Header = () => {
             await axios.get("/api/auth/status");
             window.location.href = `${BACKEND_URL}/api/auth/login`;
           } catch (err) {
-            handleError(err); // snackbar
+            handleError(err);
           }
         }}
       >

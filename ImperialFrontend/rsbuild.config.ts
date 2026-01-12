@@ -1,6 +1,7 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
 
+// Read from environment at build time
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:5032";
 const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 
@@ -10,12 +11,10 @@ export default defineConfig({
       index: "./src/index.tsx",
     },
     define: {
-      "process.env.BACKEND_URL": JSON.stringify(
-        process.env.BACKEND_URL ?? "http://localhost:5032"
-      ),
-      "process.env.FRONTEND_URL": JSON.stringify(
-        process.env.FRONTEND_URL ?? "http://localhost:5173"
-      ),
+      // Define as simple global constants that will be replaced at build time
+      RSBUILD_PUBLIC_API_URL: JSON.stringify(BACKEND_URL),
+      RSBUILD_BACKEND_URL: JSON.stringify(BACKEND_URL),
+      RSBUILD_FRONTEND_URL: JSON.stringify(FRONTEND_URL),
     },
   },
   html: {

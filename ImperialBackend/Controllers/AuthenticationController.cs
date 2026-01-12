@@ -10,6 +10,13 @@ namespace ImperialBackend.Controllers;
 [Route("api/auth")]
 public class AuthenticationController : ControllerBase
 {
+    private readonly ILogger<AuthenticationController> _logger;
+
+    public AuthenticationController(ILogger<AuthenticationController> logger)
+    {
+        _logger = logger;
+    }
+
     private static string Env(IConfiguration config, string key)
     {
         var value = config[key];
@@ -107,27 +114,34 @@ public class AuthenticationController : ControllerBase
         CancellationToken ct
     )
     {
-        // In Docker, always hit Authentik by service name.
-        // (Browser never sees this; it's only your backend checking reachability.)
-        const string authentikInternalBase = "http://authentik-server:9000";
+        // Use INTERNAL Authentik URL for backend-to-Authentik communication
+        var authentikInternalUrl = Env(config, "AUTHENTIK_INTERNAL_URL");
+        var metadata = $"{authentikInternalUrl}/application/o/imperial-web/.well-known/openid-configuration";
 
-        var issuerPath = Env(config, "AUTHENTIK_ISSUER_PATH"); // e.g. /application/o/imperial-web/
-        var internalIssuer = CombineUrl(authentikInternalBase, issuerPath);
-        var metadata = $"{internalIssuer}/.well-known/openid-configuration";
+        _logger.LogInformation("[Auth Status] Checking Authentik at: {MetadataUrl}", metadata);
 
         try
         {
             var client = http.CreateClient();
-            client.Timeout = TimeSpan.FromSeconds(2);
+            client.Timeout = TimeSpan.FromSeconds(5);
 
+            _logger.LogDebug("[Auth Status] Sending request...");
             using var res = await client.GetAsync(metadata, ct);
-            if (!res.IsSuccessStatusCode)
-                return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
+            
+            _logger.LogInformation("[Auth Status] Response status: {StatusCode}", res.StatusCode);
 
+            if (!res.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("[Auth Status] Authentik returned non-success status: {StatusCode}", res.StatusCode);
+                return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
+            }
+
+            _logger.LogInformation("[Auth Status] Authentik is healthy");
             return Ok(new { ok = true });
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "[Auth Status] Failed to connect to Authentik at {MetadataUrl}", metadata);
             return StatusCode(503, new { ok = false, error = "AuthProviderUnavailable" });
         }
     }
