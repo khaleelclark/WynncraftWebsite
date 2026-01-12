@@ -70,6 +70,12 @@ Copy-Item "secrets/sqlserver_connection_string.example.txt"        "secrets/sqls
 
 💡 If files already exist and you want to overwrite them, add -Force to Copy-Item.
 
+If there is an issue with the frontend crashing due to not installing node modules try adding the following to your frontend volues:
+
+```
+- /app/node_modules
+```
+
 ```
 Imperial Backend/
 ├── ImperialBackend/         # .NET backend

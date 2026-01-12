@@ -50,6 +50,7 @@ export const Header = () => {
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
+  const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:5032";
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -111,8 +112,7 @@ export const Header = () => {
         onClick={async () => {
           try {
             await axios.get("/api/auth/status");
-            //window.location.href = "/api/auth/login";
-            window.location.href = "http://192.168.4.121:5032/api/auth/login";
+            window.location.href = `${BACKEND_URL}/api/auth/login`;
           } catch (err) {
             handleError(err); // snackbar
           }

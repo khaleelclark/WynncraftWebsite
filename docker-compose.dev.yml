@@ -95,8 +95,11 @@ services:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
       ConnectionStrings__DefaultConnection_FILE: /run/secrets/sqlserver_connection_string
-      Authentik__ClientId: ${CLIENT_ID}
-      Authentik__ClientSecret: ${CLIENT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      BACKEND_URL: ${BACKEND_URL}
+      AUTHENTIK_URL: ${AUTHENTIK_URL}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-raid-rabbit}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-imperial}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-imperial-website}
@@ -115,6 +118,8 @@ services:
       context: ./ImperialFrontend
       dockerfile: Dockerfile.dev
     container_name: imperial_frontend
+    env_file:
+      - .env
     ports:
       - "5173:5173"
     volumes:

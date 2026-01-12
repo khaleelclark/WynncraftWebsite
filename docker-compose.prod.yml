@@ -1,24 +1,128 @@
-# Needs Secrets
 services:
+  postgresql:
+    image: postgres:15
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - imperial-net
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - imperial-net
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:latest
+    restart: unless-stopped
+    command: server
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - ./authentik-data:/media
+      - ./custom-templates:/templates
+    networks:
+      - imperial-net
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:latest
+    restart: unless-stopped
+    command: worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      AUTHENTIK_POSTGRESQL__HOST: postgresql
+      AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
+      AUTHENTIK_POSTGRESQL__USER: ${POSTGRES_USER}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${POSTGRES_PASSWORD}
+      AUTHENTIK_REDIS__HOST: redis
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+    volumes:
+      - ./authentik-data:/media
+      - ./custom-templates:/templates
+    user: root
+    networks:
+      - imperial-net
+
   backend:
     build:
       context: ./ImperialBackend
       dockerfile: Dockerfile.prod
     container_name: imperial_backend
+    env_file:
+      - .env
     environment:
       ASPNETCORE_URLS: "http://+:5032"
-      ASPNETCORE_ENVIRONMENT: "Development"
-      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ImperialDb_New;User Id=sa;Password=SomeStrongPassword123!;Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=True"
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__DefaultConnection_FILE: /run/secrets/sqlserver_connection_string
+      FRONTEND_URL: ${FRONTEND_URL}
+      BACKEND_URL: ${BACKEND_URL}
+      AUTHENTIK_URL: ${AUTHENTIK_URL}
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      RABBITMQ_HOST: ${RABBITMQ_HOST:-raid-rabbit}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-imperial}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-imperial-website}
+      RABBITMQ_QUEUE_RAIDS_COMPLETED: ${RABBITMQ_QUEUE_RAIDS_COMPLETED:-raids.completed.q}
+      RABBITMQ_PASSWORD_FILE: /run/secrets/rabbitmq_website_password
+    secrets:
+      - sqlserver_connection_string
+      - rabbitmq_website_password
     ports:
       - "5032:5032"
     depends_on:
       - db
+    networks:
+      - imperial-net
 
   frontend:
     build:
       context: ./ImperialFrontend
       dockerfile: Dockerfile.prod
     container_name: imperial_frontend
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    networks:
+      - imperial-net
     ports:
       - "5173:80"
     depends_on:
@@ -27,14 +131,30 @@ services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: imperial_db
+    env_file:
+      - .env
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "SomeStrongPassword123!"
+      SA_PASSWORD: ${MSSQL_SA_PASSWORD}
       MSSQL_PID: "Express"
     ports:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
+    networks:
+      - imperial-net
+
+secrets:
+  rabbitmq_website_password:
+    file: ./secrets/rabbitmq_website_password.txt
+
+  sqlserver_connection_string:
+    file: ./secrets/sqlserver_connection_string.txt
 
 volumes:
   sql_data:
+
+networks:
+  imperial-net:
+    external: true
+    name: imperial-net

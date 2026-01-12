@@ -49,6 +49,23 @@ builder.Services.AddSwaggerGen();
 
 builder.Configuration.AddEnvironmentVariables();
 
+static string Env(string name)
+{
+    var value = Environment.GetEnvironmentVariable(name);
+    if (string.IsNullOrWhiteSpace(value))
+        throw new InvalidOperationException(
+            $"{name} is not set (check .env / docker compose env)."
+        );
+    return value.TrimEnd('/');
+}
+
+var frontendUrl = Env("FRONTEND_URL");
+var backendUrl = Env("BACKEND_URL");
+var authentikUrl = Env("AUTHENTIK_URL");
+var clientId = Env("CLIENT_ID");
+var clientSecret = Env("CLIENT_SECRET");
+var issuerPath = Env("AUTHENTIK_ISSUER_PATH");
+
 // Connection string (supports ConnectionStrings__DefaultConnection_FILE)
 var cs = SecretReader.Get("ConnectionStrings__DefaultConnection", required: false);
 if (!string.IsNullOrWhiteSpace(cs))
@@ -180,45 +197,30 @@ builder.Logging.AddConsole();
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
-static string ToPublicUrl(string url)
+string ToPublicUrl(string url)
 {
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    return url.Replace("http://authentik-server:9000", "http://192.168.4.121:9000")
-        .Replace("https://authentik-server:9000", "http://192.168.4.121:9000")
-        .Replace("http://backend:5032", "http://192.168.4.121:5032")
-        .Replace("https://backend:5032", "http://192.168.4.121:5032");
+    return url.Replace("http://authentik-server:9000", authentikUrl)
+        .Replace("https://authentik-server:9000", authentikUrl)
+        .Replace("http://backend:5032", backendUrl)
+        .Replace("https://backend:5032", backendUrl);
 }
 
 /* ============================
  * Authentik / OIDC config
  * ============================ */
 
-var authentikAuthority =
-    builder.Configuration["Authentik:Authority"]
-    ?? throw new InvalidOperationException("Authentik:Authority not configured");
+// Authentik URLs (flat env)
+var authentikAuthority = (authentikUrl.TrimEnd('/') + issuerPath).TrimEnd('/');
 
-// Internal URL is for backchannel metadata fetch from inside Docker.
-var authentikInternalUrl = builder.Configuration["Authentik:InternalUrl"] ?? authentikAuthority;
-
-var clientId =
-    builder.Configuration["Authentik:ClientId"]
-    ?? throw new InvalidOperationException("Authentik:ClientId not configured");
-
-var clientSecret =
-    builder.Configuration["Authentik:ClientSecret"]
-    ?? throw new InvalidOperationException("Authentik:ClientSecret not configured");
-
-// IMPORTANT: Authority should be the server root, e.g. http://localhost:9000
-// NOT /application/o/imperial-web/
-authentikAuthority = authentikAuthority.TrimEnd('/');
-authentikInternalUrl = authentikInternalUrl.TrimEnd('/');
+// Internal issuer (what backend uses to fetch metadata inside Docker)
+var authentikInternalIssuer = ("http://authentik-server:9000" + issuerPath).TrimEnd('/');
 
 // This is the callback URL Authentik must allow, and what the browser can resolve.
-const string publicBackendBaseUrl = "http://192.168.4.121:5032";
-var callbackUrl = $"{publicBackendBaseUrl}/api/auth/callback";
-var signoutCallbackUrl = $"{publicBackendBaseUrl}/api/auth/signout-callback";
+var callbackUrl = $"{backendUrl}/api/auth/callback";
+var signoutCallbackUrl = $"{backendUrl}/api/auth/signout-callback";
 
 builder
     .Services.AddAuthentication(options =>
@@ -285,7 +287,8 @@ builder
             options.MapInboundClaims = false;
 
             // ✅ Backchannel metadata fetch uses internal Docker URL (safe + reliable)
-            options.MetadataAddress = $"{authentikInternalUrl}/.well-known/openid-configuration";
+            //options.MetadataAddress = $"{authentikInternalUrl}/.well-known/openid-configuration";
+            options.MetadataAddress = $"{authentikInternalIssuer}/.well-known/openid-configuration";
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -359,7 +362,7 @@ builder
                 // AFTER LOGOUT CALLBACK
                 OnSignedOutCallbackRedirect = context =>
                 {
-                    context.Response.Redirect("http://192.168.4.121:5173/");
+                    context.Response.Redirect(frontendUrl);
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
@@ -367,7 +370,7 @@ builder
                 // FAILURE
                 OnRemoteFailure = context =>
                 {
-                    context.Response.Redirect("http://192.168.4.121:5173/login?error=auth_failed");
+                    context.Response.Redirect($"{frontendUrl}/login?error=auth_failed");
                     context.HandleResponse();
                     return Task.CompletedTask;
                 },
@@ -428,13 +431,6 @@ app.Map(
             return;
         }
 
-        if (ex is InvalidOperationException)
-        {
-            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
-            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
-            return;
-        }
-
         if (ex is SqlException)
         {
             ctx.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
@@ -458,6 +454,13 @@ app.Map(
                     message = "Login is currently unavailable. Please try again later.",
                 }
             );
+            return;
+        }
+
+        if (ex is InvalidOperationException)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status409Conflict;
+            await ctx.Response.WriteAsJsonAsync(new { error = "Conflict", message = ex.Message });
             return;
         }
 
