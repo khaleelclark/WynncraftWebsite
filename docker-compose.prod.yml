@@ -138,8 +138,6 @@ services:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: ${MSSQL_SA_PASSWORD}
       MSSQL_PID: "Express"
-    ports:
-      - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
     networks:

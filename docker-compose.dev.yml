@@ -3,7 +3,7 @@ services:
     image: postgres:15
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.dev
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -39,7 +39,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.dev
     environment:
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
@@ -66,7 +66,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.dev
     environment:
       AUTHENTIK_POSTGRESQL__HOST: postgresql
       AUTHENTIK_POSTGRESQL__NAME: ${POSTGRES_DB}
@@ -90,7 +90,7 @@ services:
     ports:
       - "5032:5032"
     env_file:
-      - .env
+      - .env.dev
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
@@ -119,7 +119,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: imperial_frontend
     env_file:
-      - .env
+      - .env.dev
     ports:
       - "5173:5173"
     volumes:
@@ -134,7 +134,7 @@ services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     env_file:
-      - .env
+      - .env.dev
     environment:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: ${MSSQL_SA_PASSWORD}

@@ -26,6 +26,12 @@ From the project root run the docker container using the following
 docker compose -f docker-compose.dev.yml up --build
 ```
 
+Note- if running in dev use the follwoing command to ensure proper .env vars are being passed
+
+```
+docker compose --env-file .env.dev -f docker-compose.dev.yml up --build
+```
+
 To copy secret files and .env file, do the following and edit them with the correct values
 
 Initial Setup (Secrets & Environment Files)

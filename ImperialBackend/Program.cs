@@ -257,7 +257,7 @@ builder
             options.CallbackPath = "/api/auth/callback";
             options.SignedOutCallbackPath = "/api/auth/signout-callback";
 
-            options.RequireHttpsMetadata = false;
+            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
             options.MapInboundClaims = false;
 
             // CRITICAL: Use internal URL for metadata fetching
@@ -273,13 +273,17 @@ builder
             options.CorrelationCookie.Name = "imperial.oidc.correlation";
             options.CorrelationCookie.HttpOnly = true;
             options.CorrelationCookie.SameSite = SameSiteMode.Lax;
-            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.CorrelationCookie.SecurePolicy = builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
 
             options.NonceCookie.Name = "imperial.oidc.nonce";
             options.NonceCookie.HttpOnly = true;
             options.NonceCookie.SameSite = SameSiteMode.Lax;
-            options.NonceCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.NonceCookie.SecurePolicy = builder.Environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
             options.NonceCookie.Expiration = TimeSpan.FromMinutes(15);
 
             options.Events = new OpenIdConnectEvents
