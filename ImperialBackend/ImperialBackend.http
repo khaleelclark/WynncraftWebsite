@@ -1,6 +1,0 @@
-@ImperialBackend_HostAddress = http://localhost:5032
-
-GET {{ImperialBackend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -44,14 +44,14 @@ const headerButtons: HeaderButton[] = [
 ];
 
 export const Header = () => {
+  console.log("a", import.meta);
   const navigate = useNavigate();
   const { user } = useUser();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
-  const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:5032";
-
+  const BACKEND_URL = import.meta.env.PUBLIC_API_URL ?? "http://localhost:5032";
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };

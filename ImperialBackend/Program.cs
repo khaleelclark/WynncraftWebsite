@@ -65,6 +65,8 @@ var authentikUrl = Env("AUTHENTIK_URL");
 var clientId = Env("CLIENT_ID");
 var clientSecret = Env("CLIENT_SECRET");
 var issuerPath = Env("AUTHENTIK_ISSUER_PATH");
+var authentikInternalUrl = Env("AUTHENTIK_INTERNAL_URL");
+var backendInternalUrl = Env("BACKEND_INTERNAL_URL");
 
 // Connection string (supports ConnectionStrings__DefaultConnection_FILE)
 var cs = SecretReader.Get("ConnectionStrings__DefaultConnection", required: false);
@@ -202,10 +204,7 @@ string ToPublicUrl(string url)
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    return url.Replace("http://authentik-server:9000", authentikUrl)
-        .Replace("https://authentik-server:9000", authentikUrl)
-        .Replace("http://backend:5032", backendUrl)
-        .Replace("https://backend:5032", backendUrl);
+    return url.Replace(authentikInternalUrl, authentikUrl).Replace(backendInternalUrl, backendUrl);
 }
 
 /* ============================
@@ -213,14 +212,15 @@ string ToPublicUrl(string url)
  * ============================ */
 
 // Authentik URLs (flat env)
-var authentikAuthority = (authentikUrl.TrimEnd('/') + issuerPath).TrimEnd('/');
+var authentikAuthority = issuerPath.TrimEnd('/');
 
 // Internal issuer (what backend uses to fetch metadata inside Docker)
-var authentikInternalIssuer = ("http://authentik-server:9000" + issuerPath).TrimEnd('/');
+var authentikInternalIssuer = issuerPath.TrimEnd('/');
 
 // This is the callback URL Authentik must allow, and what the browser can resolve.
-var callbackUrl = $"{backendUrl}/api/auth/callback";
-var signoutCallbackUrl = $"{backendUrl}/api/auth/signout-callback";
+var callbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/callback";
+var signoutCallbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/signout-callback";
+Console.WriteLine($"[Auth] Callback URL: {callbackUrl}");
 
 builder
     .Services.AddAuthentication(options =>
@@ -283,7 +283,9 @@ builder
             options.CallbackPath = "/api/auth/callback";
             options.SignedOutCallbackPath = "/api/auth/signout-callback";
 
-            options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+            //options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+            options.RequireHttpsMetadata = false;
+
             options.MapInboundClaims = false;
 
             // ✅ Backchannel metadata fetch uses internal Docker URL (safe + reliable)

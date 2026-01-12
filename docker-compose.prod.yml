@@ -90,7 +90,7 @@ services:
       - .env
     environment:
       ASPNETCORE_URLS: "http://+:5032"
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection_FILE: /run/secrets/sqlserver_connection_string
       FRONTEND_URL: ${FRONTEND_URL}
       BACKEND_URL: ${BACKEND_URL}
@@ -118,7 +118,7 @@ services:
       dockerfile: Dockerfile.prod
     container_name: imperial_frontend
     env_file:
-      - .env
+      - ./ImperialFrontend/.env
     environment:
       NODE_ENV: production
     networks:
