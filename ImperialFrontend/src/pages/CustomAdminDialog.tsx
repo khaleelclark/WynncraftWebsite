@@ -23,7 +23,7 @@ export const CustomAdminDialog = ({
       onClose();
     }}
     disableEscapeKeyDown
-    maxWidth="lg"
+    maxWidth="xl"
     fullWidth
     slotProps={{
       paper: {
