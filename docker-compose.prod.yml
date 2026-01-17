@@ -126,6 +126,10 @@ services:
       - imperial-net
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ./ImperialFrontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      #- /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
 

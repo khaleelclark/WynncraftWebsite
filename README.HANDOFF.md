@@ -10,6 +10,8 @@ This checklist is for handing the project to someone else to host and run in pro
 
 - A public domain with DNS control
 
+- SSMS (or equivalent to import via .bacpac) OR sqlpackage installed.
+
 ## 2) DNS setup
 
 Create DNS records pointing to the server IP:
@@ -28,25 +30,11 @@ MAC OS/Linux
 
 cp .env.example .env
 
-cp RabbitMQ/secrets/rabbitmq_admin_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_admin_password.txt
-
-cp RabbitMQ/secrets/rabbitmq_website_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_website_password.txt
-
-cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_raidbot_password.txt
-
-cp secrets/rabbitmq_website_password.example.txt \
-
-secrets/rabbitmq_website_password.txt
-
-cp secrets/sqlserver_connection_string.example.txt \
-
-secrets/sqlserver_connection_string.txt
+cp RabbitMQ/secrets/rabbitmq_admin_password.example.txt RabbitMQ/secrets/rabbitmq_admin_password.txt
+cp RabbitMQ/secrets/rabbitmq_website_password.example.txt RabbitMQ/secrets/rabbitmq_website_password.txt
+cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt RabbitMQ/secrets/rabbitmq_raidbot_password.txt
+cp secrets/rabbitmq_website_password.example.txt secrets/rabbitmq_website_password.txt
+cp secrets/sqlserver_connection_string.example.txt secrets/sqlserver_connection_string.txt
 
 ```
 
@@ -89,7 +77,7 @@ Populate values in `.env`:
 
 - `CLIENT_ID` and `CLIENT_SECRET` will be created in Authentik later
 
-- SQL Server: set `MSSQL_SA_PASSWORD`
+- SQL Server: set `MSSQL_SA_PASSWORD` (this will be your sa password, not what the website will use)
 
 - RabbitMQ: set `RABBITMQ_HOST`, `RABBITMQ_VHOST`, `RABBITMQ_USERNAME` if deviating from defaults
 
@@ -123,11 +111,7 @@ docker network ls | rg imperial-net
 
 # STEP-BY-STEP: After you export the BACPAC
 
-## Step 1 — Import the BACPAC (admin credentials)
-
-### 🔐 **Which credentials are used here?**
-
-**`sa` (or another sysadmin login)**
+## Step 1 — Import the BACPAC (using the admin credentials you set in the `.env` file)
 
 You **must** use an admin-level login to import a bacpac. T
 
@@ -145,11 +129,12 @@ Example with `sqlpackage`:
 ```
 sqlpackage \
   /Action:Import \
-  /SourceFile:ImperialDb_New.bacpac \
-  /TargetServerName:localhost \
+  /SourceFile:/home/<path-to-your-file>/Imperial_Db_New.bacpac \
+  /TargetServerName:db,1433 \
   /TargetDatabaseName:ImperialDb_New \
   /TargetUser:sa \
-  /TargetPassword:YOUR_SA_PASSWORD
+  /TargetPassword:'YOUR_SA_PASSWORD' \
+  /TargetTrustServerCertificate:True
 ```
 
 ---
@@ -264,21 +249,9 @@ Services included:
 
 - Frontend (Nginx + static assets)
 
-## 7) Authentik initial setup
+## 7) Authentik initial setup (Refer to Authentik Setup Packet)
 
-1. Open `http://auth.yourdomain.com` and complete the Authentik setup wizard.
-
-2. Create an OIDC provider/app named `imperial-web`.
-
-3. Set redirect URIs:
-
-- `http://yourdomain.com/api/auth/callback`
-
-- `http://yourdomain.com/api/auth/signout-callback`
-
-4. Ensure the `groups` claim includes `admins` for users who should access admin pages.
-
-5. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and restart the stack:
+1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and restart the stack:
 
 ```bash
 
@@ -301,16 +274,6 @@ Options:
 - Frontend: `http://yourdomain.com`
 
 - Authentik: `http://auth.yourdomain.com`
-
-- Backend API: `http://yourdomain.com/api/health` (if you have a health route)
-
-## 10) TLS (recommended)
-
-If you need HTTPS, add a reverse proxy (Caddy, Nginx, Traefik) in front of the stack or extend the Nginx container to serve TLS certificates.
-
----
-
-Notes:
 
 - `docker-compose.prod.yml` expects the `imperial-net` network created by the RabbitMQ compose file.
 

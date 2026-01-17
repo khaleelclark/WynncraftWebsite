@@ -170,7 +170,7 @@ export const GenericAdminPage = ({
 
   const updateRecord = (updatedRecord: any) => {
     setMembers(prev =>
-      prev.map(item => (item.id === updatedRecord.id ? updatedRecord : item))
+      prev.map(item => (item.id === updatedRecord.id ? updatedRecord : item)),
     );
     setOpenUpdateDialog(false);
   };

@@ -91,7 +91,6 @@ const Profile: React.FC = () => {
         {SnackbarElement}
         <Box
           sx={{
-            p: 3,
             display: "flex",
             justifyContent: "center",
             bgcolor: "background.default",
@@ -110,7 +109,6 @@ const Profile: React.FC = () => {
               bgcolor: "background.paper",
               color: "text.primary",
               borderRadius: 3,
-              transform: "scale(1.1)",
               transformOrigin: "top center",
               border: theme => `1px solid ${theme.palette.divider}`,
               boxShadow: "0 16px 40px rgba(0,0,0,0.55)",
