@@ -53,6 +53,7 @@ export const Header = () => {
   const open = Boolean(anchorEl);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
+  // Public backend URL injected at build time (used for auth redirects).
   const BACKEND_URL = RSBUILD_PUBLIC_API_URL;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -64,6 +65,7 @@ export const Header = () => {
   const nickname =
     user?.claims?.find((c: any) => c.type === "nickname")?.value ?? "User";
 
+  // Hide auth-only destinations for anonymous users.
   const availableButtons = headerButtons.filter(
     button => !(button.requiresAuth && !user?.isAuthenticated)
   );
@@ -114,6 +116,7 @@ export const Header = () => {
         color="primary"
         onClick={async () => {
           try {
+            // Verify Auth provider health before redirecting to SSO.
             await axios.get("/api/auth/status");
             window.location.href = `${BACKEND_URL}/api/auth/login`;
           } catch (err) {

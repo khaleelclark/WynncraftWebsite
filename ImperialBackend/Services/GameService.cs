@@ -19,6 +19,7 @@ public class GameService : IGameService
 
     public async Task<GenericGetDTO> CreateAsync(GenericPostDTO dto)
     {
+        // Enforce unique game names.
         if (await _context.Games.AnyAsync(g => g.GameName == dto.Name))
             throw new InvalidOperationException("Game already exists");
 
@@ -34,6 +35,7 @@ public class GameService : IGameService
     {
         var game = await _context.Games.FindAsync(id) ?? throw new KeyNotFoundException();
 
+        // Only name is editable.
         game.GameName = dto.Name;
         await _context.SaveChangesAsync();
 
@@ -42,6 +44,7 @@ public class GameService : IGameService
 
     public async Task DeleteAsync(int id)
     {
+        // Prevent deleting games still referenced by members.
         var refs = await _context.GuildMemberGames.AsNoTracking().CountAsync(g => g.GameId == id);
 
         if (refs > 0)

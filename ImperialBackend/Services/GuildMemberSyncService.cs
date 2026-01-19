@@ -44,6 +44,7 @@ namespace ImperialBackend.Services
                     await SyncGuildMembersFromApis(stoppingToken);
 
                     var now = DateTimeOffset.UtcNow;
+                    // Run nightly stats once per UTC day, near midnight.
                     if (now.Hour == 0 && (now - lastNightlySync).TotalHours > 23)
                     {
                         await SyncNightlyStats(stoppingToken);
@@ -104,6 +105,7 @@ namespace ImperialBackend.Services
             await using var db = await dbFactory.CreateDbContextAsync(stoppingToken);
 
             // IMPORTANT: This query will throw SqlException when DB is down — now caught in ExecuteAsync
+            // Batch the oldest synced members first to distribute API load fairly.
             var membersToSync = await db
                 .GuildMembers.Where(m => m.Uuid != Guid.Empty)
                 .OrderBy(m => m.LastSynced ?? DateTimeOffset.MinValue)
@@ -123,6 +125,7 @@ namespace ImperialBackend.Services
                 // Mojang profile lookup
                 try
                 {
+                    // Mojang returns canonical UUID and current username.
                     var uuidResponse = await http.GetAsync(
                         $"https://api.minecraftservices.com/minecraft/profile/lookup/{member.Uuid}",
                         stoppingToken
@@ -161,6 +164,7 @@ namespace ImperialBackend.Services
                 {
                     if (member.Uuid != Guid.Empty)
                     {
+                        // Wynncraft supplies playtime, wars, and guild rank.
                         var wynnResponse = await http.GetAsync(
                             $"https://api.wynncraft.com/v3/player/{member.Uuid}",
                             stoppingToken
@@ -211,11 +215,13 @@ namespace ImperialBackend.Services
                     );
                 }
 
+                // Mark as synced even if one of the APIs failed.
                 member.LastSynced = DateTimeOffset.UtcNow;
             }
 
             try
             {
+                // Persist all member updates in one transaction.
                 await db.SaveChangesAsync(stoppingToken);
             }
             catch (DbUpdateConcurrencyException)

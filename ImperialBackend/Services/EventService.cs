@@ -14,6 +14,7 @@ public class EventService : IEventService
     public async Task<List<EventGetDTO>> GetAllAsync() =>
         await _context
             .Events.AsNoTracking()
+            // Read-only projection for list views.
             .Select(e => new EventGetDTO
             {
                 Id = e.EventId,
@@ -30,6 +31,7 @@ public class EventService : IEventService
         if (ev == null)
             throw new KeyNotFoundException();
 
+        // Map entity to DTO for API output.
         return new EventGetDTO
         {
             Id = ev.EventId,
@@ -41,6 +43,7 @@ public class EventService : IEventService
 
     public async Task<EventGetDTO> CreateAsync(EventPostDTO dto)
     {
+        // Create and persist a new event record.
         var ev = new Event
         {
             EventName = dto.Name,
@@ -64,6 +67,7 @@ public class EventService : IEventService
     {
         var ev = await _context.Events.FindAsync(id) ?? throw new KeyNotFoundException();
 
+        // Update name and date bounds.
         ev.EventName = dto.Name;
         ev.EventStart = dto.EventStart;
         ev.EventEnd = dto.EventEnd;
@@ -81,6 +85,7 @@ public class EventService : IEventService
 
     public async Task DeleteAsync(int id)
     {
+        // Delete is allowed only for existing events.
         var ev = await _context.Events.FindAsync(id) ?? throw new KeyNotFoundException();
 
         _context.Events.Remove(ev);

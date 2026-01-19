@@ -25,6 +25,7 @@ const GuildMemberList: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Public roster for the landing page.
     axios
       .get("/api/guildmembers/public")
       .then(res => setMembers(res.data))
@@ -48,6 +49,7 @@ const GuildMemberList: React.FC = () => {
       headerAlign: "center",
       renderCell: (params: any) => (
         <Box
+          // Clicking the avatar/name navigates to the profile view.
           onClick={() => navigate(`/profile/${params.row.id}`)}
           sx={{
             display: "flex",

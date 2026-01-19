@@ -53,6 +53,7 @@ export const CustomForm = ({
   };
 
   const flattenObject = (obj: any) => {
+    // Convert nested objects/arrays into id lists so the API receives flat payloads.
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => {
         // 🔹 If it's an array, flatten each element the same way you flatten objects
@@ -80,6 +81,7 @@ export const CustomForm = ({
   };
 
   const handleSubmit = async () => {
+    // Normalize data before sending to match DTO shapes in the API.
     const flattenFormValues = flattenObject(formValues);
     const action: FormAction = isPost ? "create" : "update";
 

@@ -32,6 +32,7 @@ const Leaderboard: React.FC = () => {
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
+  // Sentinel ids: -1 = all time, -2 = custom range.
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
     name: "All Time",
@@ -56,6 +57,7 @@ const Leaderboard: React.FC = () => {
             width: "100%",
             cursor: "pointer",
           }}
+          // Click through to the member profile.
           onClick={() => navigate(`/profile/${params.row.id}`)}
         >
           <img
@@ -122,6 +124,7 @@ const Leaderboard: React.FC = () => {
   ];
 
   const getLeaderboard = () => {
+    // Avoid requests until both bounds are set.
     if (!startDateTime || !endDateTime) return;
 
     axios
@@ -147,6 +150,7 @@ const Leaderboard: React.FC = () => {
       return;
     }
 
+    // Pre-fill date range for standard events.
     if (selectedEvent?.eventStart && selectedEvent?.eventEnd) {
       setStartDateTime(dayjs(selectedEvent.eventStart));
       setEndDateTime(dayjs(selectedEvent.eventEnd));
@@ -154,6 +158,7 @@ const Leaderboard: React.FC = () => {
   }, [selectedEvent]);
 
   useEffect(() => {
+    // Fetch once date range changes.
     if (startDateTime && endDateTime) getLeaderboard();
   }, [startDateTime, endDateTime]);
 

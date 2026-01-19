@@ -14,6 +14,7 @@ export const CustomTimeAndDateSelector = ({
   const showError = touched && formValidations?.[id] === false;
 
   useEffect(() => {
+    // Initialize validation state for required datetime field.
     register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
   }, []);
 
@@ -23,6 +24,7 @@ export const CustomTimeAndDateSelector = ({
       value={dayjs(formValues?.[id])}
       onChange={(newValue: Dayjs | null) => {
         const validated = !!newValue && newValue.isValid();
+        // Store as ISO-8601 string for API compatibility.
         register?.(id, newValue ? newValue.toISOString() : "", validated);
         setTouched(true);
       }}

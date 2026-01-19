@@ -24,6 +24,7 @@ public class RaidService : IRaidService
 
     public async Task<RaidGetDTO> CreateAsync(RaidPostDTO dto)
     {
+        // Prevent duplicate ids in the source data.
         var exists = await _context.Raids.AnyAsync(r => r.RaidId == dto.Id);
         if (exists)
             throw new InvalidOperationException($"Raid with id {dto.Id} already exists.");
@@ -65,6 +66,7 @@ public class RaidService : IRaidService
 
     public async Task DeleteAsync(int id)
     {
+        // Block deletion if any completion records reference the raid.
         var refs = await _context.RaidsCompleted.AsNoTracking().CountAsync(ri => ri.RaidId == id);
 
         if (refs > 0)

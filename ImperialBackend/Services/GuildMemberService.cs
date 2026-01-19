@@ -19,11 +19,13 @@ namespace ImperialBackend.Services
 
         public async Task<GuildMemberAdminGetDTO> CreateAsync(GuildMemberPostDTO dto)
         {
+            // Validate the rank and any referenced ids before insert.
             if (!await _context.Ranks.AnyAsync(r => r.RankId == dto.Rank))
                 throw new InvalidOperationException("Invalid RankId");
 
             await ValidateIdsAsync(dto);
 
+            // Build the member plus many-to-many join rows.
             var member = new GuildMember
             {
                 MainUsername = dto.Name,
@@ -53,6 +55,7 @@ namespace ImperialBackend.Services
 
         public async Task<GuildMemberAdminGetDTO> UpdateAsync(int id, GuildMemberPostDTO dto)
         {
+            // Validate referenced ids so we can return clean errors to the UI.
             await ValidateIdsAsync(dto);
 
             var member = await _context
@@ -69,6 +72,7 @@ namespace ImperialBackend.Services
             member.RankId = dto.Rank;
             member.Uuid = dto.Uuid;
 
+            // Sync join tables to match the requested medals/games.
             SyncCollection(
                 member.Medals,
                 dto.Medals,
@@ -94,6 +98,7 @@ namespace ImperialBackend.Services
 
         public async Task<List<GuildMemberPublicGetDTO>> GetAllPublicAsync()
         {
+            // Public list is minimal to avoid exposing admin-only fields.
             return await _context
                 .GuildMembers.AsNoTracking()
                 .Include(m => m.Rank)
@@ -129,6 +134,7 @@ namespace ImperialBackend.Services
 
         public async Task<List<GuildMemberAdminGetDTO>> GetAllAdminAsync()
         {
+            // Admin list includes full navigation data for editing.
             var members = await _context
                 .GuildMembers.AsNoTracking()
                 .Include(m => m.Rank)
@@ -147,6 +153,7 @@ namespace ImperialBackend.Services
 
         public async Task<GuildMemberProfileGetDTO> GetByIdAsync(int id)
         {
+            // Load full profile details for the public profile page.
             var member = await _context
                 .GuildMembers.AsNoTracking()
                 .Include(m => m.PlayerHistoricalStats)
@@ -162,10 +169,12 @@ namespace ImperialBackend.Services
 
             var oldest = member.PlayerHistoricalStats.OrderBy(s => s.SyncDate).FirstOrDefault();
 
+            // Use raid instance overlap to compute "top partners" for this member.
             var memberRaidIds = _context
                 .RaidInstances.Where(ri => ri.GuildMemberId == member.GuildMemberId)
                 .Select(ri => ri.RaidCompletedId);
 
+            // Compute top partners by shared raid instances in descending order.
             var topRaidPartners = await _context
                 .RaidInstances.AsNoTracking()
                 .Where(ri => memberRaidIds.Contains(ri.RaidCompletedId))
@@ -200,6 +209,7 @@ namespace ImperialBackend.Services
                 WynncraftRank = member.WynncraftRank,
                 Uuid = member.Uuid,
                 RankName = member.Rank!.RankName,
+                // Compare oldest snapshot to current totals to get period deltas.
                 WarsCompleted = oldest == null ? 0 : member.WarsCompleted - oldest.WarsCompleted,
                 HoursPlayed = oldest == null ? 0 : member.HoursPlayed - oldest.HoursPlayed,
                 RaidsCompleted = await _context.RaidInstances.CountAsync(ri =>
@@ -221,10 +231,12 @@ namespace ImperialBackend.Services
             DateTimeOffset endDate
         )
         {
+            // Load members and their historical stats to compute deltas.
             var members = await _context
                 .GuildMembers.Include(m => m.PlayerHistoricalStats)
                 .ToListAsync();
 
+            // Precompute raid counts in the window to avoid per-member queries.
             var raidCounts = await _context
                 .RaidInstances.Where(ri =>
                     ri.RaidCompleted != null
@@ -239,6 +251,8 @@ namespace ImperialBackend.Services
 
             foreach (var m in members)
             {
+                // Build a time-ordered list so we can compute the delta between
+                // the earliest snapshot and the latest (current) totals.
                 var stats = m
                     .PlayerHistoricalStats.Where(s =>
                         s.SyncDate >= startDate && s.SyncDate <= endDate
@@ -260,6 +274,7 @@ namespace ImperialBackend.Services
 
                 if (stats.Count >= 2)
                 {
+                    // Delta between first and last in-range snapshots.
                     wars = stats.Last().WarsCompleted - stats.First().WarsCompleted;
                     hours = stats.Last().HoursPlayed - stats.First().HoursPlayed;
                 }
@@ -303,6 +318,7 @@ namespace ImperialBackend.Services
 
         private async Task ValidateIdsAsync(GuildMemberPostDTO dto)
         {
+            // Validate join-table ids for medals and games.
             if (dto.Medals?.Any() == true)
             {
                 var valid = await _context.Medals.Select(m => m.MedalId).ToListAsync();
@@ -360,11 +376,13 @@ namespace ImperialBackend.Services
         {
             targetIds ??= Enumerable.Empty<int>();
 
+            // Remove items no longer present in the target set.
             foreach (var item in existing.Where(e => !targetIds.Contains(getId(e))).ToList())
                 existing.Remove(item);
 
             var existingIds = existing.Select(getId).ToHashSet();
 
+            // Add any new items that are missing.
             foreach (var id in targetIds.Where(id => !existingIds.Contains(id)))
                 existing.Add(factory(id));
         }

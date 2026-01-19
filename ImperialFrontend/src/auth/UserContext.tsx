@@ -24,6 +24,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<AuthMe | null>(null);
 
   useEffect(() => {
+    // Fetch current session; anonymous users return isAuthenticated=false.
     axios
       .get<AuthMe>("/api/auth/me")
       .then(res => {

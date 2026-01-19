@@ -57,6 +57,7 @@ const Profile: React.FC = () => {
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
+    // Load profile data for the selected member id.
     axios
       .get(`/api/guildmembers/${id}`)
       .then(res => {
@@ -207,6 +208,7 @@ const Profile: React.FC = () => {
                 Last Updated
               </Typography>
               <Typography variant="body1">
+                {/* Display last sync in a consistent local format. */}
                 {profile.lastSynced
                   ? dayjs(profile.lastSynced).format("YYYY-MM-DD hh:mm A")
                   : "Has not synced yet"}
@@ -288,6 +290,7 @@ const Profile: React.FC = () => {
               {profile.topRaidPartners && profile.topRaidPartners.length > 0 ? (
                 <Grid container spacing={2}>
                   {profile.topRaidPartners.map((p, index) => {
+                    // Medal is purely visual ranking for the top 3 entries.
                     const medal = medals[index];
                     return (
                       <Grid

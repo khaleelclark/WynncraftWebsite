@@ -19,6 +19,7 @@ public class MedalService : IMedalService
 
     public async Task<GenericGetDTO> CreateAsync(GenericPostDTO dto)
     {
+        // Simple create; no uniqueness constraint enforced here.
         var medal = new Medal { MedalName = dto.Name };
         _context.Medals.Add(medal);
         await _context.SaveChangesAsync();
@@ -30,6 +31,7 @@ public class MedalService : IMedalService
     {
         var medal = await _context.Medals.FindAsync(id) ?? throw new KeyNotFoundException();
 
+        // Only name is editable.
         medal.MedalName = dto.Name;
         await _context.SaveChangesAsync();
 
@@ -38,6 +40,7 @@ public class MedalService : IMedalService
 
     public async Task DeleteAsync(int id)
     {
+        // Prevent deleting medals that are still assigned to members.
         var refs = await _context.GuildMemberMedals.AsNoTracking().CountAsync(m => m.MedalId == id);
 
         if (refs > 0)

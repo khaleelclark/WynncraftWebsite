@@ -35,6 +35,7 @@ namespace ImperialBackend.Controllers
             [FromQuery] DateTimeOffset? endDate
         )
         {
+            // Public endpoint supports optional date range filtering.
             var raids = await _service.GetAllPublicAsync(startDate, endDate);
             return Ok(raids);
         }

@@ -15,7 +15,7 @@ export function useApiErrorSnackbar() {
 
     const data = err.response?.data as any;
 
-    // Prefer explicit backend message
+    // Prefer explicit backend message for domain-specific errors.
     if (typeof data?.message === "string" && data.message.trim())
       return data.message;
 
@@ -27,12 +27,14 @@ export function useApiErrorSnackbar() {
       }
     }
 
+    // Network-level failures (no HTTP response).
     if (!err.response) {
       return navigator.onLine
         ? "Can’t reach the server right now."
         : "You appear to be offline.";
     }
 
+    // HTTP status fallbacks when no specific message is present.
     switch (err.response.status) {
       case 504:
         return "Unable to reach server. Please try again later.";
@@ -59,12 +61,12 @@ export function useApiErrorSnackbar() {
 
   const handleError = (
     err: unknown,
-    opts?: { prefix?: string; fallback?: string }
+    opts?: { prefix?: string; fallback?: string },
   ) => {
     const base = getErrorMessage(err);
     const msg = opts?.prefix
       ? `${opts.prefix}: ${base}`
-      : opts?.fallback ?? base;
+      : (opts?.fallback ?? base);
 
     show(msg, "error");
   };
