@@ -55,7 +55,7 @@ Copy-Item "secrets/sqlserver_connection_string.example.txt"        "secrets/sqls
 
 💡 If files already exist and you want to overwrite them, add -Force to Copy-Item.
 
-If there is an issue with the frontend crashing due to not installing node modules try adding the following to your frontend volues:
+If there is an issue with the frontend crashing due to not installing node modules try adding the following to your frontend volumes:
 
 ```
 - /app/node_modules
@@ -77,7 +77,7 @@ Populate values in `.env`:
 
 - `CLIENT_ID` and `CLIENT_SECRET` will be created in Authentik later
 
-- SQL Server: set `MSSQL_SA_PASSWORD` (this will be your sa password, not what the website will use)
+- SQL Server: set `MSSQL_SA_PASSWORD` (this will be your `sa` password, not what the website will use)
 
 - RabbitMQ: set `RABBITMQ_HOST`, `RABBITMQ_VHOST`, `RABBITMQ_USERNAME` if deviating from defaults
 
@@ -109,13 +109,9 @@ docker network ls | rg imperial-net
 
 ## 4a) Import Database (BACPAC)
 
-# STEP-BY-STEP: After you export the BACPAC
+### Step 1 — Import the BACPAC (using the admin credentials you set in the `.env` file)
 
-## Step 1 — Import the BACPAC (using the admin credentials you set in the `.env` file)
-
-You **must** use an admin-level login to import a bacpac. T
-
-import it “like normal”\*\*.
+You **must** use an admin-level login to import a bacpac.
 
 Examples (pick one):
 
@@ -137,46 +133,68 @@ sqlpackage \
   /TargetTrustServerCertificate:True
 ```
 
+After this step:
+
+- Database exists
+- Schema and data imported
+- Application login does not exist yet (this is expected)
+
 ---
 
-## Step 2 — Create the app user (still admin-only, one-time)
+### Step 2 — Create the application database user (one-time)
 
-Now you immediately run **one SQL script** using **admin credentials** (`sa`).
+After importing the BACPAC, you must create the application login used by the website.
+
+This is done by running one SQL script using administrator credentials (`sa`).
 
 This script:
 
-- creates a **server login**
-- maps it to a **database user**
-- grants **least privilege**
+- creates the server login
+- updates its password if re-run
+- maps it to the database
+- grants least-privilege access
 
-### 🔐 Credentials used
+🔐 Credentials used
 
-Still **`sa`**  
-(This is the _last time_ you’ll use it unless something breaks.)
+Still `sa`
+(This is the last time `sa` is used unless something breaks.)
 
-### 📄 Script to run (copy/paste safe)
+📄 Script to run
 
-```
--- Create server login (run at server scope)
+Open SSMS / Azure Data Studio, connect as `sa`, then run:
+
+```sql
+-- ============================================================
+-- Imperial Website - Application Login Setup
+-- Run once as SQL Server administrator (`sa`)
+-- Safe to re-run
+-- ============================================================
+
+-- Create or update server login
 IF NOT EXISTS (
     SELECT 1 FROM sys.server_principals WHERE name = N'imperial_app'
 )
 BEGIN
     CREATE LOGIN [imperial_app]
-    WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
+        WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
+END
+ELSE
+BEGIN
+    ALTER LOGIN [imperial_app]
+        WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
 END
 GO
 
 USE [ImperialDb_New];
 GO
 
--- Create database user (if missing)
+-- Create database user
 IF NOT EXISTS (
     SELECT 1 FROM sys.database_principals WHERE name = N'imperial_app'
 )
 BEGIN
     CREATE USER [imperial_app]
-    FOR LOGIN [imperial_app];
+        FOR LOGIN [imperial_app];
 END
 GO
 
@@ -188,36 +206,44 @@ GO
 
 ### What this user can do
 
-✅ Read/write data  
-❌ Cannot change schema  
-❌ Cannot drop tables  
-❌ Cannot touch other databases  
-❌ Cannot administer SQL Server
+| Capability             | Allowed |
+| ---------------------- | ------- |
+| Read data              | ✅      |
+| Write data             | ✅      |
+| Alter schema           | ❌      |
+| Drop tables            | ❌      |
+| Access other databases | ❌      |
+| Administer SQL Server  | ❌      |
 
-This is what your **website will use**.
+This is the account used by the website at runtime.
 
----
+### Step 3 — Configure runtime database access
 
-## Step 3 — Lock in the runtime credentials (no admin from here on)
-
-Now you create the **runtime connection string** for the backend:
+Create the backend SQL connection string using the imperial_app credentials:
 
 `Server=db,1433; Database=ImperialDb_New; User Id=imperial_app; Password=STRONG_RANDOM_PASSWORD_HERE; Encrypt=False; TrustServerCertificate=True;`
 
-Put this in:
+Put this into:
 
-- `sqlserver_connection_string.txt`
-- Docker secret
-- Whatever your backend already expects
+secrets/sqlserver_connection_string.txt
 
-### 🔐 Credentials used from now on
+This file is mounted as a Docker secret and read by the backend at startup.
 
-❌ NOT `sa`  
-✅ ONLY `imperial_app`
+Credentials used from this point forward:
 
-`docker compose -f docker-compose.prod.yml up --build`
+✅ imperial_app
+
+⚠️ Important note
+If you change the imperial_app password in SQL Server later, you must also update the SQL connection string secret to match.
+
+Next run:
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
 
 The app connects using `imperial_app`.
+The backend container will fail to start if the password does not match.
 
 ## 5) Update frontend Nginx hostnames
 
