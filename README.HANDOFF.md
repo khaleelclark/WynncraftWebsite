@@ -161,7 +161,7 @@ Still `sa`
 
 📄 Script to run
 
-Open SSMS / Azure Data Studio, connect as `sa`, then run:
+Open SSMS / Azure Data Studio / VSC SQL Server (mssql) extension, connect as `sa`, then run:
 
 ```sql
 -- ============================================================
@@ -257,7 +257,9 @@ Edit `ImperialFrontend/nginx.conf` and replace:
 
 ## 7) Authentik initial setup (Refer to Authentik Setup Packet)
 
-1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and sart the stack:
+See `Authentik-Setup.md` for the full Authentik configuration steps.
+
+1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and start the stack:
 
 ```bash
 
