@@ -287,8 +287,30 @@ Options:
 
 - Update `.env` URLs any time the domain or hostnames change.
 
-- If there is an issue with the frontend crashing in production due to not installing node modules try adding the following to your frontend volumes:
+## Dev troubleshooting
+
+### If there is an issue with the frontend crashing in production due to not installing node modules try adding the following to your frontend volumes:
 
 ```
 - /app/node_modules
 ```
+
+### If Authentik reports `Role "authentik" does not exist`, the Postgres data directory was initialized with different credentials. You must delete `./pgdata` so Postgres can re-initialize:
+
+Mac OS/Linux:
+
+```bash
+docker compose -f docker-compose.dev.yml down
+sudo rm -rf pgdata
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Windows (PowerShell):
+
+```powershell
+docker compose -f docker-compose.dev.yml down
+Remove-Item -Recurse -Force pgdata
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Populate values in `.env`:
