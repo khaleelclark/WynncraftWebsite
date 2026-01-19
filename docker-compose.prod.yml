@@ -130,6 +130,7 @@ services:
     volumes:
       - ./ImperialFrontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       #- /etc/letsencrypt:/etc/letsencrypt:ro
+      #- /app/node_modules # (only if you run into node_modules issues)
     depends_on:
       - backend
 

@@ -130,7 +130,7 @@ Example with `sqlpackage`:
 sqlpackage \
   /Action:Import \
   /SourceFile:/home/<path-to-your-file>/Imperial_Db_New.bacpac \
-  /TargetServerName:db,1433 \
+  /TargetServerName:localhost,1433 \
   /TargetDatabaseName:ImperialDb_New \
   /TargetUser:sa \
   /TargetPassword:'YOUR_SA_PASSWORD' \
