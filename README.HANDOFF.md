@@ -12,6 +12,8 @@ This checklist is for handing the project to someone else to host and run in pro
 
 - SSMS (or equivalent to import via .bacpac) OR sqlpackage installed.
 
+- If using HTTPS, ensure certs are provisioned and 443 is open.
+
 ## 2) DNS setup
 
 Create DNS records pointing to the server IP:
@@ -55,12 +57,6 @@ Copy-Item "secrets/sqlserver_connection_string.example.txt"        "secrets/sqls
 
 💡 If files already exist and you want to overwrite them, add -Force to Copy-Item.
 
-If there is an issue with the frontend crashing due to not installing node modules try adding the following to your frontend volumes:
-
-```
-- /app/node_modules
-```
-
 Populate values in `.env`:
 
 - `FRONTEND_URL` = `http://yourdomain.com`
@@ -80,6 +76,10 @@ Populate values in `.env`:
 - SQL Server: set `MSSQL_SA_PASSWORD` (this will be your `sa` password, not what the website will use)
 
 - RabbitMQ: set `RABBITMQ_HOST`, `RABBITMQ_VHOST`, `RABBITMQ_USERNAME` if deviating from defaults
+
+### Note
+
+    https://yourdomain.com and https://auth.yourdomain.com as the expected endpoints when TLS is on.
 
 Populate secrets:
 
@@ -107,9 +107,9 @@ docker network ls | rg imperial-net
 
 ```
 
-## 4a) Import Database (BACPAC)
+## 5) Import Database (BACPAC)
 
-### Step 1 — Import the BACPAC (using the admin credentials you set in the `.env` file)
+### 5a — Import the BACPAC (using the admin credentials you set in the `.env` file)
 
 You **must** use an admin-level login to import a bacpac.
 
@@ -141,7 +141,7 @@ After this step:
 
 ---
 
-### Step 2 — Create the application database user (one-time)
+### 5b — Create the application database user (one-time)
 
 After importing the BACPAC, you must create the application login used by the website.
 
@@ -217,7 +217,7 @@ GO
 
 This is the account used by the website at runtime.
 
-### Step 3 — Configure runtime database access
+### 5c — Configure runtime database access
 
 Create the backend SQL connection string using the imperial_app credentials:
 
@@ -236,16 +236,16 @@ Credentials used from this point forward:
 ⚠️ Important note
 If you change the imperial_app password in SQL Server later, you must also update the SQL connection string secret to match.
 
-Next run:
+Next run the databse container:
 
 ```bash
-docker compose -f docker-compose.prod.yml up --build
+docker compose -f docker-compose.prod.yml up --build db
 ```
 
 The app connects using `imperial_app`.
 The backend container will fail to start if the password does not match.
 
-## 5) Update frontend Nginx hostnames
+## 6) Update frontend Nginx hostnames
 
 Edit `ImperialFrontend/nginx.conf` and replace:
 
@@ -255,29 +255,9 @@ Edit `ImperialFrontend/nginx.conf` and replace:
 
 - `set $authentik_backend ...` if the container hostname differs (default `authentik-server:9000` works with the prod compose)
 
-## 6) Start the production stack
-
-```bash
-
-docker compose -f docker-compose.prod.yml up --build
-
-```
-
-Services included:
-
-- SQL Server (app data)
-
-- Postgres + Redis (Authentik)
-
-- Authentik server/worker
-
-- Backend API
-
-- Frontend (Nginx + static assets)
-
 ## 7) Authentik initial setup (Refer to Authentik Setup Packet)
 
-1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and restart the stack:
+1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and sart the stack:
 
 ```bash
 
@@ -297,12 +277,18 @@ Options:
 
 ## 9) Verify
 
-- Frontend: `http://yourdomain.com`
+- Frontend: `https://yourdomain.com`
 
-- Authentik: `http://auth.yourdomain.com`
+- Authentik: `https://auth.yourdomain.com`
 
 - `docker-compose.prod.yml` expects the `imperial-net` network created by the RabbitMQ compose file.
 
 - The backend requires RabbitMQ at runtime for the raids consumer.
 
 - Update `.env` URLs any time the domain or hostnames change.
+
+- If there is an issue with the frontend crashing in production due to not installing node modules try adding the following to your frontend volumes:
+
+```
+- /app/node_modules
+```
