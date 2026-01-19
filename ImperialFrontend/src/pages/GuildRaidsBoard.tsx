@@ -26,6 +26,7 @@ const GuildRaidsBoard: React.FC = () => {
   const [endDateTime, setEndDateTime] = useState<Dayjs | null>(null);
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
+  // Sentinel ids: -1 = all time, -2 = custom date range.
   const [selectedEvent, setSelectedEvent] = useState<any>({
     id: -1,
     name: "All Time",
@@ -75,6 +76,7 @@ const GuildRaidsBoard: React.FC = () => {
   ];
 
   const getPublicRaids = () => {
+    // Avoid requests until both bounds are set (event selection or custom picker).
     if (!startDateTime || !endDateTime) return;
 
     axios
@@ -92,6 +94,7 @@ const GuildRaidsBoard: React.FC = () => {
   };
 
   useEffect(() => {
+    // Custom range selected: clear state until the user picks bounds.
     if (selectedEvent?.id === -2) {
       setStartDateTime(null);
       setEndDateTime(null);
@@ -99,6 +102,7 @@ const GuildRaidsBoard: React.FC = () => {
       return;
     }
 
+    // Standard event: preload its fixed start/end window.
     if (selectedEvent?.eventStart && selectedEvent?.eventEnd) {
       setStartDateTime(dayjs(selectedEvent.eventStart));
       setEndDateTime(dayjs(selectedEvent.eventEnd));
@@ -106,6 +110,7 @@ const GuildRaidsBoard: React.FC = () => {
   }, [selectedEvent]);
 
   useEffect(() => {
+    // Fetch when date window changes.
     if (startDateTime && endDateTime) getPublicRaids();
   }, [startDateTime, endDateTime]);
 

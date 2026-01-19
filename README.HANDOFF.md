@@ -10,6 +10,10 @@ This checklist is for handing the project to someone else to host and run in pro
 
 - A public domain with DNS control
 
+- SSMS (or equivalent to import via .bacpac) OR sqlpackage installed.
+
+- If using HTTPS, ensure certs are provisioned and 443 is open.
+
 ## 2) DNS setup
 
 Create DNS records pointing to the server IP:
@@ -28,25 +32,11 @@ MAC OS/Linux
 
 cp .env.example .env
 
-cp RabbitMQ/secrets/rabbitmq_admin_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_admin_password.txt
-
-cp RabbitMQ/secrets/rabbitmq_website_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_website_password.txt
-
-cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt \
-
-RabbitMQ/secrets/rabbitmq_raidbot_password.txt
-
-cp secrets/rabbitmq_website_password.example.txt \
-
-secrets/rabbitmq_website_password.txt
-
-cp secrets/sqlserver_connection_string.example.txt \
-
-secrets/sqlserver_connection_string.txt
+cp RabbitMQ/secrets/rabbitmq_admin_password.example.txt RabbitMQ/secrets/rabbitmq_admin_password.txt
+cp RabbitMQ/secrets/rabbitmq_website_password.example.txt RabbitMQ/secrets/rabbitmq_website_password.txt
+cp RabbitMQ/secrets/rabbitmq_raidbot_password.example.txt RabbitMQ/secrets/rabbitmq_raidbot_password.txt
+cp secrets/rabbitmq_website_password.example.txt secrets/rabbitmq_website_password.txt
+cp secrets/sqlserver_connection_string.example.txt secrets/sqlserver_connection_string.txt
 
 ```
 
@@ -67,12 +57,6 @@ Copy-Item "secrets/sqlserver_connection_string.example.txt"        "secrets/sqls
 
 💡 If files already exist and you want to overwrite them, add -Force to Copy-Item.
 
-If there is an issue with the frontend crashing due to not installing node modules try adding the following to your frontend volues:
-
-```
-- /app/node_modules
-```
-
 Populate values in `.env`:
 
 - `FRONTEND_URL` = `http://yourdomain.com`
@@ -89,9 +73,13 @@ Populate values in `.env`:
 
 - `CLIENT_ID` and `CLIENT_SECRET` will be created in Authentik later
 
-- SQL Server: set `MSSQL_SA_PASSWORD`
+- SQL Server: set `MSSQL_SA_PASSWORD` (this will be your `sa` password, not what the website will use)
 
 - RabbitMQ: set `RABBITMQ_HOST`, `RABBITMQ_VHOST`, `RABBITMQ_USERNAME` if deviating from defaults
+
+#### Note:
+
+https://yourdomain.com and https://auth.yourdomain.com as the expected endpoints when TLS is on.
 
 Populate secrets:
 
@@ -119,19 +107,11 @@ docker network ls | rg imperial-net
 
 ```
 
-## 4a) Import Database (BACPAC)
+## 5) Import Database (BACPAC)
 
-# STEP-BY-STEP: After you export the BACPAC
+### 5a — Import the BACPAC (using the admin credentials you set in the `.env` file)
 
-## Step 1 — Import the BACPAC (admin credentials)
-
-### 🔐 **Which credentials are used here?**
-
-**`sa` (or another sysadmin login)**
-
-You **must** use an admin-level login to import a bacpac. T
-
-import it “like normal”\*\*.
+You **must** use an admin-level login to import a bacpac.
 
 Examples (pick one):
 
@@ -145,53 +125,76 @@ Example with `sqlpackage`:
 ```
 sqlpackage \
   /Action:Import \
-  /SourceFile:ImperialDb_New.bacpac \
-  /TargetServerName:localhost \
+  /SourceFile:/home/<path-to-your-file>/Imperial_Db_New.bacpac \
+  /TargetServerName:localhost,1433 \
   /TargetDatabaseName:ImperialDb_New \
   /TargetUser:sa \
-  /TargetPassword:YOUR_SA_PASSWORD
+  /TargetPassword:'YOUR_SA_PASSWORD' \
+  /TargetTrustServerCertificate:True
 ```
+
+After this step:
+
+- Database exists
+- Schema and data imported
+- Application login does not exist yet (this is expected)
 
 ---
 
-## Step 2 — Create the app user (still admin-only, one-time)
+### 5b — Create the application database user (one-time)
 
-Now you immediately run **one SQL script** using **admin credentials** (`sa`).
+After importing the BACPAC, you must create the application login used by the website.
+
+This is done by running one SQL script using administrator credentials (`sa`).
 
 This script:
 
-- creates a **server login**
-- maps it to a **database user**
-- grants **least privilege**
+- creates the server login
+- updates its password if re-run
+- maps it to the database
+- grants least-privilege access
 
-### 🔐 Credentials used
+🔐 Credentials used
 
-Still **`sa`**  
-(This is the _last time_ you’ll use it unless something breaks.)
+Still `sa`
+(This is the last time `sa` is used unless something breaks.)
 
-### 📄 Script to run (copy/paste safe)
+📄 Script to run
 
-```
--- Create server login (run at server scope)
+Open SSMS / Azure Data Studio / VSC SQL Server (mssql) extension, connect as `sa`, then run:
+
+```sql
+-- ============================================================
+-- Imperial Website - Application Login Setup
+-- Run once as SQL Server administrator (`sa`)
+-- Safe to re-run
+-- ============================================================
+
+-- Create or update server login
 IF NOT EXISTS (
     SELECT 1 FROM sys.server_principals WHERE name = N'imperial_app'
 )
 BEGIN
     CREATE LOGIN [imperial_app]
-    WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
+        WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
+END
+ELSE
+BEGIN
+    ALTER LOGIN [imperial_app]
+        WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
 END
 GO
 
 USE [ImperialDb_New];
 GO
 
--- Create database user (if missing)
+-- Create database user
 IF NOT EXISTS (
     SELECT 1 FROM sys.database_principals WHERE name = N'imperial_app'
 )
 BEGIN
     CREATE USER [imperial_app]
-    FOR LOGIN [imperial_app];
+        FOR LOGIN [imperial_app];
 END
 GO
 
@@ -203,38 +206,46 @@ GO
 
 ### What this user can do
 
-✅ Read/write data  
-❌ Cannot change schema  
-❌ Cannot drop tables  
-❌ Cannot touch other databases  
-❌ Cannot administer SQL Server
+| Capability             | Allowed |
+| ---------------------- | ------- |
+| Read data              | ✅      |
+| Write data             | ✅      |
+| Alter schema           | ❌      |
+| Drop tables            | ❌      |
+| Access other databases | ❌      |
+| Administer SQL Server  | ❌      |
 
-This is what your **website will use**.
+This is the account used by the website at runtime.
 
----
+### 5c — Configure runtime database access
 
-## Step 3 — Lock in the runtime credentials (no admin from here on)
-
-Now you create the **runtime connection string** for the backend:
+Create the backend SQL connection string using the imperial_app credentials:
 
 `Server=db,1433; Database=ImperialDb_New; User Id=imperial_app; Password=STRONG_RANDOM_PASSWORD_HERE; Encrypt=False; TrustServerCertificate=True;`
 
-Put this in:
+Put this into:
 
-- `sqlserver_connection_string.txt`
-- Docker secret
-- Whatever your backend already expects
+secrets/sqlserver_connection_string.txt
 
-### 🔐 Credentials used from now on
+This file is mounted as a Docker secret and read by the backend at startup.
 
-❌ NOT `sa`  
-✅ ONLY `imperial_app`
+Credentials used from this point forward:
 
-`docker compose -f docker-compose.prod.yml up --build`
+✅ imperial_app
+
+⚠️ Important note
+If you change the imperial_app password in SQL Server later, you must also update the SQL connection string secret to match.
+
+Next run the databse container:
+
+```bash
+docker compose -f docker-compose.prod.yml up --build db
+```
 
 The app connects using `imperial_app`.
+The backend container will fail to start if the password does not match.
 
-## 5) Update frontend Nginx hostnames
+## 6) Update frontend Nginx hostnames
 
 Edit `ImperialFrontend/nginx.conf` and replace:
 
@@ -244,41 +255,11 @@ Edit `ImperialFrontend/nginx.conf` and replace:
 
 - `set $authentik_backend ...` if the container hostname differs (default `authentik-server:9000` works with the prod compose)
 
-## 6) Start the production stack
+## 7) Authentik initial setup (Refer to Authentik Setup Packet)
 
-```bash
+See `Authentik-Setup.md` for the full Authentik configuration steps.
 
-docker compose -f docker-compose.prod.yml up --build
-
-```
-
-Services included:
-
-- SQL Server (app data)
-
-- Postgres + Redis (Authentik)
-
-- Authentik server/worker
-
-- Backend API
-
-- Frontend (Nginx + static assets)
-
-## 7) Authentik initial setup
-
-1. Open `http://auth.yourdomain.com` and complete the Authentik setup wizard.
-
-2. Create an OIDC provider/app named `imperial-web`.
-
-3. Set redirect URIs:
-
-- `http://yourdomain.com/api/auth/callback`
-
-- `http://yourdomain.com/api/auth/signout-callback`
-
-4. Ensure the `groups` claim includes `admins` for users who should access admin pages.
-
-5. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and restart the stack:
+1. Copy `CLIENT_ID` / `CLIENT_SECRET` into `.env` and start the stack:
 
 ```bash
 
@@ -298,22 +279,40 @@ Options:
 
 ## 9) Verify
 
-- Frontend: `http://yourdomain.com`
+- Frontend: `https://yourdomain.com`
 
-- Authentik: `http://auth.yourdomain.com`
-
-- Backend API: `http://yourdomain.com/api/health` (if you have a health route)
-
-## 10) TLS (recommended)
-
-If you need HTTPS, add a reverse proxy (Caddy, Nginx, Traefik) in front of the stack or extend the Nginx container to serve TLS certificates.
-
----
-
-Notes:
+- Authentik: `https://auth.yourdomain.com`
 
 - `docker-compose.prod.yml` expects the `imperial-net` network created by the RabbitMQ compose file.
 
 - The backend requires RabbitMQ at runtime for the raids consumer.
 
 - Update `.env` URLs any time the domain or hostnames change.
+
+## Dev troubleshooting
+
+### If there is an issue with the frontend crashing in production due to not installing node modules try adding the following to your frontend volumes:
+
+```
+- /app/node_modules
+```
+
+### If Authentik reports `Role "authentik" does not exist`, the Postgres data directory was initialized with different credentials. You must delete `./pgdata` so Postgres can re-initialize:
+
+Mac OS/Linux:
+
+```bash
+docker compose -f docker-compose.dev.yml down
+sudo rm -rf pgdata
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Windows (PowerShell):
+
+```powershell
+docker compose -f docker-compose.dev.yml down
+Remove-Item -Recurse -Force pgdata
+docker compose -f docker-compose.dev.yml up -d
+```
+
+Populate values in `.env`:

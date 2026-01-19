@@ -11,6 +11,7 @@ export function RequireAuth({ children }: { children: React.ReactElement }) {
 
   // Finished loading, but not authenticated
   if (!user.isAuthenticated) {
+    // Preserve the attempted path for post-login navigation.
     return <Navigate to="/" replace state={{ from: location.pathname }} />;
   }
 

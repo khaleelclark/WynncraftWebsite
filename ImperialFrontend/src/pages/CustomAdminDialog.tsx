@@ -19,11 +19,12 @@ export const CustomAdminDialog = ({
   <Dialog
     open={open}
     onClose={(_e, reason) => {
+      // Avoid accidental closes while editing forms.
       if (reason === "backdropClick" || reason === "escapeKeyDown") return;
       onClose();
     }}
     disableEscapeKeyDown
-    maxWidth="lg"
+    maxWidth="xl"
     fullWidth
     slotProps={{
       paper: {

@@ -28,6 +28,7 @@ export const CustomDropdown = ({
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
+    // Populate dropdown options and initialize validation state.
     axios
       .get(apiEndpoint)
       .then(res => {
@@ -51,6 +52,7 @@ export const CustomDropdown = ({
       <Autocomplete
         value={formValues?.[id] ?? []}
         onChange={(_, selectedItem: any) => {
+          // Multi-select expects a non-empty array when required.
           const hasValue = multiple
             ? Array.isArray(selectedItem) && selectedItem.length > 0
             : !!selectedItem;
@@ -99,6 +101,7 @@ export const CustomDropdown = ({
       <Autocomplete
         value={formValues?.[id] ?? null}
         onChange={(_, selectedItem) => {
+          // Single-select uses a single object or null.
           const hasValue = !!selectedItem;
           const validated = required ? hasValue : true;
           register?.(id, selectedItem, validated);

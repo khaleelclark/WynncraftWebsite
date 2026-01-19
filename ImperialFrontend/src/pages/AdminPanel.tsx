@@ -21,6 +21,7 @@ import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { Header } from "./Header";
 
 const AdminPanel: React.FC = () => {
+  // Dialog state per admin surface.
   const [guildMembersOpen, setGuildMembersOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
   const [gamesOpen, setGamesOpen] = useState(false);
@@ -29,6 +30,7 @@ const AdminPanel: React.FC = () => {
   const [raidsOpen, setRaidsOpen] = useState(false);
   const [raidsCompletedOpen, setRaidsCompletedOpen] = useState(false);
 
+  // Per-entity form definitions are reused by GenericAdminPage.
   const createGuildMemberForm = (
     <CustomForm title="Guild Member Management" apiEndpoint="/api/guildmembers">
       <CustomTextField id="discordTag" label="Discord Tag" minLength={1} />
@@ -221,7 +223,7 @@ const AdminPanel: React.FC = () => {
             </Grid>
           </Paper>
 
-          {/* ----- Dialogs ----- */}
+          {/* ----- Dialogs: open the GenericAdminPage with the right endpoints ----- */}
           <CustomAdminDialog
             open={guildMembersOpen}
             onClose={() => setGuildMembersOpen(false)}

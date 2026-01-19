@@ -22,16 +22,17 @@ export const CustomTextField = ({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    // Initialize form state so parent can validate immediately.
     register?.(
       id,
       formValues?.[id] ?? (isUUID ? null : ""),
-      formValues?.[id] !== undefined || isUUID
+      formValues?.[id] !== undefined || isUUID,
     );
   }, []);
 
   const UUIDv1 =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  const UUIDv2 = /^[0-9a-f]{32}$/i;
+  //const UUIDv2 = /^[0-9a-f]{32}$/i; db does not use this format.
   const isNumber = type === "number";
   const isUUID = format === "UUID";
 
@@ -49,10 +50,10 @@ export const CustomTextField = ({
         onChange={e => {
           let value: string | null = e.target.value;
 
+          // Validate required, UUID formats, and numeric constraints.
           const requiredOk =
             isUUID || (value.trim() !== "" && value.length >= minLength);
-          const uuidOk =
-            !isUUID || value === "" || UUIDv1.test(value) || UUIDv2.test(value);
+          const uuidOk = !isUUID || value === "" || UUIDv1.test(value);
           const parsed = Number(value);
           const numberOk = !isNumber || (Number.isFinite(parsed) && parsed > 0);
           const validated = requiredOk && uuidOk && numberOk;
@@ -60,10 +61,10 @@ export const CustomTextField = ({
           const message = !requiredOk
             ? `Required. Must be at least ${minLength} character(s).`
             : !uuidOk
-            ? "Invalid UUID"
-            : !numberOk
-            ? "Must be a positive number"
-            : "";
+              ? "Invalid UUID"
+              : !numberOk
+                ? "Must be a positive number"
+                : "";
 
           value = isUUID && value === "" ? null : value;
 

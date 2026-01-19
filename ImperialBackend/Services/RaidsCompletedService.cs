@@ -15,6 +15,7 @@ namespace ImperialBackend.Services
 
         public async Task<List<RaidCompletedGetDTO>> GetAllAsync()
         {
+            // Admin list includes raid + member details for editing.
             var raidsCompleted = await _context
                 .RaidsCompleted.AsNoTracking()
                 .Include(r => r.Raid)
@@ -43,9 +44,11 @@ namespace ImperialBackend.Services
 
         public async Task<RaidCompletedGetDTO> UpdateAsync(int id, RaidCompletedPostDTO dto)
         {
+            // Validate FK constraints up front for clearer errors.
             if (!await _context.Raids.AnyAsync(r => r.RaidId == dto.Raid))
                 throw new InvalidOperationException("Invalid RaidId");
 
+            // Enforce at least one guild member and validate all ids.
             if (dto.GuildMembers == null || dto.GuildMembers.Count == 0)
                 throw new InvalidOperationException(
                     "GuildMemberIds must contain at least one member"
@@ -67,6 +70,7 @@ namespace ImperialBackend.Services
             rc.RaidId = dto.Raid;
             rc.CompletedDate = dto.CompletedDate;
 
+            // Sync join table to match requested members.
             SyncCollection(
                 rc.RaidInstances,
                 dto.GuildMembers,
@@ -81,9 +85,11 @@ namespace ImperialBackend.Services
 
         public async Task<RaidCompletedGetDTO> CreateAsync(RaidCompletedPostDTO dto)
         {
+            // Validate FK constraints up front for clearer errors.
             if (!await _context.Raids.AnyAsync(r => r.RaidId == dto.Raid))
                 throw new InvalidOperationException("Invalid RaidId");
 
+            // Enforce at least one guild member and validate all ids.
             if (dto.GuildMembers == null || dto.GuildMembers.Count == 0)
                 throw new InvalidOperationException(
                     "GuildMemberIds must contain at least one member"
@@ -99,6 +105,7 @@ namespace ImperialBackend.Services
             {
                 RaidId = dto.Raid,
                 CompletedDate = dto.CompletedDate,
+                // Create join rows for each unique member id.
                 RaidInstances = dto
                     .GuildMembers.Distinct()
                     .Select(id => new RaidInstance { GuildMemberId = id })
@@ -116,6 +123,7 @@ namespace ImperialBackend.Services
             DateTimeOffset? endDate
         )
         {
+            // Public list is read-only but still includes names for display.
             var query = _context
                 .RaidsCompleted.AsNoTracking()
                 .Include(r => r.Raid)
@@ -128,9 +136,11 @@ namespace ImperialBackend.Services
                 if (endDate < startDate)
                     throw new InvalidOperationException("endDate must be >= startDate");
 
+                // Compare in UTC to align with persisted CompletedDate.
                 var startUtc = startDate.Value.UtcDateTime;
                 var endUtc = endDate.Value.UtcDateTime;
 
+                // CompletedDate is stored in UTC.
                 query = query.Where(r => r.CompletedDate >= startUtc && r.CompletedDate <= endUtc);
             }
 
@@ -141,6 +151,7 @@ namespace ImperialBackend.Services
 
         public async Task DeleteAsync(int id)
         {
+            // Delete join rows explicitly before the parent record.
             var rc = await _context
                 .RaidsCompleted.Include(r => r.RaidInstances)
                 .FirstOrDefaultAsync(r => r.RaidCompletedId == id);
@@ -156,6 +167,7 @@ namespace ImperialBackend.Services
 
         public async Task<object> SyncFromBotAsync(RaidBotReportDTO dto)
         {
+            // Bot reports are idempotent-ish; we only create a new completion record.
             if (dto.MinecraftUsernames == null || dto.MinecraftUsernames.Count == 0)
                 throw new InvalidOperationException(
                     "minecraftUsernames must contain at least one player."
@@ -175,6 +187,7 @@ namespace ImperialBackend.Services
 
             var notFoundUsers = new List<string>();
 
+            // De-dupe incoming usernames to avoid duplicate RaidInstances.
             var distinctNames = dto
                 .MinecraftUsernames.Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -184,6 +197,7 @@ namespace ImperialBackend.Services
                 .Select(m => new { m.GuildMemberId, m.MinecraftUsername })
                 .ToListAsync();
 
+            // Match usernames case-insensitively to stored MinecraftUsername.
             foreach (var username in distinctNames)
             {
                 var member = members.FirstOrDefault(m =>
@@ -206,11 +220,13 @@ namespace ImperialBackend.Services
 
             return new
             {
+                // Return details for bot logging/confirmation.
                 raidId = raid.RaidId,
                 raidName = raid.RaidName,
                 raidInstanceId = raidCompleted.RaidCompletedId,
                 completedDateUtc,
                 createdCount = raidCompleted.RaidInstances.Count,
+                // Returned for bot feedback/logging.
                 notFoundUsers,
             };
         }

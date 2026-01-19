@@ -8,6 +8,7 @@ import { UserProvider } from "./auth/UserContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
+    {/* Global auth + date localization providers for the app. */}
     <UserProvider>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <App />

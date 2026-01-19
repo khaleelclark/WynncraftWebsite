@@ -14,6 +14,7 @@ export const CustomDateOnlySelector = ({
   const showError = touched && formValidations?.[id] === false;
 
   useEffect(() => {
+    // Initialize validation state for required date field.
     register?.(id, formValues?.[id] ?? "", formValues?.id !== undefined);
   }, []);
 
@@ -21,14 +22,15 @@ export const CustomDateOnlySelector = ({
     <>
       <DatePicker
         label={label}
-        value={dayjs(formValues?.[id])}
-        onChange={(newValue: Dayjs | null) => {
-          const validated = !!newValue && newValue.isValid();
-          register?.(
-            id,
-            newValue ? newValue.format("YYYY-MM-DD") : "",
-            validated
-          );
+      value={dayjs(formValues?.[id])}
+      onChange={(newValue: Dayjs | null) => {
+        const validated = !!newValue && newValue.isValid();
+        // Store as YYYY-MM-DD for date-only API fields.
+        register?.(
+          id,
+          newValue ? newValue.format("YYYY-MM-DD") : "",
+          validated
+        );
           setTouched(true);
         }}
         closeOnSelect

@@ -1,6 +1,7 @@
 import { createTheme, Theme } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
+// Brand palette used across the site.
 const imperial = {
   crimson: "#490113ff",
   blood: "#5b011bff",
@@ -16,11 +17,13 @@ const imperial = {
   ember: "#B0540F",
 };
 
+// Alternating table row colors for DataGrid.
 const imperialTable = {
   rowEven: "#240108ff",
   rowOdd: "#3c0010ff",
 };
 
+// Global MUI theme overrides and component styles.
 const theme = createTheme({
   palette: {
     primary: {

@@ -84,6 +84,7 @@ public class GuildMembersController : ControllerBase
     [HttpGet()]
     public async Task<IActionResult> GetAllGeneric()
     {
+        // Generic list used by admin dropdowns.
         return Ok(await _service.GetAllGenericAsync());
     }
 
@@ -106,6 +107,7 @@ public class GuildMembersController : ControllerBase
     {
         var msg = ex.Message;
 
+        // Map validation errors to field names used by the admin UI.
         var field =
             msg.Contains("UUID", StringComparison.OrdinalIgnoreCase) ? "uuid"
             : msg.Contains("RankId", StringComparison.OrdinalIgnoreCase) ? "rank"

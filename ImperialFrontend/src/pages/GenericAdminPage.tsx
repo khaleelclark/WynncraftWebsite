@@ -69,6 +69,7 @@ export const GenericAdminPage = ({
       .catch(handleError);
   }, []);
 
+  // Heuristic date formatting based on field name.
   const formatDateTime = (iso: string) =>
     new Date(iso).toLocaleString(undefined, {
       dateStyle: "short",
@@ -85,6 +86,7 @@ export const GenericAdminPage = ({
     /(date|time|at|created|updated|synced|completed|start|end)/i.test(key) &&
     !isDateOnlyField(key);
 
+  // Build grid columns from the first row shape, then append actions.
   const columns: GridColDef[] =
     members.length !== 0
       ? [
@@ -98,6 +100,7 @@ export const GenericAdminPage = ({
             flex: 1,
 
             valueGetter: (value: any) => {
+              // Display formatting for dates, arrays, and nested objects.
               if (
                 typeof value === "string" &&
                 (isDateTimeField(key) || isDateOnlyField(key))
@@ -170,7 +173,7 @@ export const GenericAdminPage = ({
 
   const updateRecord = (updatedRecord: any) => {
     setMembers(prev =>
-      prev.map(item => (item.id === updatedRecord.id ? updatedRecord : item))
+      prev.map(item => (item.id === updatedRecord.id ? updatedRecord : item)),
     );
     setOpenUpdateDialog(false);
   };
@@ -204,6 +207,7 @@ export const GenericAdminPage = ({
   const blockBackdropAndEscClose =
     (setter: React.Dispatch<React.SetStateAction<boolean>>) =>
     (_event: object, reason?: "backdropClick" | "escapeKeyDown") => {
+      // Force explicit close so forms don't lose state on accidental clicks.
       if (reason === "backdropClick" || reason === "escapeKeyDown") return;
       setter(false);
     };

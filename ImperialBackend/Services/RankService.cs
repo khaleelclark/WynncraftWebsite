@@ -19,6 +19,7 @@ public class RankService : IRankService
 
     public async Task<GenericGetDTO> CreateAsync(GenericPostDTO dto)
     {
+        // Simple create; no uniqueness constraint enforced here.
         var rank = new Rank { RankName = dto.Name };
         _context.Ranks.Add(rank);
         await _context.SaveChangesAsync();
@@ -30,6 +31,7 @@ public class RankService : IRankService
     {
         var rank = await _context.Ranks.FindAsync(id) ?? throw new KeyNotFoundException();
 
+        // Only name is editable.
         rank.RankName = dto.Name;
         await _context.SaveChangesAsync();
 
@@ -38,6 +40,7 @@ public class RankService : IRankService
 
     public async Task DeleteAsync(int id)
     {
+        // Prevent deleting ranks that are still assigned to members.
         var refs = await _context.GuildMembers.AsNoTracking().CountAsync(m => m.RankId == id);
 
         if (refs > 0)

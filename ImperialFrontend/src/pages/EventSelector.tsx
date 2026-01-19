@@ -36,6 +36,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
   const { handleError, SnackbarElement } = useApiErrorSnackbar();
 
   useEffect(() => {
+    // Load server-defined events and prepend sentinel options.
     axios
       .get("/api/events")
       .then(res => {
@@ -44,11 +45,13 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
       })
       .catch(err => {
         handleError(err);
+        // Fall back to the sentinel options when the API is unavailable.
         setEvents([CUSTOM_EVENT, ALL_TIME_EVENT]);
       });
   }, []);
 
   useEffect(() => {
+    // Notify parent when selection changes.
     const selected = events.find(e => e.id === selectedId) || ALL_TIME_EVENT;
     onSelect(selected);
   }, [selectedId, events, onSelect]);
