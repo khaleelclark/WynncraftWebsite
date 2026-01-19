@@ -77,9 +77,9 @@ Populate values in `.env`:
 
 - RabbitMQ: set `RABBITMQ_HOST`, `RABBITMQ_VHOST`, `RABBITMQ_USERNAME` if deviating from defaults
 
-### Note
+#### Note:
 
-    https://yourdomain.com and https://auth.yourdomain.com as the expected endpoints when TLS is on.
+https://yourdomain.com and https://auth.yourdomain.com as the expected endpoints when TLS is on.
 
 Populate secrets:
 
