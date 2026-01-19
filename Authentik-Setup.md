@@ -103,6 +103,7 @@ Advanced Protocol Settings
 Select Based on the Users ID - (not the default hash)
 
 ![](media/media/image13.png)
+
 Select Next
 
 Select next again
@@ -114,6 +115,7 @@ Close
 Directory \> Groups
 
 ![](media/media/image17.png)
+
 Select edit button on authentik-admins
 
 ![](media/media/image3.png)
