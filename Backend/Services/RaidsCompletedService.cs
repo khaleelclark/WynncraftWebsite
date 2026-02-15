@@ -6,9 +6,9 @@ namespace Backend.Services
 {
     public class RaidsCompletedService : IRaidsCompletedService
     {
-        private readonly ImperialDbContext _context;
+        private readonly WynncraftDbContext _context;
 
-        public RaidsCompletedService(ImperialDbContext context)
+        public RaidsCompletedService(WynncraftDbContext context)
         {
             _context = context;
         }

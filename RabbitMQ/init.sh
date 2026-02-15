@@ -3,15 +3,15 @@ set -euo pipefail
 
 RABBIT_HOST="raid-rabbit"
 MGMT_PORT="15672"
-VHOST="imperial"
+VHOST="wynncraft"
 
-ADMIN_USER="imperial"
+ADMIN_USER="wynncraft"
 ADMIN_PASS="$(cat /run/secrets/rabbitmq_admin_password)"
 
 RAIDBOT_USER="raid-bot"
 RAIDBOT_PASS="$(cat /run/secrets/rabbitmq_raidbot_password)"
 
-WEBSITE_USER="imperial-website"
+WEBSITE_USER="wynncraft-website"
 WEBSITE_PASS="$(cat /run/secrets/rabbitmq_website_password)"
 
 EXCHANGE_NAME="raids.exchange"

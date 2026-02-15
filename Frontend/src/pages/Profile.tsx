@@ -308,7 +308,8 @@ const Profile: React.FC = () => {
                             width: "100%",
                             cursor: "pointer",
                             borderRadius: 3,
-                            border: `1px solid #B0540F`,
+                            border: theme =>
+                              `1px solid ${theme.palette.warning.main}`,
                             bgcolor: "background.default",
                             transition:
                               "transform 120ms ease, box-shadow 120ms ease",

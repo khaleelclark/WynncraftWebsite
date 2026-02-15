@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class GameService : IGameService
 {
-    private readonly ImperialDbContext _context;
+    private readonly WynncraftDbContext _context;
 
-    public GameService(ImperialDbContext context)
+    public GameService(WynncraftDbContext context)
     {
         _context = context;
     }

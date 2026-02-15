@@ -1,4 +1,4 @@
-# Imperial Website Production Handoff Checklist
+# Wynncraft Website Production Handoff Checklist
 
 This checklist is for handing the project to someone else to host and run in production with their own domain.
 
@@ -65,11 +65,11 @@ Populate values in `.env`:
 
 - `AUTHENTIK_URL` = `http://auth.yourdomain.com`
 
-- `AUTHENTIK_ISSUER_PATH` = `http://auth.yourdomain.com/application/o/imperial-web/`
+- `AUTHENTIK_ISSUER_PATH` = `http://auth.yourdomain.com/application/o/wynncraft-web/`
 
 - `AUTHENTIK_INTERNAL_URL` = `http://authentik-server:9000`
 
-- `BACKEND_INTERNAL_URL` = `http://imperial_backend:5032`
+- `BACKEND_INTERNAL_URL` = `http://backend:5032`
 
 - `CLIENT_ID` and `CLIENT_SECRET` will be created in Authentik later
 
@@ -91,7 +91,7 @@ Populate secrets:
 
 ## 4) Run RabbitMQ first (creates the network)
 
-RabbitMQ compose creates the `imperial-net` network used by the rest of the stack.
+RabbitMQ compose creates the `wynncraft-guild-net` network used by the rest of the stack.
 
 ```bash
 
@@ -103,7 +103,7 @@ Confirm the network exists:
 
 ```bash
 
-docker network ls | rg imperial-net
+docker network ls | rg wynncraft-guild-net
 
 ```
 
@@ -125,9 +125,9 @@ Example with `sqlpackage`:
 ```
 sqlpackage \
   /Action:Import \
-  /SourceFile:/home/<path-to-your-file>/Imperial_Db_New.bacpac \
+  /SourceFile:/home/<path-to-your-file>/your-export.bacpac \
   /TargetServerName:localhost,1433 \
-  /TargetDatabaseName:ImperialDb_New \
+  /TargetDatabaseName:WynncraftDB \
   /TargetUser:sa \
   /TargetPassword:'YOUR_SA_PASSWORD' \
   /TargetTrustServerCertificate:True
@@ -161,46 +161,46 @@ Still `sa`
 
 📄 Script to run
 
-Open SSMS / Azure Data Studio / VSC SQL Server (mssql) extension, connect as `sa`, then run:
+Open SSMS / Azure Data Studio / VSC SQL Server (mssql) extension, connect as `sa`, then run: *need way via cmd
 
 ```sql
 -- ============================================================
--- Imperial Website - Application Login Setup
+-- Wynncraft Website - Application Login Setup
 -- Run once as SQL Server administrator (`sa`)
 -- Safe to re-run
 -- ============================================================
 
 -- Create or update server login
 IF NOT EXISTS (
-    SELECT 1 FROM sys.server_principals WHERE name = N'imperial_app'
+    SELECT 1 FROM sys.server_principals WHERE name = N'wynncraft_app'
 )
 BEGIN
-    CREATE LOGIN [imperial_app]
+    CREATE LOGIN [wynncraft_app]
         WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
 END
 ELSE
 BEGIN
-    ALTER LOGIN [imperial_app]
+    ALTER LOGIN [wynncraft_app]
         WITH PASSWORD = 'STRONG_RANDOM_PASSWORD_HERE';
 END
 GO
 
-USE [ImperialDb_New];
+USE [WynncraftDB];
 GO
 
 -- Create database user
 IF NOT EXISTS (
-    SELECT 1 FROM sys.database_principals WHERE name = N'imperial_app'
+    SELECT 1 FROM sys.database_principals WHERE name = N'wynncraft_app'
 )
 BEGIN
-    CREATE USER [imperial_app]
-        FOR LOGIN [imperial_app];
+    CREATE USER [wynncraft_app]
+        FOR LOGIN [wynncraft_app];
 END
 GO
 
 -- Grant least-privilege access
-ALTER ROLE db_datareader ADD MEMBER [imperial_app];
-ALTER ROLE db_datawriter ADD MEMBER [imperial_app];
+ALTER ROLE db_datareader ADD MEMBER [wynncraft_app];
+ALTER ROLE db_datawriter ADD MEMBER [wynncraft_app];
 GO
 ```
 
@@ -219,9 +219,9 @@ This is the account used by the website at runtime.
 
 ### 5c — Configure runtime database access
 
-Create the backend SQL connection string using the imperial_app credentials:
+Create the backend SQL connection string using the wynncraft_app credentials:
 
-`Server=db,1433; Database=ImperialDb_New; User Id=imperial_app; Password=STRONG_RANDOM_PASSWORD_HERE; Encrypt=False; TrustServerCertificate=True;`
+`Server=db,1433; Database=WynncraftDB; User Id=wynncraft_app; Password=STRONG_RANDOM_PASSWORD_HERE; Encrypt=False; TrustServerCertificate=True;`
 
 Put this into:
 
@@ -231,10 +231,10 @@ This file is mounted as a Docker secret and read by the backend at startup.
 
 Credentials used from this point forward:
 
-✅ imperial_app
+✅ wynncraft_app
 
 ⚠️ Important note
-If you change the imperial_app password in SQL Server later, you must also update the SQL connection string secret to match.
+If you change the wynncraft_app password in SQL Server later, you must also update the SQL connection string secret to match.
 
 Next run the databse container:
 
@@ -242,16 +242,16 @@ Next run the databse container:
 docker compose -f docker-compose.prod.yml up --build db
 ```
 
-The app connects using `imperial_app`.
+The app connects using `wynncraft_app`.
 The backend container will fail to start if the password does not match.
 
 ## 6) Update frontend Nginx hostnames
 
-Edit `ImperialFrontend/nginx.conf` and replace:
+Edit `Frontend/nginx.conf` and replace:
 
-- `server_name imperial.local;` with your real domain
+- `server_name wynncraft.local;` with your real domain
 
-- `server_name auth.imperial.local;` with `auth.yourdomain.com`
+- `server_name auth.wynncraft.local;` with `auth.yourdomain.com`
 
 - `set $authentik_backend ...` if the container hostname differs (default `authentik-server:9000` works with the prod compose)
 
@@ -283,7 +283,7 @@ Options:
 
 - Authentik: `https://auth.yourdomain.com`
 
-- `docker-compose.prod.yml` expects the `imperial-net` network created by the RabbitMQ compose file.
+- `docker-compose.prod.yml` expects the `wynncraft-guild-net` network created by the RabbitMQ compose file.
 
 - The backend requires RabbitMQ at runtime for the raids consumer.
 

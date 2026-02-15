@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class RaidService : IRaidService
 {
-    private readonly ImperialDbContext _context;
+    private readonly WynncraftDbContext _context;
 
-    public RaidService(ImperialDbContext context)
+    public RaidService(WynncraftDbContext context)
     {
         _context = context;
     }

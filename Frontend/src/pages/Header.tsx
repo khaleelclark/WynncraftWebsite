@@ -67,7 +67,7 @@ export const Header = () => {
 
   // Hide auth-only destinations for anonymous users.
   const availableButtons = headerButtons.filter(
-    button => !(button.requiresAuth && !user?.isAuthenticated)
+    button => !(button.requiresAuth && !user?.isAuthenticated),
   );
 
   const authControl = user?.claims ? (
@@ -142,7 +142,7 @@ export const Header = () => {
           py: 1.5,
           bgcolor: "background.paper",
           color: "text.primary",
-          borderBottom: t => `1px solid #B0540F`,
+          borderBottom: t => `1px solid ${t.palette.divider}`,
           boxShadow: 2,
           position: "sticky",
           top: 0,
@@ -181,12 +181,13 @@ export const Header = () => {
               fontWeight: 700,
               letterSpacing: 0.5,
               lineHeight: 1,
-              background: "#ffffffff",
+              background: t =>
+                `linear-gradient(90deg, ${t.palette.primary.main} 0%, ${t.palette.secondary.main} 100%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Imperial
+            Novus
           </Typography>
         </Box>
 

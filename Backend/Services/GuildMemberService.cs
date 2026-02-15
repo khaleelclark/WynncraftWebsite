@@ -6,9 +6,9 @@ namespace Backend.Services
 {
     public class GuildMemberService : IGuildMemberService
     {
-        private readonly ImperialDbContext _context;
+        private readonly WynncraftDbContext _context;
 
-        public GuildMemberService(ImperialDbContext context)
+        public GuildMemberService(WynncraftDbContext context)
         {
             _context = context;
         }
@@ -307,6 +307,15 @@ namespace Backend.Services
         {
             var member =
                 await _context.GuildMembers.FindAsync(id) ?? throw new KeyNotFoundException();
+
+            // RaidInstances -> GuildMember uses Restrict delete behavior, so remove
+            // dependent raid-instance rows first to allow member deletion.
+            var raidInstances = await _context
+                .RaidInstances.Where(ri => ri.GuildMemberId == id)
+                .ToListAsync();
+
+            if (raidInstances.Count > 0)
+                _context.RaidInstances.RemoveRange(raidInstances);
 
             _context.GuildMembers.Remove(member);
             await _context.SaveChangesAsync();

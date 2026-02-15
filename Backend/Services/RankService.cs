@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class RankService : IRankService
 {
-    private readonly ImperialDbContext _context;
+    private readonly WynncraftDbContext _context;
 
-    public RankService(ImperialDbContext context)
+    public RankService(WynncraftDbContext context)
     {
         _context = context;
     }

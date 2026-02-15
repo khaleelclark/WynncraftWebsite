@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class MedalService : IMedalService
 {
-    private readonly ImperialDbContext _context;
+    private readonly WynncraftDbContext _context;
 
-    public MedalService(ImperialDbContext context)
+    public MedalService(WynncraftDbContext context)
     {
         _context = context;
     }

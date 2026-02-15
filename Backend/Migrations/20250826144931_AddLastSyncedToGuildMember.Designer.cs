@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend.Migrations
 {
-    [DbContext(typeof(ImperialDbContext))]
+    [DbContext(typeof(WynncraftDbContext))]
     [Migration("20250826144931_AddLastSyncedToGuildMember")]
     partial class AddLastSyncedToGuildMember
     {

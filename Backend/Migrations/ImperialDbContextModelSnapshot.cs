@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend.Migrations
 {
-    [DbContext(typeof(ImperialDbContext))]
-    partial class ImperialDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(WynncraftDbContext))]
+    partial class WynncraftDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

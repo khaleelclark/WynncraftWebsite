@@ -3,53 +3,52 @@ import type {} from "@mui/x-data-grid/themeAugmentation";
 
 // Brand palette used across the site.
 const imperial = {
-  crimson: "#490113ff",
-  blood: "#5b011bff",
-  magenta: "#6a0b33ff",
-  hotPink: "#E73C83",
-  rose: "#F9A5C9",
-  plum: "#310127ff",
-  orchid: "#440638ff",
-  paper: "#F7F2F5",
-  pearl: "#E1CED3",
-  ink: "#1A0B0E",
-  dryTears: "#160101ff",
-  ember: "#B0540F",
+  deepTeal: "#031A1A",
+  darkTeal: "#052828",
+  teal: "#083535",
+  tealLight: "#0E4747",
+  orange: "#F28C28",
+  orangeDark: "#C96A12",
+  gold: "#F4C542",
+  goldLight: "#FFE08A",
+  paper: "#FFF4D6",
+  pearl: "#FFDFA3",
+  ink: "#072222",
 };
 
 // Alternating table row colors for DataGrid.
 const imperialTable = {
-  rowEven: "#240108ff",
-  rowOdd: "#3c0010ff",
+  rowEven: "#072626",
+  rowOdd: "#051F1F",
 };
 
 // Global MUI theme overrides and component styles.
 const theme = createTheme({
   palette: {
     primary: {
-      main: imperial.magenta,
-      dark: imperial.blood,
-      light: imperial.hotPink,
-      contrastText: imperial.paper,
+      main: imperial.orange,
+      dark: imperial.orangeDark,
+      light: imperial.goldLight,
+      contrastText: imperial.ink,
     },
     secondary: {
-      main: imperial.orchid,
-      dark: imperial.plum,
-      light: imperial.rose,
-      contrastText: imperial.paper,
+      main: imperial.gold,
+      dark: imperial.orangeDark,
+      light: imperial.goldLight,
+      contrastText: imperial.ink,
     },
     background: {
-      default: imperial.dryTears,
-      paper: imperial.crimson,
+      default: imperial.deepTeal,
+      paper: imperial.darkTeal,
     },
     text: {
       primary: imperial.paper,
-      secondary: imperial.rose,
+      secondary: imperial.pearl,
     },
-    divider: "rgba(225, 206, 211, 0.25)",
+    divider: "rgba(242, 140, 40, 0.45)",
     error: { main: "#FF0055" },
     success: { main: "#4ADE80" },
-    warning: { main: imperial.ember },
+    warning: { main: imperial.gold },
 
     info: { main: "#60A5FA" },
   },
@@ -74,11 +73,11 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          backgroundColor: imperial.dryTears,
+          backgroundColor: imperial.deepTeal,
           color: imperial.paper,
         },
         a: {
-          color: imperial.hotPink,
+          color: imperial.gold,
         },
       },
     },
@@ -87,10 +86,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: imperial.crimson,
-          border: "1px solid rgba(178, 0, 75, 0.45)",
+          backgroundColor: imperial.darkTeal,
+          border: "1px solid rgba(242, 140, 40, 0.65)",
           boxShadow:
-            "0 10px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(249,165,201,0.08)",
+            "0 10px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(242,140,40,0.14)",
         },
       },
     },
@@ -107,29 +106,30 @@ const theme = createTheme({
         },
 
         containedPrimary: {
-          backgroundColor: imperial.ink,
-          color: imperial.paper,
-          border: "1px solid rgba(255, 214, 231, 0.55)",
-          boxShadow: "0 0 14px rgba(231,60,131,0.20)",
+          backgroundColor: imperial.orange,
+          color: imperial.ink,
+          border: "1px solid rgba(242, 140, 40, 0.75)",
+          boxShadow: "0 0 14px rgba(242,140,40,0.28)",
           "&:hover": {
-            backgroundColor: imperial.hotPink,
-            boxShadow: "0 0 18px rgba(231,60,131,0.55)",
+            backgroundColor: imperial.orangeDark,
+            color: imperial.paper,
+            boxShadow: "0 0 20px rgba(242,140,40,0.55)",
           },
         },
 
         outlinedPrimary: {
           color: imperial.paper,
-          borderColor: "rgba(231, 60, 131, 0.55)",
+          borderColor: "rgba(242, 140, 40, 0.65)",
           "&:hover": {
-            borderColor: "rgba(231, 60, 131, 0.85)",
-            backgroundColor: "rgba(231, 60, 131, 0.12)",
+            borderColor: "rgba(242, 140, 40, 0.95)",
+            backgroundColor: "rgba(242, 140, 40, 0.2)",
           },
         },
 
         textPrimary: {
-          color: imperial.rose,
+          color: imperial.pearl,
           "&:hover": {
-            backgroundColor: "rgba(231, 60, 131, 0.10)",
+            backgroundColor: "rgba(242, 140, 40, 0.2)",
           },
         },
       },
@@ -153,17 +153,17 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          backgroundColor: "rgba(26, 11, 14, 0.35)", // ink wash
+          backgroundColor: "rgba(7, 34, 34, 0.45)", // ink wash
           borderRadius: 12,
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(225, 206, 211, 0.25)",
+            borderColor: "rgba(255, 223, 163, 0.25)",
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(231, 60, 131, 0.55)",
+            borderColor: "rgba(242, 140, 40, 0.65)",
           },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(231, 60, 131, 0.85)",
-            boxShadow: "0 0 0 3px rgba(231, 60, 131, 0.18)",
+            borderColor: "rgba(242, 140, 40, 0.95)",
+            boxShadow: "0 0 0 3px rgba(242, 140, 40, 0.24)",
           },
         },
         input: {
@@ -175,9 +175,9 @@ const theme = createTheme({
     MuiInputLabel: {
       styleOverrides: {
         root: {
-          color: "rgba(249, 165, 201, 0.85)",
+          color: "rgba(255, 208, 140, 0.92)",
           "&.Mui-focused": {
-            color: imperial.hotPink,
+            color: imperial.orange,
           },
         },
       },
@@ -186,7 +186,7 @@ const theme = createTheme({
     MuiFormHelperText: {
       styleOverrides: {
         root: {
-          color: "rgba(225, 206, 211, 0.75)",
+          color: "rgba(255, 196, 112, 0.82)",
         },
       },
     },
@@ -239,29 +239,29 @@ const theme = createTheme({
         root: {
           borderRadius: 12,
           overflow: "hidden",
-          backgroundColor: imperial.crimson,
+          backgroundColor: imperial.darkTeal,
           color: imperial.paper,
-          border: "1px solid rgba(178, 0, 75, 0.65)",
+          border: "1px solid rgba(242, 140, 40, 0.68)",
           boxShadow:
-            "0 10px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(249,165,201,0.08)",
+            "0 10px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(242,140,40,0.12)",
           "& .MuiDataGrid-menuIcon, & .MuiDataGrid-menuIconButton": {
             color: imperial.paper,
             opacity: 1,
           },
           "& .MuiDataGrid-menuIconButton:hover": {
-            backgroundColor: "rgba(231, 60, 131, 0.18)",
+            backgroundColor: "rgba(242, 140, 40, 0.28)",
           },
         },
 
         columnHeaders: {
-          background: `linear-gradient(90deg, ${imperial.blood} 0%, ${imperial.magenta} 100%)`,
+          background: `linear-gradient(90deg, ${imperial.teal} 0%, ${imperial.tealLight} 100%)`,
           color: imperial.paper,
-          borderBottom: "1px solid rgba(231, 60, 131, 0.45)",
+          borderBottom: "1px solid rgba(242, 140, 40, 0.55)",
           fontWeight: 800,
         },
 
         cell: {
-          borderColor: "rgba(225, 206, 211, 0.12)",
+          borderColor: "rgba(242, 140, 40, 0.2)",
         },
 
         row: {
@@ -272,13 +272,13 @@ const theme = createTheme({
             backgroundColor: imperialTable.rowOdd,
           },
           "&:hover": {
-            backgroundColor: "rgba(176, 84, 15, 0.16)",
+            backgroundColor: "rgba(242, 140, 40, 0.2)",
           },
           "&.Mui-selected": {
-            backgroundColor: "rgba(178, 0, 75, 0.30)",
+            backgroundColor: "rgba(242, 140, 40, 0.34)",
           },
           "&.Mui-selected:hover": {
-            backgroundColor: "rgba(231, 60, 131, 0.22)",
+            backgroundColor: "rgba(242, 140, 40, 0.42)",
           },
         },
       },
@@ -287,7 +287,7 @@ const theme = createTheme({
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: "rgba(225, 206, 211, 0.18)",
+          borderColor: "rgba(242, 140, 40, 0.4)",
         },
       },
     },
@@ -296,7 +296,7 @@ const theme = createTheme({
       styleOverrides: {
         tooltip: {
           backgroundColor: imperial.ink,
-          border: "1px solid rgba(231, 60, 131, 0.45)",
+          border: "1px solid rgba(242, 140, 40, 0.65)",
           color: imperial.paper,
         },
         arrow: {
@@ -308,8 +308,8 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: `linear-gradient(90deg, ${imperial.plum} 0%, ${imperial.crimson} 40%, ${imperial.blood} 100%)`,
-          borderBottom: "1px solid rgba(231, 60, 131, 0.35)",
+          background: `linear-gradient(90deg, ${imperial.teal} 0%, ${imperial.darkTeal} 45%, ${imperial.deepTeal} 100%)`,
+          borderBottom: "1px solid rgba(242, 140, 40, 0.55)",
         },
       },
     },
@@ -318,8 +318,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: imperial.crimson,
-          border: "1px solid rgba(178, 0, 75, 0.45)",
+          backgroundColor: imperial.darkTeal,
+          border: "1px solid rgba(242, 140, 40, 0.65)",
         },
       },
     },

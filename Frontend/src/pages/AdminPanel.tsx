@@ -136,7 +136,7 @@ const AdminPanel: React.FC = () => {
             sx={{
               p: 4,
               maxWidth: "100%",
-              bgcolor: "#2e000cff",
+              bgcolor: "background.paper",
               color: "text.primary",
               borderRadius: 3,
               border: theme => `1px solid ${theme.palette.divider}`,

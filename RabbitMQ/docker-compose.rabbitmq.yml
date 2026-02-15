@@ -9,8 +9,8 @@ services:
       - "127.0.0.1:15672:15672"
 
     environment:
-      RABBITMQ_DEFAULT_USER: imperial
-      RABBITMQ_DEFAULT_VHOST: imperial
+      RABBITMQ_DEFAULT_USER: wynncraft
+      RABBITMQ_DEFAULT_VHOST: wynncraft
 
     secrets:
       - rabbitmq_admin_password
@@ -28,7 +28,7 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
 
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
     restart: unless-stopped
     healthcheck:
@@ -61,7 +61,7 @@ services:
         exec /bin/bash /init.sh
 
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
     restart: "no"
 
@@ -77,6 +77,6 @@ volumes:
   rabbitmq-data:
 
 networks:
-  imperial-net:
-    name: imperial-net
+  wynncraft-guild-net:
+    name: wynncraft-guild-net
     driver: bridge

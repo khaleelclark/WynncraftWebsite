@@ -172,15 +172,15 @@ const Leaderboard: React.FC = () => {
   const pickerSx = {
     mb: 3,
     "& .MuiOutlinedInput-input.Mui-disabled": {
-      color: "#c3c3c3ff !important",
-      WebkitTextFillColor: "#c3c3c3ff !important",
+      color: theme => `${theme.palette.text.secondary} !important`,
+      WebkitTextFillColor: theme => `${theme.palette.text.secondary} !important`,
       opacity: 1,
     },
     "& .MuiSvgIcon-root": {
-      color: "#efdddb",
+      color: "text.secondary",
     },
     "& .MuiInputLabel-root": {
-      color: "#efdddb",
+      color: "text.secondary",
     },
     "& .MuiOutlinedInput-root": {
       backgroundColor: "background.paper",
@@ -214,7 +214,7 @@ const Leaderboard: React.FC = () => {
 
           {!selectedEvent || selectedEvent?.id === -1 ? (
             <Typography
-              sx={{ my: 2, color: "#efdddb", textAlign: "center" }}
+              sx={{ my: 2, color: "text.secondary", textAlign: "center" }}
             ></Typography>
           ) : (
             <Box sx={{ my: 2 }}>

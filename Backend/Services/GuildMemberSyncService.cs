@@ -100,7 +100,7 @@ namespace Backend.Services
         {
             using var scope = _serviceProvider.CreateScope();
             var dbFactory = scope.ServiceProvider.GetRequiredService<
-                IDbContextFactory<ImperialDbContext>
+                IDbContextFactory<WynncraftDbContext>
             >();
             await using var db = await dbFactory.CreateDbContextAsync(stoppingToken);
 
@@ -234,7 +234,7 @@ namespace Backend.Services
         {
             using var scope = _serviceProvider.CreateScope();
             var dbFactory = scope.ServiceProvider.GetRequiredService<
-                IDbContextFactory<ImperialDbContext>
+                IDbContextFactory<WynncraftDbContext>
             >();
             await using var db = await dbFactory.CreateDbContextAsync(stoppingToken);
 

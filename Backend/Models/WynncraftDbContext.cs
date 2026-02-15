@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Models
 {
-    public class ImperialDbContext : DbContext
+    public class WynncraftDbContext : DbContext
     {
-        public ImperialDbContext(DbContextOptions<ImperialDbContext> options)
+        public WynncraftDbContext(DbContextOptions<WynncraftDbContext> options)
             : base(options) { }
 
         public DbSet<Rank> Ranks { get; set; }

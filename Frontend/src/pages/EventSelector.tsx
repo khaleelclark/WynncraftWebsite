@@ -83,7 +83,7 @@ const EventSelector: React.FC<Props> = ({ onSelect }) => {
             color: "text.secondary",
           },
           "& .MuiSelect-select": {
-            color: "#ffffff",
+            color: "text.primary",
           },
         }}
       >

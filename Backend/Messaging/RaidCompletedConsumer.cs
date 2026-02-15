@@ -18,7 +18,7 @@ namespace Backend.Messaging;
 public sealed class RaidCompletedConsumer : BackgroundService
 {
     private readonly ILogger<RaidCompletedConsumer> _logger;
-    private readonly IDbContextFactory<ImperialDbContext> _dbFactory;
+    private readonly IDbContextFactory<WynncraftDbContext> _dbFactory;
 
     private RMQConnection? _connection;
     private RMQChannel? _channel;
@@ -29,7 +29,7 @@ public sealed class RaidCompletedConsumer : BackgroundService
     private readonly string _queueName;
 
     public RaidCompletedConsumer(
-        IDbContextFactory<ImperialDbContext> dbFactory,
+        IDbContextFactory<WynncraftDbContext> dbFactory,
         ILogger<RaidCompletedConsumer> logger
     )
     {
@@ -40,12 +40,12 @@ public sealed class RaidCompletedConsumer : BackgroundService
         _userName = SecretReader.Get(
             "RABBITMQ_USERNAME",
             required: false,
-            defaultValue: "imperial-website"
+            defaultValue: "wynncraft-website"
         );
         _virtualHost = SecretReader.Get(
             "RABBITMQ_VHOST",
             required: false,
-            defaultValue: "imperial"
+            defaultValue: "wynncraft"
         );
 
         _password = SecretReader.Get("RABBITMQ_PASSWORD", required: true);

@@ -73,7 +73,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
 // Database factory is used by hosted services and controllers.
-builder.Services.AddDbContextFactory<ImperialDbContext>(options =>
+builder.Services.AddDbContextFactory<WynncraftDbContext>(options =>
     options.UseSqlServer(
         connectionString,
         sqlOptions =>
@@ -207,7 +207,7 @@ string ToPublicUrl(string url)
 
 // Use internal URL for metadata fetching, public URL for authority/issuer validation
 var authentikAuthority = issuerPath.TrimEnd('/');
-var authentikInternalIssuer = $"{authentikInternalUrl}/application/o/imperial-web";
+var authentikInternalIssuer = $"{authentikInternalUrl}/application/o/wynncraft-web";
 
 // Explicit callback routes shared with Authentik (shown in logs for debugging).
 var callbackUrl = $"{backendUrl.TrimEnd('/')}/api/auth/callback";
@@ -230,7 +230,7 @@ builder
         options =>
         {
             // Session cookie for the web UI.
-            options.Cookie.Name = "imperial.auth";
+            options.Cookie.Name = "wynncraft.auth";
             options.Cookie.HttpOnly = true;
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -294,7 +294,7 @@ builder
                 ValidIssuer = authentikAuthority,
             };
 
-            options.CorrelationCookie.Name = "imperial.oidc.correlation";
+            options.CorrelationCookie.Name = "wynncraft.oidc.correlation";
             options.CorrelationCookie.HttpOnly = true;
             options.CorrelationCookie.SameSite = SameSiteMode.Lax;
             options.CorrelationCookie.SecurePolicy = builder.Environment.IsDevelopment()
@@ -302,7 +302,7 @@ builder
                 : CookieSecurePolicy.Always;
             options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
 
-            options.NonceCookie.Name = "imperial.oidc.nonce";
+            options.NonceCookie.Name = "wynncraft.oidc.nonce";
             options.NonceCookie.HttpOnly = true;
             options.NonceCookie.SameSite = SameSiteMode.Lax;
             options.NonceCookie.SecurePolicy = builder.Environment.IsDevelopment()

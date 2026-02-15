@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Backend.Migrations
 {
-    [DbContext(typeof(ImperialDbContext))]
+    [DbContext(typeof(WynncraftDbContext))]
     [Migration("20260106131521_MakeUUIDsNullable")]
     partial class MakeUUIDsNullable
     {

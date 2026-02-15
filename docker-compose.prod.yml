@@ -16,7 +16,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
   redis:
     image: redis:7
@@ -27,7 +27,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
   authentik-server:
     image: ghcr.io/goauthentik/server:latest
@@ -54,7 +54,7 @@ services:
       - ./authentik-data:/media
       - ./custom-templates:/templates
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
   authentik-worker:
     image: ghcr.io/goauthentik/server:latest
@@ -79,13 +79,13 @@ services:
       - ./custom-templates:/templates
     user: root
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
   backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile.prod
-    container_name: imperial_backend
+    container_name: backend
     env_file:
       - .env
     environment:
@@ -98,8 +98,8 @@ services:
       CLIENT_ID: ${CLIENT_ID}
       CLIENT_SECRET: ${CLIENT_SECRET}
       RABBITMQ_HOST: ${RABBITMQ_HOST:-raid-rabbit}
-      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-imperial}
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-imperial-website}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-wynncraft}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-wynncraft-website}
       RABBITMQ_QUEUE_RAIDS_COMPLETED: ${RABBITMQ_QUEUE_RAIDS_COMPLETED:-raids.completed.q}
       RABBITMQ_PASSWORD_FILE: /run/secrets/rabbitmq_website_password
     secrets:
@@ -110,7 +110,7 @@ services:
     depends_on:
       - db
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
   frontend:
     build:
@@ -119,16 +119,16 @@ services:
       args:
         BACKEND_URL: ${BACKEND_URL}
         FRONTEND_URL: ${FRONTEND_URL}
-    container_name: imperial_frontend
+    container_name: frontend
     environment:
       NODE_ENV: production
     networks:
-      - imperial-net
+      - wynncraft-guild-net
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./ImperialFrontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./Frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       #- /etc/letsencrypt:/etc/letsencrypt:ro
       #- /app/node_modules # (only if you run into node_modules issues)
     depends_on:
@@ -136,7 +136,7 @@ services:
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: imperial_db
+    container_name: wynncraft_db
     env_file:
       - .env
     environment:
@@ -146,7 +146,7 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     networks:
-      - imperial-net
+      - wynncraft-guild-net
 
 secrets:
   rabbitmq_website_password:
@@ -159,6 +159,6 @@ volumes:
   sql_data:
 
 networks:
-  imperial-net:
+  wynncraft-guild-net:
     external: true
-    name: imperial-net
+    name: wynncraft-guild-net

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class EventService : IEventService
 {
-    private readonly ImperialDbContext _context;
+    private readonly WynncraftDbContext _context;
 
-    public EventService(ImperialDbContext context)
+    public EventService(WynncraftDbContext context)
     {
         _context = context;
     }

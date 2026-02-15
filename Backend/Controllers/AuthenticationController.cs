@@ -117,7 +117,7 @@ public class AuthenticationController : ControllerBase
         // Use INTERNAL Authentik URL for backend-to-Authentik communication
         var authentikInternalUrl = Env(config, "AUTHENTIK_INTERNAL_URL");
         var metadata =
-            $"{authentikInternalUrl}/application/o/imperial-web/.well-known/openid-configuration";
+            $"{authentikInternalUrl}/application/o/wynncraft-web/.well-known/openid-configuration";
 
         _logger.LogInformation("[Auth Status] Checking Authentik at: {MetadataUrl}", metadata);
 

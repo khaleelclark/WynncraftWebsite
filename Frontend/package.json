@@ -1,0 +1,33 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
+    "@mui/x-data-grid": "^8.10.2",
+    "@mui/x-date-pickers": "^7",
+    "@rsbuild/plugin-react": "^1.4.2",
+    "axios": "^1.13.2",
+    "dayjs": "^1.11.19",
+    "oidc-client-ts": "^3.4.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.8.2"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "latest",
+    "@types/node": "^25.0.6",
+    "@types/react": "^19.1.11",
+    "@types/react-dom": "^19.1.8",
+    "@types/react-router-dom": "^5.3.3",
+    "typescript": "^5.0.0"
+  }
+}
