@@ -1,0 +1,21 @@
+# Use full SDK for dev (needed for dotnet watch)
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+
+WORKDIR /app
+
+# Copy only csproj for caching
+COPY Backend.csproj ./
+
+# Restore NuGet packages
+RUN dotnet restore
+
+# Expose API port
+EXPOSE 5032
+
+# Set dev environment and polling for file changes
+ENV ASPNETCORE_URLS=http://0.0.0.0:5032
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
+
+# Use bind-mounted code; dotnet watch handles rebuilds
+CMD ["dotnet", "watch", "run", "--no-launch-profile"]

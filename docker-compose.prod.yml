@@ -83,7 +83,7 @@ services:
 
   backend:
     build:
-      context: ./ImperialBackend
+      context: ./Backend
       dockerfile: Dockerfile.prod
     container_name: imperial_backend
     env_file:
@@ -114,7 +114,7 @@ services:
 
   frontend:
     build:
-      context: ./ImperialFrontend
+      context: ./Frontend
       dockerfile: Dockerfile.prod
       args:
         BACKEND_URL: ${BACKEND_URL}
