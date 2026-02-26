@@ -39,3 +39,4 @@ Thumbs.db
 .pnpm-store/
 
 setup-login.sql
+*.bacpac
