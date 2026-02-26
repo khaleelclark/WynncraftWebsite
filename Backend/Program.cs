@@ -196,14 +196,36 @@ builder.Logging.AddFilter("Microsoft.AspNetCore.Authorization", LogLevel.Debug);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
 builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
 
+//string ToPublicUrl(string url)
+//{
+    // Convert internal container URLs to public URLs for redirects and metadata.
+   // if (string.IsNullOrWhiteSpace(url))
+    //    return url;
+
+  //  return url.Replace(authentikInternalUrl, authentikUrl).Replace(backendInternalUrl, backendUrl);
+//}
+
+
 string ToPublicUrl(string url)
 {
-    // Convert internal container URLs to public URLs for redirects and metadata.
     if (string.IsNullOrWhiteSpace(url))
         return url;
 
-    return url.Replace(authentikInternalUrl, authentikUrl).Replace(backendInternalUrl, backendUrl);
+    var updated = url
+        .Replace(authentikInternalUrl, authentikUrl)
+        .Replace(backendInternalUrl, backendUrl);
+
+    // Force https only in prod
+    if (!builder.Environment.IsDevelopment() &&
+        updated.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+    {
+        updated = "https://" + updated.Substring("http://".Length);
+    }
+
+    return updated;
 }
+
+
 
 // Use internal URL for metadata fetching, public URL for authority/issuer validation
 var authentikAuthority = issuerPath.TrimEnd('/');
@@ -406,9 +428,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Centralized exception mapping to API-friendly responses.
-app.UseExceptionHandler("/error");
-
 // Trust proxy headers for correct scheme/host/IP.
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
@@ -419,6 +438,9 @@ app.UseForwardedHeaders(
             | ForwardedHeaders.XForwardedHost,
     }
 );
+
+// Centralized exception mapping to API-friendly responses.
+app.UseExceptionHandler("/error");
 
 app.UseRouting();
 app.UseAuthentication();
@@ -507,6 +529,8 @@ static bool IsAuthentikOidcDown(Exception? ex)
     }
     return false;
 }
+
+app.MapGet("/health", () => Results.Ok(new { ok = true }));
 
 // Route attribute controllers and start the host.
 app.MapControllers();
