@@ -152,7 +152,7 @@ const AdminPanel: React.FC = () => {
                 color: "text.primary",
               }}
             >
-              Imperial Guild Admin Panel
+              Novus Guild Admin Panel
             </Typography>
             <Typography
               variant="subtitle1"
@@ -162,7 +162,7 @@ const AdminPanel: React.FC = () => {
                 mb: 4,
               }}
             >
-              Manage all Imperial guild information in one place.
+              Manage all Novus guild information in one place.
             </Typography>
 
             {/* --- TILE GRID --- */}

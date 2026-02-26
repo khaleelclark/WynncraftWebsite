@@ -19,21 +19,21 @@ export default defineConfig({
   },
   html: {
     template: "./src/index.html",
-    // favicon: "./public/favicon.ico",
-    // meta: {
-    //   description:
-    //     "Wynncraft Website. Designed and developed by esteemed members of the Wynncraft Guild Community.",
-    //   author: "pto, thop",
-    //   "og:title": "Wynncraft Website",
-    //   "og:description": "Wynncraft Website",
-    //   "og:image": `${FRONTEND_URL}/public/`,
-    //   "og:url": FRONTEND_URL,
-    //   "og:type": "website",
-    //   "twitter:title": "Wynncraft Guild",
-    //   "twitter:description": "Wynncraft Guild",
-    //   "twitter:card": "summary_large_image",
-    //   "twitter:image": `${FRONTEND_URL}/public/`,
-    // },
+    favicon: "./public/favicon.ico",
+      meta: {
+        description:
+         "Wynncraft Website. Designed and developed by esteemed members of the Wynncraft Guild Community.",
+         author: "pto, thop",
+         "og:title": "Novus Guild",
+         "og:description": "Wynncraft Website for the Novus Guild",
+         "og:image": `${FRONTEND_URL}/novus-logo.png`,
+         "og:url": FRONTEND_URL,
+         "og:type": "website",
+         "twitter:title": "Novus Wynncraft Guild",
+         "twitter:description": "Wynncraft Guild",
+         "twitter:card": "summary_large_image",
+         "twitter:image": `${FRONTEND_URL}/novus-logo.png`,
+       },
   },
   plugins: [pluginReact()],
   tools: {
