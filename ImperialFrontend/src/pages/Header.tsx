@@ -166,8 +166,8 @@ export const Header = () => {
         >
           <Box
             component="img"
-            src="/imperial-logo.png"
-            alt="Imperial logo"
+            src="/novus-logo.png"
+            alt="Novus logo"
             sx={{
               width: 34,
               height: 34,
