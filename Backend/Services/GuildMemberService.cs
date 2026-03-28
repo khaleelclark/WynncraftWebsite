@@ -231,6 +231,8 @@ namespace Backend.Services
             DateTimeOffset endDate
         )
         {
+
+            DateTimeOffset now = DateTimeOffset.UtcNow;
             if (endDate < startDate)
                 throw new InvalidOperationException("endDate must be >= startDate");
 
@@ -261,6 +263,16 @@ namespace Backend.Services
                     )
                     .OrderBy(s => s.SyncDate)
                     .ToList();
+
+                if (now < endDate)
+                    stats.Add(
+                        new PlayerHistoricalStat
+                        {
+                            WarsCompleted = m.WarsCompleted,
+                            HoursPlayed = m.HoursPlayed,
+                            SyncDate = DateTimeOffset.UtcNow,
+                        }
+                    );
 
                 int wars = 0,
                     hours = 0;
