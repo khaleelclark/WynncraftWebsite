@@ -231,6 +231,9 @@ namespace Backend.Services
             DateTimeOffset endDate
         )
         {
+            if (endDate < startDate)
+                throw new InvalidOperationException("endDate must be >= startDate");
+
             // Load members and their historical stats to compute deltas.
             var members = await _context
                 .GuildMembers.Include(m => m.PlayerHistoricalStats)
@@ -251,8 +254,7 @@ namespace Backend.Services
 
             foreach (var m in members)
             {
-                // Build a time-ordered list so we can compute the delta between
-                // the earliest snapshot and the latest (current) totals.
+                // Compare the earliest and latest historical snapshots inside the requested range.
                 var stats = m
                     .PlayerHistoricalStats.Where(s =>
                         s.SyncDate >= startDate && s.SyncDate <= endDate
@@ -260,21 +262,12 @@ namespace Backend.Services
                     .OrderBy(s => s.SyncDate)
                     .ToList();
 
-                stats.Add(
-                    new PlayerHistoricalStat
-                    {
-                        WarsCompleted = m.WarsCompleted,
-                        HoursPlayed = m.HoursPlayed,
-                        SyncDate = DateTimeOffset.UtcNow,
-                    }
-                );
-
                 int wars = 0,
                     hours = 0;
 
                 if (stats.Count >= 2)
                 {
-                    // Delta between first and last in-range snapshots.
+                    // Delta between the first and last snapshots in the requested window.
                     wars = stats.Last().WarsCompleted - stats.First().WarsCompleted;
                     hours = stats.Last().HoursPlayed - stats.First().HoursPlayed;
                 }
