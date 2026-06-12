@@ -106,10 +106,11 @@ namespace Backend.Services
 
             // IMPORTANT: This query will throw SqlException when DB is down — now caught in ExecuteAsync
             // Batch the oldest synced members first to distribute API load fairly.
+            // Capped at 45 to stay safely under Wynncraft's 50-request-per-window rate limit.
             var membersToSync = await db
                 .GuildMembers.Where(m => m.Uuid != Guid.Empty)
                 .OrderBy(m => m.LastSynced ?? DateTimeOffset.MinValue)
-                .Take(100)
+                .Take(45)
                 .ToListAsync(stoppingToken);
 
             if (membersToSync.Count == 0)
@@ -160,6 +161,7 @@ namespace Backend.Services
                 }
 
                 // Wynncraft API
+                var wynnRateLimited = false;
                 try
                 {
                     if (member.Uuid != Guid.Empty)
@@ -170,7 +172,15 @@ namespace Backend.Services
                             stoppingToken
                         );
 
-                        if (wynnResponse.IsSuccessStatusCode)
+                        if (wynnResponse.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                        {
+                            wynnRateLimited = true;
+                            _logger.LogWarning(
+                                "Wynncraft rate limit hit for member {Id}; skipping LastSynced update.",
+                                member.GuildMemberId
+                            );
+                        }
+                        else if (wynnResponse.IsSuccessStatusCode)
                         {
                             var wynnJson = await wynnResponse.Content.ReadAsStringAsync(
                                 stoppingToken
@@ -190,7 +200,7 @@ namespace Backend.Services
                                     "wars",
                                     out var warsProp
                                 )
-                                    ? warsProp.GetInt32()
+                                    ? (int)warsProp.GetDouble()
                                     : 0;
                             }
 
@@ -204,19 +214,29 @@ namespace Backend.Services
                                     : null;
                             }
                         }
+                        else
+                        {
+                            _logger.LogWarning(
+                                "Wynncraft API returned {StatusCode} for member {Id}.",
+                                (int)wynnResponse.StatusCode,
+                                member.GuildMemberId
+                            );
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(
+                    _logger.LogWarning(
                         ex,
                         "Wynncraft sync failed for member {Id}.",
                         member.GuildMemberId
                     );
                 }
 
-                // Mark as synced even if one of the APIs failed.
-                member.LastSynced = DateTimeOffset.UtcNow;
+                // Only stamp LastSynced on success — rate-limited members stay at the
+                // front of the queue so they're retried first next cycle.
+                if (!wynnRateLimited)
+                    member.LastSynced = DateTimeOffset.UtcNow;
             }
 
             try
